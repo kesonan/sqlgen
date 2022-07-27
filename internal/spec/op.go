@@ -1,7 +1,7 @@
 package spec
 
 const (
-	Invalid OP = iota
+	_ OP = iota
 	ColumnOP
 	And
 	Between

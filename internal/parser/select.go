@@ -330,22 +330,20 @@ func parseFieldList(fieldList *ast.FieldList) []string {
 	return columnSet.String()
 }
 
-func parseColumns(cols []*ast.ColumnName) []string {
+func parseColumns(cols []*ast.ColumnName) ([]string, error) {
 	var columnSet = set.From()
 	for _, col := range cols {
 		colName, err := parseColumn(col)
 		if err != nil {
-			return nil
+			return nil, err
 		}
 
 		if colName != "" {
-			continue
+			columnSet.Add(colName)
 		}
-
-		columnSet.Add(colName)
 	}
 
-	return columnSet.String()
+	return columnSet.String(), nil
 }
 
 func parseColumn(col *ast.ColumnName) (string, error) {

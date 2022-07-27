@@ -15,10 +15,15 @@ func parseInsert(stmt *ast.InsertStmt) (*spec.InsertStmt, error) {
 		return nil, errorNearBy(err, text)
 	}
 
+	columns, err := parseColumns(stmt.Columns)
+	if err != nil {
+		return nil, err
+	}
+
 	ret.Table = tableName
 	ret.Action = spec.ActionCreate
 	ret.SQL = text
-	ret.Columns = parseColumns(stmt.Columns)
+	ret.Columns = columns
 
 	return &ret, nil
 }

@@ -18,7 +18,7 @@ type Column struct {
 	// Name is the name of the column.
 	Name string
 	// TP is the type of the column.
-	TP Type
+	TP byte
 }
 
 // ColumnOption is a column option.

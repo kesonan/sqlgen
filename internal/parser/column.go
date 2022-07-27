@@ -3,6 +3,7 @@ package parser
 import (
 	"github.com/pingcap/parser/ast"
 	"github.com/pingcap/parser/mysql"
+	"github.com/pingcap/parser/test_driver"
 
 	"github.com/anqiansong/sqlgen/internal/set"
 	"github.com/anqiansong/sqlgen/internal/spec"
@@ -21,7 +22,6 @@ func parseColumnDef(col *ast.ColumnDef) (*spec.Column, *spec.Constraint) {
 		column.TP = tp.Tp
 	}
 	column.Name = col.Name.String()
-	column.TP = col.Tp
 	for _, opt := range col.Options {
 		var tp = opt.Tp
 		switch tp {
@@ -32,7 +32,13 @@ func parseColumnDef(col *ast.ColumnDef) (*spec.Column, *spec.Constraint) {
 		case ast.ColumnOptionDefaultValue:
 			column.HasDefaultValue = true
 		case ast.ColumnOptionComment:
-			column.Comment = opt.Expr.Text()
+			var expr = opt.Expr
+			if expr != nil {
+				value, ok := expr.(*test_driver.ValueExpr)
+				if ok {
+					column.Comment = value.GetString()
+				}
+			}
 		case ast.ColumnOptionUniqKey:
 			constraint.AppendUniqueKey(column.Name)
 		case ast.ColumnOptionPrimaryKey:
@@ -55,20 +61,19 @@ func parseConstraint(constraint *ast.Constraint) *spec.Constraint {
 		return nil
 	}
 
-	var keyName = constraint.Name
 	var ret = spec.NewConstraint()
 	switch constraint.Tp {
 	case ast.ConstraintPrimaryKey:
-		ret.AppendPrimaryKey(keyName, columns...)
+		ret.AppendPrimaryKey(columns...)
 	case ast.ConstraintKey, ast.ConstraintIndex:
-		ret.AppendIndex(keyName, columns...)
+		ret.AppendIndex(columns...)
 	case ast.ConstraintUniq, ast.ConstraintUniqKey, ast.ConstraintUniqIndex:
-		ret.AppendUniqueKey(keyName, columns...)
+		ret.AppendUniqueKey(columns...)
 	default:
 		// ignore other constraints
 	}
 
-	return &spec.Constraint{}
+	return ret
 }
 
 func parseColumnFromKeys(keys []*ast.IndexPartSpecification) []string {

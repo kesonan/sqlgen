@@ -12,7 +12,9 @@ CREATE TABLE `user`
     `create_time` timestamp NULL,
     `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 --     PRIMARY KEY (`id`),
+    KEY `name_index` (`name`),
     UNIQUE KEY `name_index` (`name`),
+    UNIQUE KEY `name_index2` (`name`),
     UNIQUE KEY `user_index` (`user`),
     UNIQUE KEY `type_index` (`type`),
     UNIQUE KEY `mobile_index` (`mobile`)
@@ -27,6 +29,8 @@ where id = 1
     and a = 2
    or b = 1
     and (c = 1 or d = 1)
+    group by name
+    order by name desc
     limit 1,10;
 
 update user

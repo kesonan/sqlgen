@@ -15,6 +15,7 @@ type InsertStmt struct {
 	Table string
 }
 
+// SelectStmt represents a select statement.
 type SelectStmt struct {
 	// Action represents the db action.
 	Action Action
@@ -38,6 +39,7 @@ type SelectStmt struct {
 	Where *Clause
 }
 
+// DeleteStmt represents a delete statement.
 type DeleteStmt struct {
 	// Action represents the db action.
 	Action Action
@@ -53,6 +55,7 @@ type DeleteStmt struct {
 	Where *Clause
 }
 
+// UpdateStmt represents a update statement.
 type UpdateStmt struct {
 	// Action represents the db action.
 	Action Action
@@ -70,6 +73,7 @@ type UpdateStmt struct {
 	Where *Clause
 }
 
+// ByItem represents an order-by or group-by item.
 type ByItem struct {
 	Column string
 	Desc   bool
@@ -87,11 +91,15 @@ type Clause struct {
 	OP OP
 }
 
+// Limit represents a limit clause.
 type Limit struct {
-	Count  bool
+	// Count represents the limit count.
+	Count bool
+	// Offset represents the limit offset.
 	Offset bool
 }
 
+// IsValid returns true if the statement is valid.
 func (c *Clause) IsValid() bool {
 	return c.Column != "" || c.OP != 0 || c.Left != nil || c.Right != nil
 }
