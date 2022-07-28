@@ -5,7 +5,6 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
-	"path/filepath"
 	"strings"
 	"text/template"
 
@@ -14,7 +13,7 @@ import (
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 
 	"github.com/anqiansong/sqlgen/internal/infoschema"
-	"github.com/anqiansong/sqlgen/internal/set"
+	"github.com/anqiansong/sqlgen/internal/patterns"
 	"github.com/anqiansong/sqlgen/internal/spec"
 	"github.com/anqiansong/sqlgen/internal/stringx"
 )
@@ -34,8 +33,8 @@ func From(dsn string, pattern ...string) (*spec.DXL, error) {
 		return nil, err
 	}
 
-	var p = parseTableList(pattern...)
-	var matchTables = p.match(tables)
+	var p = patterns.New(pattern...)
+	var matchTables = p.Match(tables...)
 	var dxl spec.DXL
 	for _, table := range matchTables {
 		modelTable, err := model.FindColumns(schema, table)
@@ -73,40 +72,6 @@ func parseDSN(dsn string) (db, url string, err error) {
 	url = fmt.Sprintf("%s:%s@tcp(%s)/%s", cfg.User, cfg.Passwd, cfg.Addr, "information_schema")
 	db = cfg.DBName
 	return
-}
-
-type pattern []string
-
-func (p pattern) match(list []string) []string {
-	var matchTableSet = set.From()
-	for _, s := range list {
-		for _, v := range p {
-			match, _ := filepath.Match(v, s)
-			if match {
-				matchTableSet.Add(s)
-			}
-		}
-	}
-	return matchTableSet.String()
-
-}
-func parseTableList(patterns ...string) pattern {
-	var patternSet = set.From()
-	if len(patterns) == 0 {
-		patternSet.Add("*")
-		return patternSet.String()
-	}
-
-	for _, v := range patterns {
-		fields := strings.FieldsFunc(v, func(r rune) bool {
-			return r == ','
-		})
-		for _, f := range fields {
-			patternSet.Add(f)
-		}
-	}
-
-	return patternSet.String()
 }
 
 //go:embed init.tpl.sql
