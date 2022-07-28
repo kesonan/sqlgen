@@ -153,7 +153,7 @@ func parseExprNode(node ast.ExprNode) (*spec.Clause, error) {
 			clause.OP = spec.ColumnOP
 			clause.Column = colName
 		}
-	case *test_driver.ValueExpr:
+	case *test_driver.ValueExpr, *test_driver.ParamMarkerExpr:
 		// ignores it
 	case *ast.ParenthesesExpr:
 		c, err := parseExprNode(v.Expr)
@@ -289,26 +289,28 @@ func parseLimit(limit *ast.Limit) (*spec.Limit, error) {
 	var count = limit.Count
 	var offset = limit.Offset
 	var ret spec.Limit
-	parseValue := func(node ast.ExprNode) error {
-		_, ok := node.(*test_driver.ValueExpr)
+	parseValue := func(node ast.ExprNode) (int64, error) {
+		value, ok := node.(*test_driver.ValueExpr)
 		if !ok {
-			return errorUnsupportedLimitExpr
+			return 0, errorUnsupportedLimitExpr
 		}
-		return nil
+		return value.Datum.GetInt64(), nil
 	}
 
 	if count != nil {
-		if err := parseValue(count); err != nil {
+		count, err := parseValue(count)
+		if err != nil {
 			return nil, err
 		}
-		ret.Count = true
+		ret.Count = count
 	}
 
 	if offset != nil {
-		if err := parseValue(offset); err != nil {
+		offset, err := parseValue(offset)
+		if err != nil {
 			return nil, err
 		}
-		ret.Offset = true
+		ret.Offset = offset
 	}
 
 	return &ret, nil

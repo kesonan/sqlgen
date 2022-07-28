@@ -41,5 +41,9 @@ func Parse(sql string) (*spec.DXL, error) {
 		}
 	}
 
+	if err = ret.Validate(); err != nil {
+		return nil, err
+	}
+
 	return &ret, nil
 }

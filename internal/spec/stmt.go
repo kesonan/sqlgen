@@ -3,6 +3,11 @@ package spec
 // WildCard is a wildcard column.
 const WildCard = "*"
 
+var _ DML = (*InsertStmt)(nil)
+var _ DML = (*UpdateStmt)(nil)
+var _ DML = (*SelectStmt)(nil)
+var _ DML = (*DeleteStmt)(nil)
+
 // InsertStmt represents a insert statement.
 type InsertStmt struct {
 	// Action represents the db action.
@@ -94,9 +99,9 @@ type Clause struct {
 // Limit represents a limit clause.
 type Limit struct {
 	// Count represents the limit count.
-	Count bool
+	Count int64
 	// Offset represents the limit offset.
-	Offset bool
+	Offset int64
 }
 
 // IsValid returns true if the statement is valid.
@@ -108,14 +113,30 @@ func (i *InsertStmt) SQLText() string {
 	return i.SQL
 }
 
+func (i *InsertStmt) validate() error {
+	return nil
+}
+
 func (s *SelectStmt) SQLText() string {
 	return s.SQL
+}
+
+func (s *SelectStmt) validate() error {
+	return nil
 }
 
 func (d *DeleteStmt) SQLText() string {
 	return d.SQL
 }
 
+func (d *DeleteStmt) validate() error {
+	return nil
+}
+
 func (u *UpdateStmt) SQLText() string {
 	return u.SQL
+}
+
+func (u *UpdateStmt) validate() error {
+	return nil
 }

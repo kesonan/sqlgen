@@ -40,9 +40,9 @@ func parseColumnDef(col *ast.ColumnDef) (*spec.Column, *spec.Constraint) {
 				}
 			}
 		case ast.ColumnOptionUniqKey:
-			constraint.AppendUniqueKey(column.Name)
+			constraint.AppendUniqueKey(column.Name, column.Name)
 		case ast.ColumnOptionPrimaryKey:
-			constraint.AppendPrimaryKey(column.Name)
+			constraint.AppendPrimaryKey(column.Name, column.Name)
 		default:
 			// ignore other options
 		}
@@ -62,13 +62,14 @@ func parseConstraint(constraint *ast.Constraint) *spec.Constraint {
 	}
 
 	var ret = spec.NewConstraint()
+	var key = constraint.Name
 	switch constraint.Tp {
 	case ast.ConstraintPrimaryKey:
-		ret.AppendPrimaryKey(columns...)
+		ret.AppendPrimaryKey(key, columns...)
 	case ast.ConstraintKey, ast.ConstraintIndex:
-		ret.AppendIndex(columns...)
+		ret.AppendIndex(key, columns...)
 	case ast.ConstraintUniq, ast.ConstraintUniqKey, ast.ConstraintUniqIndex:
-		ret.AppendUniqueKey(columns...)
+		ret.AppendUniqueKey(key, columns...)
 	default:
 		// ignore other constraints
 	}

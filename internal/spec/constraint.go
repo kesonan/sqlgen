@@ -1,8 +1,6 @@
 package spec
 
 import (
-	"strings"
-
 	"github.com/anqiansong/sqlgen/internal/set"
 )
 
@@ -16,8 +14,7 @@ func NewConstraint() *Constraint {
 }
 
 // AppendPrimaryKey appends a column to the primary key.
-func (c *Constraint) AppendPrimaryKey(columns ...string) {
-	var key = strings.Join(columns, ":")
+func (c *Constraint) AppendPrimaryKey(key string, columns ...string) {
 	c.append(func(key string) ([]string, bool) {
 		list, ok := c.PrimaryKey[key]
 		return list, ok
@@ -27,8 +24,7 @@ func (c *Constraint) AppendPrimaryKey(columns ...string) {
 }
 
 // AppendUniqueKey appends a column to the unique key.
-func (c *Constraint) AppendUniqueKey(columns ...string) {
-	var key = strings.Join(columns, ":")
+func (c *Constraint) AppendUniqueKey(key string, columns ...string) {
 	c.append(func(key string) ([]string, bool) {
 		list, ok := c.UniqueKey[key]
 		return list, ok
@@ -38,8 +34,7 @@ func (c *Constraint) AppendUniqueKey(columns ...string) {
 }
 
 // AppendIndex appends a column to the unique key.
-func (c *Constraint) AppendIndex(columns ...string) {
-	var key = strings.Join(columns, ":")
+func (c *Constraint) AppendIndex(key string, columns ...string) {
 	c.append(func(key string) ([]string, bool) {
 		list, ok := c.Index[key]
 		return list, ok
@@ -62,16 +57,16 @@ func (c *Constraint) Merge(constraint *Constraint) {
 		return
 	}
 
-	for _, columns := range constraint.PrimaryKey {
-		c.AppendPrimaryKey(columns...)
+	for key, columns := range constraint.PrimaryKey {
+		c.AppendPrimaryKey(key, columns...)
 	}
 
-	for _, columns := range constraint.UniqueKey {
-		c.AppendUniqueKey(columns...)
+	for key, columns := range constraint.UniqueKey {
+		c.AppendUniqueKey(key, columns...)
 	}
 
-	for _, columns := range constraint.Index {
-		c.AppendIndex(columns...)
+	for key, columns := range constraint.Index {
+		c.AppendIndex(key, columns...)
 	}
 }
 

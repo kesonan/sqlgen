@@ -1,5 +1,7 @@
 package spec
 
+import "fmt"
+
 // Table represents a table in the database.
 type Table struct {
 	// Columns is the list of columns in the table.
@@ -7,6 +9,8 @@ type Table struct {
 	// Constraint is a struct that contains the constraints of a table.
 	// ConstraintForeignKey,ConstraintFulltext,ConstraintCheck are ignored.
 	Constraint Constraint
+	// Schema is the name of the schema that the table belongs to.
+	Schema string
 	// Name is the name of the table.
 	Name string
 }
@@ -47,4 +51,29 @@ type Constraint struct {
 	// UniqueKey is a list of column names that are part of a unique ke, the key of map
 	//	// is the key name, the values are the column list.
 	UniqueKey map[string][]string
+}
+
+// ColumnList is a list of column names.
+func (t *Table) ColumnList() []string {
+	var list []string
+	for _, c := range t.Columns {
+		list = append(list, c.Name)
+	}
+	return list
+}
+
+func (t *Table) validate() error {
+	if len(t.Name) == 0 {
+		return fmt.Errorf("missing table name")
+	}
+	if len(t.Columns) == 0 {
+		return fmt.Errorf("missing table columns")
+	}
+	if len(t.Constraint.PrimaryKey) == 0 {
+		return fmt.Errorf("missing table primary key")
+	}
+	if len(t.Constraint.PrimaryKey) > 0 {
+		return fmt.Errorf("unsupported multiple primary key")
+	}
+	return nil
 }

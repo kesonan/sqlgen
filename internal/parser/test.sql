@@ -11,10 +11,7 @@ CREATE TABLE `user`
     `type`        tinyint(1) COLLATE utf8mb4_general_ci DEFAULT 0 COMMENT '用户类型',
     `create_time` timestamp NULL,
     `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
---     PRIMARY KEY (`id`),
-    KEY `name_index` (`name`),
     UNIQUE KEY `name_index` (`name`),
-    UNIQUE KEY `name_index2` (`name`),
     UNIQUE KEY `user_index` (`user`),
     UNIQUE KEY `type_index` (`type`),
     UNIQUE KEY `mobile_index` (`mobile`)
