@@ -1,5 +1,7 @@
 package spec
 
+import "github.com/anqiansong/sqlgen/internal/set"
+
 // WildCard is a wildcard column.
 const WildCard = "*"
 
@@ -117,8 +119,28 @@ func (c *Clause) IsValid() bool {
 	return c.Column != "" || c.OP != 0 || c.Left != nil || c.Right != nil
 }
 
+// Columns returns the columns.
+func (c *Clause) Columns() []string {
+	var columnSet = set.From()
+	if len(c.Column) > 0 {
+		columnSet.Add(c.Column)
+	}
+	if c.Left != nil {
+		columnSet.AddStringList(c.Left.Columns())
+	}
+	if c.Right != nil {
+		columnSet.AddStringList(c.Right.Columns())
+	}
+
+	return columnSet.String()
+}
+
 func (i *InsertStmt) SQLText() string {
 	return i.SQL
+}
+
+func (i *InsertStmt) TableName() string {
+	return i.Table
 }
 
 func (i *InsertStmt) validate() error {
@@ -129,6 +151,10 @@ func (s *SelectStmt) SQLText() string {
 	return s.SQL
 }
 
+func (s *SelectStmt) TableName() string {
+	return s.From
+}
+
 func (s *SelectStmt) validate() error {
 	return s.Comment.validate()
 }
@@ -137,12 +163,20 @@ func (d *DeleteStmt) SQLText() string {
 	return d.SQL
 }
 
+func (d *DeleteStmt) TableName() string {
+	return d.From
+}
+
 func (d *DeleteStmt) validate() error {
 	return d.Comment.validate()
 }
 
 func (u *UpdateStmt) SQLText() string {
 	return u.SQL
+}
+
+func (u *UpdateStmt) TableName() string {
+	return u.Table
 }
 
 func (u *UpdateStmt) validate() error {

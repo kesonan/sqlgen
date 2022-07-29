@@ -18,7 +18,14 @@ func Run(dxl *spec.DXL) error {
 			"IsPrimary": ddl.Table.IsPrimary,
 		})
 		t.MustParse(gormTpl)
-		t.MustExecute(ddl.Table)
+		insertStmts, updateStmts, selectStmts, deleteStmts := dxl.Stmt(ddl.Table.Name)
+		t.MustExecute(map[string]interface{}{
+			"Table":      ddl.Table,
+			"InsertStmt": insertStmts,
+			"SelectStmt": updateStmts,
+			"DeleteStmt": selectStmts,
+			"UpdateStmt": deleteStmts,
+		})
 		t.Write(os.Stdout, true)
 	}
 

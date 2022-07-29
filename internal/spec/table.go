@@ -37,6 +37,7 @@ type ColumnOption struct {
 	Comment string
 	// HasDefault is true if the column has default value.
 	HasDefaultValue bool
+	// TODO: Add default value
 	// NotNull is true if the column is not null, false represents the column is null.
 	NotNull bool
 	// Unsigned is true if the column is unsigned.
@@ -74,6 +75,38 @@ func (t *Table) ColumnList() []string {
 		list = append(list, c.Name)
 	}
 	return list
+}
+
+// PrimaryColumnList is a list of column names that are part of the primary key.
+func (t *Table) PrimaryColumnList() []Column {
+	var ret []Column
+	for _, list := range t.Constraint.PrimaryKey {
+		for _, name := range list {
+			ret = append(ret, t.GetColumnByName(name))
+		}
+	}
+	return ret
+}
+
+// PrimaryColumn returns the primary column.
+func (t *Table) PrimaryColumn() Column {
+	list := t.PrimaryColumnList()
+	return list[0]
+}
+
+// HasOnePrimaryKey returns true if the table has one primary key.
+func (t *Table) HasOnePrimaryKey() bool {
+	return len(t.PrimaryColumnList()) == 1
+}
+
+// GetColumnByName returns the column with the given name.
+func (t *Table) GetColumnByName(name string) Column {
+	for _, c := range t.Columns {
+		if c.Name == name {
+			return c
+		}
+	}
+	return Column{}
 }
 
 func (t *Table) validate() error {

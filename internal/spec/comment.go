@@ -18,9 +18,3 @@ func (c Comment) validate() error {
 	}
 	return nil
 }
-
-//-- fn: Insert
-//-- name: foo
-//-- 用户数据插入
-//insert into user (user, name, password, mobile)
-//values ('test', 'test', 'test', 'test');

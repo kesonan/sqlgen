@@ -4,5 +4,7 @@ package spec
 type DML interface {
 	// SQLText returns the SQL text of the DML statement.
 	SQLText() string
+	// TableName returns the table of the DML statement.
+	TableName() string
 	validate() error
 }

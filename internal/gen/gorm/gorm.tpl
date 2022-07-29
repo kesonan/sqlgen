@@ -3,18 +3,29 @@
 package model
 
 import (
-    "time"
-)
+    "context"
+    )
 
-// {{UpperCamel .Name}} represents a {{.Name}} struct data.
-type {{UpperCamel .Name}} struct { {{range .Columns}}
+// {{UpperCamel $.Table.Name}} represents a {{$.Table.Name}} struct data.
+type {{UpperCamel $.Table.Name}} struct { {{range $.Table.Columns}}
     {{UpperCamel .Name}} {{.Go}} `gorm:"{{if IsPrimary .Name}}primaryKey;{{end}}column:{{.Name}}" json:"{{LowerCamel .Name}}"`{{end}}
 }
 
-func ({{UpperCamel .Name}}) TableName() string {
-    return "{{.Name}}"
+func ({{UpperCamel $.Table.Name}}) TableName() string {
+    return "{{$.Table.Name}}"
 }
 
-{{range .InsertStmt}}// sql: {{. SQL}}}
-func (m *{{UpperCamel .Name}}Model)Insert
+// Create creates a new {{$.Table.Name}}(s).
+func (m *{{UpperCamel $.Table.Name}}Model) Create(ctx context.Context, data ...*{{UpperCamel $.Table.Name}})error{
+    var length = len(data)
+    switch length{
+    case 0:
+        return fmt.Errorf("missing data")
+    default:
+        return m.db.Create(&data).Error
+    }
+}
+
+{{range $item := .SelectStmt}}{{range $comment := $item.LineText}}// {{$comment}}
+{{end}}func (m *{{UpperCamel $.Table.Name}}Model)$item.FuncName(ctx context.Context)
 {{end}}
