@@ -1,6 +1,10 @@
 package spec
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/zeromicro/go-zero/core/stringx"
+)
 
 // Table represents a table in the database.
 type Table struct {
@@ -51,6 +55,16 @@ type Constraint struct {
 	// UniqueKey is a list of column names that are part of a unique ke, the key of map
 	//	// is the key name, the values are the column list.
 	UniqueKey map[string][]string
+}
+
+// IsPrimary returns true if the column is part of the primary key.
+func (t *Table) IsPrimary(name string) bool {
+	for _, c := range t.Constraint.PrimaryKey {
+		if stringx.Contains(c, name) {
+			return true
+		}
+	}
+	return false
 }
 
 // ColumnList is a list of column names.

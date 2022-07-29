@@ -15,6 +15,6 @@ func LowerCamel(s string) string {
 }
 
 var funcMap = template.FuncMap{
-	"upperCamel": UpperCamel,
-	"lowerCamel": LowerCamel,
+	"UpperCamel": UpperCamel,
+	"LowerCamel": LowerCamel,
 }

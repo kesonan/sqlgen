@@ -17,6 +17,7 @@ CREATE TABLE `user`
     UNIQUE KEY `mobile_index` (`mobile`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '用户表' COLLATE=utf8mb4_general_ci;
 
+-- fn:FindOne
 select *, user, name
 from user
 where id = 1
@@ -30,13 +31,16 @@ where id = 1
     order by name desc
     limit 1,10;
 
+-- fn: Update
 update user
 set name = 'test'
 where id = 1;
 
+-- fn: Insert
 insert into user (user, name, password, mobile)
 values ('test', 'test', 'test', 'test');
 
+-- fn: Delete
 delete
 from user
 where id = 1;

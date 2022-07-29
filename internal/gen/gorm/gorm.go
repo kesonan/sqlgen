@@ -3,7 +3,6 @@ package gorm
 import (
 	_ "embed"
 	"os"
-	"text/template"
 
 	"github.com/anqiansong/sqlgen/internal/spec"
 	"github.com/anqiansong/sqlgen/internal/templatex"
@@ -13,19 +12,14 @@ import (
 var gormTpl string
 
 func Run(dxl *spec.DXL) error {
-	t, err := template.New("gorm").Funcs(
-		template.FuncMap{
-			"UpperCamel": templatex.UpperCamel,
-			"LowerCamel": templatex.LowerCamel,
-		}).Parse(gormTpl)
-	if err != nil {
-		return err
-	}
-
+	var t = templatex.New()
 	for _, ddl := range dxl.DDL {
-		if err = t.Execute(os.Stdout, ddl.Table); err != nil {
-			return err
-		}
+		t.AppendFuncMap(map[string]any{
+			"IsPrimary": ddl.Table.IsPrimary,
+		})
+		t.MustParse(gormTpl)
+		t.MustExecute(ddl.Table)
+		t.Write(os.Stdout, true)
 	}
 
 	return nil

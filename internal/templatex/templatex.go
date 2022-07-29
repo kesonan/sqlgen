@@ -2,10 +2,12 @@ package templatex
 
 import (
 	"bytes"
+	"io"
 	"io/ioutil"
 	"os"
 	"text/template"
 
+	"github.com/anqiansong/sqlgen/internal/format"
 	"github.com/anqiansong/sqlgen/internal/log"
 )
 
@@ -15,6 +17,7 @@ const name = "_"
 type T struct {
 	t      *template.Template
 	buffer *bytes.Buffer
+	fm     template.FuncMap
 }
 
 // New creates a new template helper.
@@ -23,12 +26,19 @@ func New() *T {
 	return &T{
 		t:      t,
 		buffer: bytes.NewBuffer(nil),
+		fm:     funcMap,
+	}
+}
+
+func (t *T) AppendFuncMap(fm template.FuncMap) {
+	for k, v := range fm {
+		t.fm[k] = v
 	}
 }
 
 // MustParse parses the template.
 func (t *T) MustParse(text string) *T {
-	t.t.Funcs(funcMap)
+	t.t.Funcs(t.fm)
 	_, err := t.t.Parse(text)
 	log.Must(err)
 	return t
@@ -42,14 +52,34 @@ func (t *T) MustExecute(data interface{}) *T {
 }
 
 // MustSaveAs saves the template to the given filename, it will overwrite the file if it exists.
-func (t *T) MustSaveAs(filename string) {
-	log.Must(ioutil.WriteFile(filename, t.buffer.Bytes(), 0666))
+func (t *T) MustSaveAs(filename string, fmt bool) {
+	var data []byte
+	var err error
+	if fmt {
+		data, err = format.Source(t.buffer.Bytes())
+		log.Must(err)
+	} else {
+		data = t.buffer.Bytes()
+	}
+	log.Must(ioutil.WriteFile(filename, data, 0666))
 }
 
 // MustSave saves the template to the given filename, it will do nothing if it exists.
-func (t *T) MustSave(filename string) {
+func (t *T) MustSave(filename string, format bool) {
 	_, err := os.Stat(filename)
 	if err != nil {
-		t.MustSaveAs(filename)
+		t.MustSaveAs(filename, format)
 	}
+}
+
+func (t *T) Write(writer io.Writer, fmt bool) {
+	var data []byte
+	var err error
+	if fmt {
+		data, err = format.Source(t.buffer.Bytes())
+		log.Must(err)
+	} else {
+		data = t.buffer.Bytes()
+	}
+	writer.Write(data)
 }

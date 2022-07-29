@@ -14,6 +14,8 @@ type InsertStmt struct {
 	Action Action
 	// Columns represents the operation columns.
 	Columns []string
+	// Comment represents a sql comment.
+	Comment
 	// SQL represents the original sql text.
 	SQL string
 	// Table represents the operation table name, do not support multiple tables.
@@ -26,6 +28,8 @@ type SelectStmt struct {
 	Action Action
 	// Columns represents the operation columns.
 	Columns []string
+	// Comment represents a sql comment.
+	Comment
 	// Distinct represents the select distinct flag.
 	Distinct bool
 	// From represents the operation table name, do not support multiple tables.
@@ -48,6 +52,8 @@ type SelectStmt struct {
 type DeleteStmt struct {
 	// Action represents the db action.
 	Action Action
+	// Comment represents a sql comment.
+	Comment
 	// From represents the operation table name, do not support multiple tables.
 	From string
 	// Limit represents the limit clause.
@@ -66,6 +72,8 @@ type UpdateStmt struct {
 	Action Action
 	// Columns represents the operation columns.
 	Columns []string
+	// Comment represents a sql comment.
+	Comment
 	// Limit represents the limit clause.
 	Limit *Limit
 	// OrderBy represents the order by clause.
@@ -114,7 +122,7 @@ func (i *InsertStmt) SQLText() string {
 }
 
 func (i *InsertStmt) validate() error {
-	return nil
+	return i.Comment.validate()
 }
 
 func (s *SelectStmt) SQLText() string {
@@ -122,7 +130,7 @@ func (s *SelectStmt) SQLText() string {
 }
 
 func (s *SelectStmt) validate() error {
-	return nil
+	return s.Comment.validate()
 }
 
 func (d *DeleteStmt) SQLText() string {
@@ -130,7 +138,7 @@ func (d *DeleteStmt) SQLText() string {
 }
 
 func (d *DeleteStmt) validate() error {
-	return nil
+	return d.Comment.validate()
 }
 
 func (u *UpdateStmt) SQLText() string {
@@ -138,5 +146,5 @@ func (u *UpdateStmt) SQLText() string {
 }
 
 func (u *UpdateStmt) validate() error {
-	return nil
+	return u.Comment.validate()
 }

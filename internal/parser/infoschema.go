@@ -16,6 +16,7 @@ import (
 	"github.com/anqiansong/sqlgen/internal/patterns"
 	"github.com/anqiansong/sqlgen/internal/spec"
 	"github.com/anqiansong/sqlgen/internal/stringx"
+	"github.com/anqiansong/sqlgen/internal/templatex"
 )
 
 var errMissingSchema = errors.New("missing schema")
@@ -103,10 +104,11 @@ func convertDML(in *spec.Table) ([]spec.DML, error) {
 
 // Unique is a unique index info.
 type Unique struct {
-	SelectColumns string
-	Table         string
-	UpdateSet     string
-	WhereClause   string
+	SelectColumns  string
+	Table          string
+	UpdateSet      string
+	WhereClause    string
+	UniqueNameJoin string
 }
 
 func getUniques(in *spec.Table) []Unique {
@@ -116,10 +118,11 @@ func getUniques(in *spec.Table) []Unique {
 	var m = map[Unique]struct{}{}
 	for _, c := range in.Constraint.PrimaryKey {
 		var item = Unique{
-			SelectColumns: columns,
-			Table:         in.Name,
-			UpdateSet:     updateSet,
-			WhereClause:   strings.Join(c, " = ? AND") + " = ?",
+			SelectColumns:  columns,
+			Table:          in.Name,
+			UpdateSet:      updateSet,
+			WhereClause:    strings.Join(c, " = ? AND") + " = ?",
+			UniqueNameJoin: templatex.UpperCamel(strings.Join(c, "")),
 		}
 		if _, ok := m[item]; ok {
 			continue
@@ -129,10 +132,11 @@ func getUniques(in *spec.Table) []Unique {
 	}
 	for _, c := range in.Constraint.UniqueKey {
 		var item = Unique{
-			SelectColumns: columns,
-			Table:         in.Name,
-			UpdateSet:     updateSet,
-			WhereClause:   strings.Join(c, " = ? AND") + " = ?",
+			SelectColumns:  columns,
+			Table:          in.Name,
+			UpdateSet:      updateSet,
+			WhereClause:    strings.Join(c, " = ? AND") + " = ?",
+			UniqueNameJoin: templatex.UpperCamel(strings.Join(c, "")),
 		}
 		if _, ok := m[item]; ok {
 			continue
