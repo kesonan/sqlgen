@@ -26,21 +26,28 @@ const (
 	SQLX
 )
 
-func Run(dsn string, filename, table []string, mode Mode) {
+type RunArg struct {
+	DSN             string
+	Filename, Table []string
+	Mode            Mode
+	Output          string
+}
+
+func Run(arg RunArg) {
 	var err error
-	if len(filename) > 0 {
-		err = runFromSQL(filename, mode)
-	} else if len(dsn) > 0 {
-		err = runFromDSN(dsn, table, mode)
+	if len(arg.filename) > 0 {
+		err = runFromSQL(arg)
+	} else if len(arg.dsn) > 0 {
+		err = runFromDSN(arg)
 	} else {
 		err = fmt.Errorf("missing dsn or filename")
 	}
 	log.Must(err)
 }
 
-func runFromSQL(filenamePatterns []string, mode Mode) error {
+func runFromSQL(arg RunArg) error {
 	var list []string
-	for _, filename := range filenamePatterns {
+	for _, filename := range arg.filename {
 		var dir = filepath.Dir(filename)
 		var base = filepath.Base(filename)
 		fileInfo, err := ioutil.ReadDir(dir)
@@ -86,16 +93,16 @@ func runFromSQL(filenamePatterns []string, mode Mode) error {
 		ret.DML = append(ret.DML, dxl.DML...)
 	}
 
-	return run(&ret, mode)
+	return run(&ret, arg.mode)
 }
 
-func runFromDSN(dsn string, patterns []string, mode Mode) error {
-	dxl, err := parser.From(dsn, patterns...)
+func runFromDSN(arg RunArg) error {
+	dxl, err := parser.From(arg.dsn, arg.table...)
 	if err != nil {
 		return err
 	}
 
-	return run(dxl, mode)
+	return run(dxl, arg.mode)
 }
 
 func run(dxl *spec.DXL, mode Mode) error {

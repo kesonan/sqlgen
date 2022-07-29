@@ -72,7 +72,7 @@ func (t *Table) validate() error {
 	if len(t.Constraint.PrimaryKey) == 0 {
 		return fmt.Errorf("missing table primary key")
 	}
-	if len(t.Constraint.PrimaryKey) > 0 {
+	if len(t.Constraint.PrimaryKey) > 1 {
 		return fmt.Errorf("unsupported multiple primary key")
 	}
 	return nil

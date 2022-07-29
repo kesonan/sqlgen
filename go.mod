@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/go-sql-driver/mysql v1.6.0
+	github.com/iancoleman/strcase v0.2.0
 	github.com/pingcap/parser v0.0.0-20220622031236-3bca03d3057b
 	github.com/spf13/cobra v1.5.0
 	github.com/stretchr/testify v1.8.0

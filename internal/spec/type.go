@@ -53,8 +53,8 @@ var typeMapper = map[typeKey]string{
 type Type byte
 
 // Go returns the Go type of the column.
-func (c Column) Go(unsigned bool) (string, error) {
-	var key = typeKey{tp: c.TP, signed: unsigned}
+func (c Column) Go() (string, error) {
+	var key = typeKey{tp: c.TP, signed: c.Unsigned}
 	if c.TP == mysql.TypeNewDecimal {
 		key.thirdPkg = defaultThirdDecimalPkg
 	}
