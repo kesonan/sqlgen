@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
+	"github.com/anqiansong/sqlgen/internal/gen/bun"
 	"github.com/anqiansong/sqlgen/internal/gen/gorm"
 	"github.com/anqiansong/sqlgen/internal/gen/sql"
 	"github.com/anqiansong/sqlgen/internal/gen/sqlx"
@@ -24,6 +25,7 @@ const (
 	GORM
 	XORM
 	SQLX
+	BUN
 )
 
 type RunArg struct {
@@ -35,9 +37,9 @@ type RunArg struct {
 
 func Run(arg RunArg) {
 	var err error
-	if len(arg.filename) > 0 {
+	if len(arg.Filename) > 0 {
 		err = runFromSQL(arg)
-	} else if len(arg.dsn) > 0 {
+	} else if len(arg.DSN) > 0 {
 		err = runFromDSN(arg)
 	} else {
 		err = fmt.Errorf("missing dsn or filename")
@@ -47,7 +49,7 @@ func Run(arg RunArg) {
 
 func runFromSQL(arg RunArg) error {
 	var list []string
-	for _, filename := range arg.filename {
+	for _, filename := range arg.Filename {
 		var dir = filepath.Dir(filename)
 		var base = filepath.Base(filename)
 		fileInfo, err := ioutil.ReadDir(dir)
@@ -93,28 +95,30 @@ func runFromSQL(arg RunArg) error {
 		ret.DML = append(ret.DML, dxl.DML...)
 	}
 
-	return run(&ret, arg.mode)
+	return run(&ret, arg.Mode)
 }
 
 func runFromDSN(arg RunArg) error {
-	dxl, err := parser.From(arg.dsn, arg.table...)
+	dxl, err := parser.From(arg.DSN, arg.Table...)
 	if err != nil {
 		return err
 	}
 
-	return run(dxl, arg.mode)
+	return run(dxl, arg.Mode)
+}
+
+var funcMap = map[Mode]func(dxl *spec.DXL) error{
+	SQL:  sql.Run,
+	GORM: gorm.Run,
+	XORM: xorm.Run,
+	SQLX: sqlx.Run,
+	BUN:  bun.Run,
 }
 
 func run(dxl *spec.DXL, mode Mode) error {
-	switch mode {
-	case SQL:
-		return sql.Run(dxl)
-	case GORM:
-		return gorm.Run(dxl)
-	case XORM:
-		return xorm.Run(dxl)
-	case SQLX:
-		return sqlx.Run(dxl)
+	fn, ok := funcMap[mode]
+	if !ok {
+		return nil
 	}
-	return nil
+	return fn(dxl)
 }

@@ -50,6 +50,15 @@ var sqlxCmd = &cobra.Command{
 	},
 }
 
+var bunCmd = &cobra.Command{
+	Use:   "bun",
+	Short: "Generate bun model",
+	Run: func(cmd *cobra.Command, args []string) {
+		arg.Mode = flags.BUN
+		flags.Run(arg)
+	},
+}
+
 func init() {
 	// flags init
 	var persistentFlags = rootCmd.PersistentFlags()
