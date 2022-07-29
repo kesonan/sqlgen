@@ -7,6 +7,11 @@ func TrimNewLine(s string) string {
 	return replacer.Replace(s)
 }
 
+func TrimSpace(s string) string {
+	var r = strings.NewReplacer(" ", "", "\t", "")
+	return r.Replace(s)
+}
+
 func RepeatJoin(s, sep string, count int) string {
 	var list []string
 	for i := 0; i < count; i++ {

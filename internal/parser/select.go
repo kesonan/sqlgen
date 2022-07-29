@@ -13,8 +13,13 @@ import (
 
 func parseSelect(stmt *ast.SelectStmt) (*spec.SelectStmt, error) {
 	var text = stmt.Text()
-	var ret spec.SelectStmt
+	comment, err := parseLineComment(text)
+	if err != nil {
+		return nil, err
+	}
 
+	var ret spec.SelectStmt
+	ret.Comment = comment
 	tableName, err := parseTableRefsClause(stmt.From)
 	if err != nil {
 		return nil, errorNearBy(err, text)

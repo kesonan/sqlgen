@@ -8,8 +8,13 @@ import (
 
 func parseInsert(stmt *ast.InsertStmt) (*spec.InsertStmt, error) {
 	var text = stmt.Text()
-	var ret spec.InsertStmt
+	comment, err := parseLineComment(text)
+	if err != nil {
+		return nil, err
+	}
 
+	var ret spec.InsertStmt
+	ret.Comment = comment
 	tableName, err := parseTableRefsClause(stmt.Table)
 	if err != nil {
 		return nil, errorNearBy(err, text)

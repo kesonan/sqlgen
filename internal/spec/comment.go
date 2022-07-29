@@ -4,8 +4,8 @@ import "fmt"
 
 // Comment represents a sql comment.
 type Comment struct {
-	// OriginalSQL represents the original sql text.
-	OriginSQL string
+	// OriginText represents the original sql text.
+	OriginText string
 	// LineText is the text of the line comment.
 	LineText []string
 	// FuncNames represents the generated function names.
@@ -14,7 +14,7 @@ type Comment struct {
 
 func (c Comment) validate() error {
 	if len(c.FuncName) == 0 {
-		return fmt.Errorf("missing func name near '%s'", c.OriginSQL)
+		return fmt.Errorf("missing func name near '%s'", c.OriginText)
 	}
 	return nil
 }

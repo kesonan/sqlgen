@@ -9,6 +9,10 @@ import (
 func parseDelete(stmt *ast.DeleteStmt) (spec.DML, error) {
 	var ret spec.DeleteStmt
 	var text = stmt.Text()
+	comment, err := parseLineComment(text)
+	if err != nil {
+		return nil, err
+	}
 
 	if stmt.IsMultiTable {
 		return nil, errorNearBy(errorMultipleTable, text)
@@ -46,6 +50,7 @@ func parseDelete(stmt *ast.DeleteStmt) (spec.DML, error) {
 		ret.Limit = limit
 	}
 
+	ret.Comment = comment
 	ret.SQL = stmt.Text()
 	ret.Action = spec.ActionDelete
 	ret.From = tableName

@@ -9,6 +9,11 @@ import (
 func parseUpdate(stmt *ast.UpdateStmt) (spec.DML, error) {
 	var ret spec.UpdateStmt
 	var text = stmt.Text()
+	comment, err := parseLineComment(text)
+	if err != nil {
+		return nil, err
+	}
+
 	if stmt.MultipleTable {
 		return nil, errorNearBy(errorMultipleTable, text)
 	}
@@ -56,6 +61,7 @@ func parseUpdate(stmt *ast.UpdateStmt) (spec.DML, error) {
 		}
 	}
 
+	ret.Comment = comment
 	ret.SQL = stmt.Text()
 	ret.Action = spec.ActionUpdate
 	ret.Table = tableName
