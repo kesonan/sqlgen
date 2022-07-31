@@ -122,6 +122,10 @@ type ByItem struct {
 	ColumnInfo Column
 	// TableInfo is the table info.
 	TableInfo *Table
+
+	// the below data are from stmt
+	// Comment represents a sql comment.
+	Comment Comment
 }
 
 // Limit represents a limit clause.
@@ -134,6 +138,10 @@ type Limit struct {
 	// the below data are from table
 	// TableInfo is the table info.
 	TableInfo *Table
+
+	// the below data are from stmt
+	// Comment represents a sql comment.
+	Comment Comment
 }
 
 func (l *Limit) IsValid() bool {

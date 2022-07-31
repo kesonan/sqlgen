@@ -3,6 +3,11 @@ package spec
 import (
 	"fmt"
 	"strings"
+
+	"github.com/iancoleman/strcase"
+
+	"github.com/anqiansong/sqlgen/internal/buffer"
+	"github.com/anqiansong/sqlgen/internal/set"
 )
 
 // Clause represents a where clause, having clause.
@@ -21,11 +26,37 @@ type Clause struct {
 	ColumnInfo Column
 	// TableInfo is the table info.
 	TableInfo *Table
+
+	// the below data are from stmt
+	// Comment represents a sql comment.
+	Comment Comment
 }
 
 type Parameter struct {
-	Column string
-	Type   string
+	Column   string
+	Type     string
+	ThirdPkg string
+}
+
+type Parameters []Parameter
+
+func (p Parameters) Range(fn func(p Parameter)) {
+	var m = map[Parameter]int{}
+	var deduplication Parameters
+	for _, v := range p {
+		if i, ok := m[v]; ok {
+			v.Column = fmt.Sprintf("%s%d", v.Column, i+1)
+			m[v] = i + 1
+			deduplication = append(deduplication, v)
+			continue
+		}
+		m[v] = 0
+		deduplication = append(deduplication, v)
+	}
+
+	for _, v := range deduplication {
+		fn(v)
+	}
 }
 
 // IsValid returns true if the statement is valid.
@@ -38,18 +69,60 @@ func (c *Clause) IsValid() bool {
 }
 
 func (c *Clause) SQL() (string, error) {
-	panic("implement me")
+	sql, _, err := c.marshal()
+	return sql, err
 }
 
-func (c *Clause) ParameterStructure() (string, error) {
-	panic("implement me")
+func (c *Clause) ParameterStructure(identifier string) (string, error) {
+	_, parameters, err := c.marshal()
+	if err != nil {
+		return "", err
+	}
+
+	var writer = buffer.New()
+	writer.Write(`type %s struct {`, c.ParameterStructureName(identifier))
+	parameters.Range(func(v Parameter) {
+		writer.Write("%s %s", v.Column, v.Type)
+	})
+	writer.Write(`}`)
+
+	return writer.String(), nil
+}
+
+func (c *Clause) ParameterStructureName(identifier string) string {
+	return strcase.ToCamel(fmt.Sprintf("%s%sParameter", c.Comment.FuncName, identifier))
+}
+
+func (c *Clause) ParameterImports() (string, error) {
+	_, parameters, err := c.marshal()
+	if err != nil {
+		return "", err
+	}
+	var thirdPkgSet = set.From()
+	parameters.Range(func(v Parameter) {
+		if len(v.ThirdPkg) == 0 {
+			return
+		}
+		thirdPkgSet.Add(v.ThirdPkg)
+	})
+
+	return strings.Join(thirdPkgSet.String(), "\n"), nil
 }
 
 func (c *Clause) Parameters(pkg string) (string, error) {
-	panic("implement me")
+	_, parameters, err := c.marshal()
+	if err != nil {
+		return "", err
+	}
+	var list []string
+	parameters.Range(func(v Parameter) {
+		list = append(list, fmt.Sprintf("%s.%s", pkg, v.Column))
+	})
+
+	return strings.Join(list, ", "), nil
 }
 
-func (c *Clause) marshal() (sql string, parameters []Parameter, err error) {
+func (c *Clause) marshal() (sql string, parameters Parameters, err error) {
 	parameters = []Parameter{}
 	if c == nil {
 		return
@@ -80,27 +153,30 @@ func (c *Clause) marshal() (sql string, parameters []Parameter, err error) {
 		sql = strings.Join(sqlList, Operator[c.OP])
 	case EQ, GE, GT, In, LE, LT, Like, NE, Not, NotIn, NotLike:
 		sql = fmt.Sprintf("%s %s ?", c.Column, Operator[c.OP])
-		goType, err := c.ColumnInfo.Go()
+		goType, thirdPkg, err := c.ColumnInfo.Go()
 		if err != nil {
 			return "", nil, err
 		}
 
 		parameters = append(parameters, Parameter{
-			Column: c.Column,
-			Type:   goType,
+			Column:   c.Column,
+			Type:     goType,
+			ThirdPkg: thirdPkg,
 		})
 	case Between, NotBetween:
 		sql = fmt.Sprintf("%s %s ? AND ?", c.Column, Operator[c.OP])
-		goType, err := c.ColumnInfo.Go()
+		goType, thirdPkg, err := c.ColumnInfo.Go()
 		if err != nil {
 			return "", nil, err
 		}
 		parameters = append(parameters, Parameter{
-			Column: fmt.Sprintf("%s%sStart", c.Column, Operator[c.OP]),
-			Type:   goType,
+			Column:   fmt.Sprintf("%s%sStart", c.Column, Operator[c.OP]),
+			Type:     goType,
+			ThirdPkg: thirdPkg,
 		}, Parameter{
-			Column: fmt.Sprintf("%s%sEnd", c.Column, Operator[c.OP]),
-			Type:   goType,
+			Column:   fmt.Sprintf("%s%sEnd", c.Column, Operator[c.OP]),
+			Type:     goType,
+			ThirdPkg: thirdPkg,
 		})
 	default:
 		// ignores 'case'

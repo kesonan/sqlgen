@@ -49,22 +49,22 @@ func from(table *Table, dml []DML) (Context, error) {
 					return Context{}, err
 				}
 
-				v.Having, err = convertClause(v.Having, table)
+				v.Having, err = convertClause(v.Having, table, v.Comment)
 				if err != nil {
 					return Context{}, err
 				}
 
-				v.Where, err = convertClause(v.Where, table)
+				v.Where, err = convertClause(v.Where, table, v.Comment)
 				if err != nil {
 					return Context{}, err
 				}
 
-				v.OrderBy, err = convertByItems(v.OrderBy, table)
+				v.OrderBy, err = convertByItems(v.OrderBy, table, v.Comment)
 				if err != nil {
 					return Context{}, err
 				}
 
-				v.Limit = convertLimit(v.Limit, table)
+				v.Limit = convertLimit(v.Limit, table, v.Comment)
 				v.ColumnInfo = columns
 				v.GroupByInfo = groupByColumns
 				v.FromInfo = table
@@ -75,29 +75,29 @@ func from(table *Table, dml []DML) (Context, error) {
 					return Context{}, err
 				}
 
-				v.Where, err = convertClause(v.Where, table)
+				v.Where, err = convertClause(v.Where, table, v.Comment)
 				if err != nil {
 					return Context{}, err
 				}
 
-				v.OrderBy, err = convertByItems(v.OrderBy, table)
+				v.OrderBy, err = convertByItems(v.OrderBy, table, v.Comment)
 				if err != nil {
 					return Context{}, err
 				}
 
 				v.TableInfo = table
 				v.ColumnInfo = columns
-				v.Limit = convertLimit(v.Limit, table)
+				v.Limit = convertLimit(v.Limit, table, v.Comment)
 				ctx.UpdateStmt = append(ctx.UpdateStmt, v)
 			case *DeleteStmt:
 				var err error
-				v.OrderBy, err = convertByItems(v.OrderBy, table)
+				v.OrderBy, err = convertByItems(v.OrderBy, table, v.Comment)
 				if err != nil {
 					return Context{}, err
 				}
 
 				v.FromInfo = table
-				v.Limit = convertLimit(v.Limit, table)
+				v.Limit = convertLimit(v.Limit, table, v.Comment)
 				ctx.DeleteStmt = append(ctx.DeleteStmt, v)
 			}
 		}

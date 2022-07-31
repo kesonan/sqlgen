@@ -2,19 +2,20 @@ package spec
 
 import "fmt"
 
-func convertLimit(limit *Limit, table *Table) *Limit {
+func convertLimit(limit *Limit, table *Table, comment Comment) *Limit {
 	if !limit.IsValid() {
 		return limit
 	}
 
 	limit.TableInfo = table
+	limit.Comment = comment
 	return limit
 }
 
-func convertByItems(byItems []*ByItem, table *Table) ([]*ByItem, error) {
+func convertByItems(byItems []*ByItem, table *Table, comment Comment) ([]*ByItem, error) {
 	var list []*ByItem
 	for _, v := range byItems {
-		byItem, err := convertByItem(v, table)
+		byItem, err := convertByItem(v, table, comment)
 		if err != nil {
 			return nil, err
 		}
@@ -23,12 +24,13 @@ func convertByItems(byItems []*ByItem, table *Table) ([]*ByItem, error) {
 	return list, nil
 }
 
-func convertByItem(byItem *ByItem, table *Table) (*ByItem, error) {
+func convertByItem(byItem *ByItem, table *Table, comment Comment) (*ByItem, error) {
 	if !byItem.IsValid() {
 		return byItem, nil
 	}
 
 	byItem.TableInfo = table
+	byItem.Comment = comment
 	column, ok := table.GetColumnByName(byItem.Column)
 	if !ok {
 		return nil, fmt.Errorf("column %q no found in table %q", byItem.Column, table.Name)
@@ -37,11 +39,12 @@ func convertByItem(byItem *ByItem, table *Table) (*ByItem, error) {
 	return byItem, nil
 }
 
-func convertClause(clause *Clause, table *Table) (*Clause, error) {
+func convertClause(clause *Clause, table *Table, comment Comment) (*Clause, error) {
 	if !clause.IsValid() {
 		return clause, nil
 	}
 
+	clause.Comment = comment
 	clause.TableInfo = table
 	column, ok := table.GetColumnByName(clause.Column)
 	if !ok {
@@ -49,11 +52,11 @@ func convertClause(clause *Clause, table *Table) (*Clause, error) {
 	}
 
 	clause.ColumnInfo = column
-	leftClause, err := convertClause(clause.Left, table)
+	leftClause, err := convertClause(clause.Left, table, comment)
 	if err != nil {
 		return nil, err
 	}
-	rightClause, err := convertClause(clause.Right, table)
+	rightClause, err := convertClause(clause.Right, table, comment)
 	if err != nil {
 		return nil, err
 	}
