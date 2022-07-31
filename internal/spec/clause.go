@@ -32,14 +32,21 @@ type Clause struct {
 	Comment Comment
 }
 
+// Parameter represents an original description data for code generation structure info.
 type Parameter struct {
-	Column   string
-	Type     string
+	// Column represents a parameter name.
+	Column string
+	// Type represents a parameter go type.
+	Type string
+	// ThirdPkg represents a go type which is a third package or go built-in package.
 	ThirdPkg string
 }
 
+// Parameters returns the parameters.
 type Parameters []Parameter
 
+// Range calls f for each clause, the name of Parameter will add a repeated number suffix to
+// avoid duplication Parameter.
 func (p Parameters) Range(fn func(p Parameter)) {
 	var m = map[Parameter]int{}
 	var deduplication Parameters
@@ -68,11 +75,13 @@ func (c *Clause) IsValid() bool {
 	return c.Column != "" || c.OP != 0 || c.Left != nil || c.Right != nil
 }
 
+// SQL returns the clause condition strings.
 func (c *Clause) SQL() (string, error) {
 	sql, _, err := c.marshal()
 	return sql, err
 }
 
+// ParameterStructure returns the parameter type structure.
 func (c *Clause) ParameterStructure(identifier string) (string, error) {
 	_, parameters, err := c.marshal()
 	if err != nil {
@@ -89,11 +98,13 @@ func (c *Clause) ParameterStructure(identifier string) (string, error) {
 	return writer.String(), nil
 }
 
+// ParameterStructureName returns the parameter structure name.
 func (c *Clause) ParameterStructureName(identifier string) string {
 	return strcase.ToCamel(fmt.Sprintf("%s%sParameter", c.Comment.FuncName, identifier))
 }
 
-func (c *Clause) ParameterImports() (string, error) {
+// ParameterThirdImports returns the third package imports.
+func (c *Clause) ParameterThirdImports() (string, error) {
 	_, parameters, err := c.marshal()
 	if err != nil {
 		return "", err
@@ -109,6 +120,7 @@ func (c *Clause) ParameterImports() (string, error) {
 	return strings.Join(thirdPkgSet.String(), "\n"), nil
 }
 
+// Parameters returns the parameter variables.
 func (c *Clause) Parameters(pkg string) (string, error) {
 	_, parameters, err := c.marshal()
 	if err != nil {
