@@ -82,7 +82,11 @@ func (t *Table) PrimaryColumnList() []Column {
 	var ret []Column
 	for _, list := range t.Constraint.PrimaryKey {
 		for _, name := range list {
-			ret = append(ret, t.GetColumnByName(name))
+			c, ok := t.GetColumnByName(name)
+			if !ok {
+				continue
+			}
+			ret = append(ret, c)
 		}
 	}
 	return ret
@@ -100,13 +104,13 @@ func (t *Table) HasOnePrimaryKey() bool {
 }
 
 // GetColumnByName returns the column with the given name.
-func (t *Table) GetColumnByName(name string) Column {
+func (t *Table) GetColumnByName(name string) (Column, bool) {
 	for _, c := range t.Columns {
 		if c.Name == name {
-			return c
+			return c, true
 		}
 	}
-	return Column{}
+	return Column{}, false
 }
 
 func (t *Table) validate() error {

@@ -134,7 +134,7 @@ func parseExprNode(node ast.ExprNode) (*spec.Clause, error) {
 
 		clause.OP = op
 		if leftClause.IsValid() {
-			if leftClause.OP == spec.ColumnOP {
+			if leftClause.OP == spec.ColumnValue {
 				clause.Column = leftClause.Column
 			} else {
 				clause.Left = leftClause
@@ -142,7 +142,7 @@ func parseExprNode(node ast.ExprNode) (*spec.Clause, error) {
 		}
 
 		if rightClause.IsValid() {
-			if rightClause.OP == spec.ColumnOP {
+			if rightClause.OP == spec.ColumnValue {
 				clause.Column = rightClause.Column
 			} else {
 				clause.Right = rightClause
@@ -155,7 +155,7 @@ func parseExprNode(node ast.ExprNode) (*spec.Clause, error) {
 		}
 
 		if len(colName) > 0 {
-			clause.OP = spec.ColumnOP
+			clause.OP = spec.ColumnValue
 			clause.Column = colName
 		}
 	case *test_driver.ValueExpr, *test_driver.ParamMarkerExpr:
@@ -167,7 +167,7 @@ func parseExprNode(node ast.ExprNode) (*spec.Clause, error) {
 		}
 
 		clause.OP = spec.Parentheses
-		if c.IsValid() && c.OP == spec.ColumnOP {
+		if c.IsValid() && c.OP == spec.ColumnValue {
 			clause.Column = c.Column
 		} else {
 			clause.Left = c
@@ -184,7 +184,7 @@ func parseExprNode(node ast.ExprNode) (*spec.Clause, error) {
 		}
 
 		clause.OP = inOP
-		if c.IsValid() && c.OP == spec.ColumnOP {
+		if c.IsValid() && c.OP == spec.ColumnValue {
 			clause.Column = c.Column
 		} else {
 			clause.Left = c
@@ -201,7 +201,7 @@ func parseExprNode(node ast.ExprNode) (*spec.Clause, error) {
 		}
 
 		clause.OP = likeOP
-		if c.IsValid() && c.OP == spec.ColumnOP {
+		if c.IsValid() && c.OP == spec.ColumnValue {
 			clause.Column = c.Column
 		} else {
 			clause.Left = c
@@ -218,7 +218,7 @@ func parseExprNode(node ast.ExprNode) (*spec.Clause, error) {
 		}
 
 		clause.OP = betweenOP
-		if c.IsValid() && c.OP == spec.ColumnOP {
+		if c.IsValid() && c.OP == spec.ColumnValue {
 			clause.Column = c.Column
 		} else {
 			clause.Left = c

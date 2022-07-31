@@ -20,13 +20,7 @@ CREATE TABLE `user`
 -- fn:FindOne
 select *, user, name
 from user
-where id = 1
-    and name like '%k%'
-    and age in (1, 2)
-    and num between 1 and 20
-    and a = 2
-   or b = 1
-    and (c = 1 or d = 1)
+where id not between 1 and 2
     group by name
     order by name desc
     limit 1,10;

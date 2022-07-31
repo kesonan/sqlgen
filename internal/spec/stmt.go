@@ -1,7 +1,5 @@
 package spec
 
-import "github.com/anqiansong/sqlgen/internal/set"
-
 // WildCard is a wildcard column.
 const WildCard = "*"
 
@@ -94,18 +92,6 @@ type ByItem struct {
 	Desc   bool
 }
 
-// Clause represents a where clause, having clause.
-type Clause struct {
-	// Column represents the column name.
-	Column string
-	// Left represents the left expr.
-	Left *Clause
-	// Right represents the right expr.
-	Right *Clause
-	// OP represents the operator.
-	OP OP
-}
-
 // Limit represents a limit clause.
 type Limit struct {
 	// Count represents the limit count.
@@ -117,22 +103,6 @@ type Limit struct {
 // IsValid returns true if the statement is valid.
 func (c *Clause) IsValid() bool {
 	return c.Column != "" || c.OP != 0 || c.Left != nil || c.Right != nil
-}
-
-// Columns returns the columns.
-func (c *Clause) Columns() []string {
-	var columnSet = set.From()
-	if len(c.Column) > 0 {
-		columnSet.Add(c.Column)
-	}
-	if c.Left != nil {
-		columnSet.AddStringList(c.Left.Columns())
-	}
-	if c.Right != nil {
-		columnSet.AddStringList(c.Right.Columns())
-	}
-
-	return columnSet.String()
 }
 
 func (i *InsertStmt) SQLText() string {

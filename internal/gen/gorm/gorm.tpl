@@ -14,18 +14,3 @@ type {{UpperCamel $.Table.Name}} struct { {{range $.Table.Columns}}
 func ({{UpperCamel $.Table.Name}}) TableName() string {
     return "{{$.Table.Name}}"
 }
-
-// Create creates a new {{$.Table.Name}}(s).
-func (m *{{UpperCamel $.Table.Name}}Model) Create(ctx context.Context, data ...*{{UpperCamel $.Table.Name}})error{
-    var length = len(data)
-    switch length{
-    case 0:
-        return fmt.Errorf("missing data")
-    default:
-        return m.db.Create(&data).Error
-    }
-}
-
-{{range $item := .SelectStmt}}{{range $comment := $item.LineText}}// {{$comment}}
-{{end}}func (m *{{UpperCamel $.Table.Name}}Model)$item.FuncName(ctx context.Context)
-{{end}}
