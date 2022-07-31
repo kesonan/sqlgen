@@ -20,6 +20,12 @@ type InsertStmt struct {
 	SQL string
 	// Table represents the operation table name, do not support multiple tables.
 	Table string
+
+	// the below data are from table
+	// ColumnInfo are the column info which are convert from Columns.
+	ColumnInfo []Column
+	// TableInfo is the table info which is convert from Table.
+	TableInfo *Table
 }
 
 // SelectStmt represents a select statement.
@@ -46,6 +52,14 @@ type SelectStmt struct {
 	SQL string
 	// Where represents the where clause.
 	Where *Clause
+
+	// the below data are from table
+	// ColumnInfo are the column info which are convert from Columns.
+	ColumnInfo []Column
+	// GroupByInfo are the column info which are convert from GroupBy.
+	GroupByInfo []Column
+	// FromInfo is the table info which is convert from From.
+	FromInfo *Table
 }
 
 // DeleteStmt represents a delete statement.
@@ -64,6 +78,10 @@ type DeleteStmt struct {
 	SQL string
 	// Where represents the where clause.
 	Where *Clause
+
+	// the below data are from table
+	// FromInfo is the table info which is convert from From.
+	FromInfo *Table
 }
 
 // UpdateStmt represents a update statement.
@@ -84,12 +102,26 @@ type UpdateStmt struct {
 	Table string
 	// Where represents the where clause.
 	Where *Clause
+
+	// the below data are from table
+	// ColumnInfo are the column info which are convert from Columns.
+	ColumnInfo []Column
+	// TableInfo is the table info which is convert from Table.
+	TableInfo *Table
 }
 
 // ByItem represents an order-by or group-by item.
 type ByItem struct {
+	// Column represents the column name.
 	Column string
-	Desc   bool
+	// Desc returns true if order by Column desc.
+	Desc bool
+
+	// the below data are from table
+	// ColumnInfo are the column info which are convert from Column.
+	ColumnInfo Column
+	// TableInfo is the table info.
+	TableInfo *Table
 }
 
 // Limit represents a limit clause.
@@ -98,11 +130,24 @@ type Limit struct {
 	Count int64
 	// Offset represents the limit offset.
 	Offset int64
+
+	// the below data are from table
+	// TableInfo is the table info.
+	TableInfo *Table
 }
 
-// IsValid returns true if the statement is valid.
-func (c *Clause) IsValid() bool {
-	return c.Column != "" || c.OP != 0 || c.Left != nil || c.Right != nil
+func (l *Limit) IsValid() bool {
+	if l == nil {
+		return false
+	}
+	return l.Count > 0
+}
+
+func (b *ByItem) IsValid() bool {
+	if b == nil {
+		return false
+	}
+	return len(b.Column) > 0
 }
 
 func (i *InsertStmt) SQLText() string {
