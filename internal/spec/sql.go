@@ -44,7 +44,7 @@ func from(table *Table, dml []DML) (Context, error) {
 					return Context{}, err
 				}
 
-				groupByColumns, err := convertColumn(table, v.GroupBy)
+				v.GroupBy, err = convertByItems(v.GroupBy, table, v.Comment)
 				if err != nil {
 					return Context{}, err
 				}
@@ -66,7 +66,6 @@ func from(table *Table, dml []DML) (Context, error) {
 
 				v.Limit = convertLimit(v.Limit, table, v.Comment)
 				v.ColumnInfo = columns
-				v.GroupByInfo = groupByColumns
 				v.FromInfo = table
 				ctx.SelectStmt = append(ctx.SelectStmt, v)
 			case *UpdateStmt:

@@ -4,6 +4,8 @@ import (
 	"fmt"
 
 	"github.com/pingcap/parser/mysql"
+
+	"github.com/anqiansong/sqlgen/internal/parameter"
 )
 
 const defaultThirdDecimalPkg = "github.com/shopspring/decimal"
@@ -52,16 +54,22 @@ var typeMapper = map[typeKey]string{
 // Type is the type of the column.
 type Type byte
 
-// Go returns the Go type of the column.
-func (c Column) Go() (string, string, error) {
+// DataType returns the Go type, third-package of the column.
+func (c Column) DataType() (parameter.Parameter, error) {
 	var key = typeKey{tp: c.TP, signed: c.Unsigned}
 	if c.TP == mysql.TypeNewDecimal {
 		key.thirdPkg = defaultThirdDecimalPkg
 	}
 	goType, ok := typeMapper[key]
 	if !ok {
-		return "", "", fmt.Errorf("unsupported type}: %v", c.TP)
+		return parameter.Parameter{}, fmt.Errorf("unsupported type}: %v", c.TP)
 	}
 
-	return goType, key.thirdPkg, nil
+	return NewParameter(c.Name, goType, key.thirdPkg), nil
+}
+
+// GoType returns the Go type of the column.
+func (c Column) GoType() (string, error) {
+	p, err := c.DataType()
+	return p.Type, err
 }

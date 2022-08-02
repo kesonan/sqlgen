@@ -4,13 +4,44 @@ package model
 
 import (
     "context"
-    )
+    "fmt"
+    "time"
+
+    "gorm.io/gorm"
+
+    "github.com/shopspring/decimal"
+)
+
+// {{UpperCamel $.Table.Name}}Model represents a {{$.Table.Name}} model.
+type {{UpperCamel $.Table.Name}}Model struct {
+    db gorm.DB
+}
 
 // {{UpperCamel $.Table.Name}} represents a {{$.Table.Name}} struct data.
 type {{UpperCamel $.Table.Name}} struct { {{range $.Table.Columns}}
-    {{UpperCamel .Name}} {{.Go}} `gorm:"{{if IsPrimary .Name}}primaryKey;{{end}}column:{{.Name}}" json:"{{LowerCamel .Name}}"`{{end}}
+    {{UpperCamel .Name}} {{.GoType}} `gorm:"{{if IsPrimary .Name}}primaryKey;{{end}}{{if .AutoIncrement}}autoIncrement;{{end}}column:{{.Name}}" json:"{{LowerCamel .Name}}"`{{end}}
 }
 
+// TableName returns the table name. it implemented by gorm.Tabler.
 func ({{UpperCamel $.Table.Name}}) TableName() string {
     return "{{$.Table.Name}}"
 }
+
+// Create creates  {{$.Table.Name}} data.
+func (m *{{UpperCamel $.Table.Name}}Model) Create(ctx context.Context, data ...*{{UpperCamel $.Table.Name}}) error {
+    if len(data)==0{
+        return fmt.Errorf("data is empty")
+    }
+
+    return m.db.Create(&data).Error
+}
+
+{{range $stmt := .SelectStmt}}
+{{if $stmt.Where.IsInValid}}{{$stmt.Where.ParameterStructure "Where"}}{{else}}{{end}}
+{{if $stmt.GroupBy.IsValid}}{{$stmt.GroupBy.ParameterStructure "GroupBy"}}{{else}}{{end}}
+{{if $stmt.Having.IsValid}}{{$stmt.Having.ParameterStructure "Having"}}{{else}}{{end}}
+{{if $stmt.OrderBy.IsValid}}{{$stmt.OrderBy.ParameterStructure "OrderBy"}}{{else}}{{end}}
+{{if $stmt.Limit.IsValid}}{{$stmt.Limit.ParameterStructure}}{{else}}{{end}}
+func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if $stmt.Where.IsValid}} , where {{$stmt.Where.ParameterStructureName "Where"}}{{end}}){
+
+}{{end}}

@@ -2,6 +2,7 @@ package templatex
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -72,12 +73,15 @@ func (t *T) MustSave(filename string, format bool) {
 	}
 }
 
-func (t *T) Write(writer io.Writer, fmt bool) {
+func (t *T) Write(writer io.Writer, formatCode bool) {
 	var data []byte
 	var err error
-	if fmt {
+	if formatCode {
 		data, err = format.Source(t.buffer.Bytes())
-		log.Must(err)
+		if err != nil {
+			fmt.Printf("%+v\n", string(t.buffer.Bytes()))
+			log.Must(err)
+		}
 	} else {
 		data = t.buffer.Bytes()
 	}

@@ -41,13 +41,13 @@ type SelectStmt struct {
 	// From represents the operation table name, do not support multiple tables.
 	From string
 	// GroupBy represents the group by clause.
-	GroupBy []string
+	GroupBy ByItems
 	// Having represents the having clause.
 	Having *Clause
 	// Limit represents the limit clause.
 	Limit *Limit
 	// OrderBy represents the order by clause.
-	OrderBy []*ByItem
+	OrderBy ByItems
 	// SQL represents the original sql text.
 	SQL string
 	// Where represents the where clause.
@@ -56,8 +56,6 @@ type SelectStmt struct {
 	// the below data are from table
 	// ColumnInfo are the column info which are convert from Columns.
 	ColumnInfo []Column
-	// GroupByInfo are the column info which are convert from GroupBy.
-	GroupByInfo []Column
 	// FromInfo is the table info which is convert from From.
 	FromInfo *Table
 }
@@ -73,7 +71,7 @@ type DeleteStmt struct {
 	// Limit represents the limit clause.
 	Limit *Limit
 	// OrderBy represents the order by clause.
-	OrderBy []*ByItem
+	OrderBy ByItems
 	// SQL represents the original sql text.
 	SQL string
 	// Where represents the where clause.
@@ -95,7 +93,7 @@ type UpdateStmt struct {
 	// Limit represents the limit clause.
 	Limit *Limit
 	// OrderBy represents the order by clause.
-	OrderBy []*ByItem
+	OrderBy ByItems
 	// SQL represents the original sql text.
 	SQL string
 	// Table represents the operation table name, do not support multiple tables.
@@ -108,24 +106,6 @@ type UpdateStmt struct {
 	ColumnInfo []Column
 	// TableInfo is the table info which is convert from Table.
 	TableInfo *Table
-}
-
-// ByItem represents an order-by or group-by item.
-type ByItem struct {
-	// Column represents the column name.
-	Column string
-	// Desc returns true if order by Column desc.
-	Desc bool
-
-	// the below data are from table
-	// ColumnInfo are the column info which are convert from Column.
-	ColumnInfo Column
-	// TableInfo is the table info.
-	TableInfo *Table
-
-	// the below data are from stmt
-	// Comment represents a sql comment.
-	Comment Comment
 }
 
 // Limit represents a limit clause.
@@ -142,20 +122,6 @@ type Limit struct {
 	// the below data are from stmt
 	// Comment represents a sql comment.
 	Comment Comment
-}
-
-func (l *Limit) IsValid() bool {
-	if l == nil {
-		return false
-	}
-	return l.Count > 0
-}
-
-func (b *ByItem) IsValid() bool {
-	if b == nil {
-		return false
-	}
-	return len(b.Column) > 0
 }
 
 func (i *InsertStmt) SQLText() string {

@@ -230,8 +230,8 @@ func parseExprNode(node ast.ExprNode) (*spec.Clause, error) {
 	return &clause, nil
 }
 
-func parseGroupBy(groupBy *ast.GroupByClause) ([]string, error) {
-	var columnSet = set.From()
+func parseGroupBy(groupBy *ast.GroupByClause) (spec.ByItems, error) {
+	var ret spec.ByItems
 	var groupByItem = groupBy.Items
 	for _, item := range groupByItem {
 		clause, err := parseExprNode(item.Expr)
@@ -239,10 +239,16 @@ func parseGroupBy(groupBy *ast.GroupByClause) ([]string, error) {
 			return nil, err
 		}
 
-		columnSet.AddStringList(getAllColumns(clause))
+		var allColumns = getAllColumns(clause)
+		for _, column := range allColumns {
+			ret = append(ret, &spec.ByItem{
+				Column: column,
+				Desc:   item.Desc,
+			})
+		}
 	}
 
-	return columnSet.String(), nil
+	return ret, nil
 }
 
 func getAllColumns(clause *spec.Clause) []string {
@@ -268,9 +274,9 @@ func parseHaving(having *ast.HavingClause) (*spec.Clause, error) {
 	return parseExprNode(having.Expr)
 }
 
-func parseOrderBy(orderBy *ast.OrderByClause) ([]*spec.ByItem, error) {
+func parseOrderBy(orderBy *ast.OrderByClause) (spec.ByItems, error) {
 	var byItem = orderBy.Items
-	var ret []*spec.ByItem
+	var ret spec.ByItems
 	for _, item := range byItem {
 		clauses, err := parseExprNode(item.Expr)
 		if err != nil {
