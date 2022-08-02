@@ -38,13 +38,13 @@ func NewParameter(column string, tp string, thirdPkg string) parameter.Parameter
 	return parameter.Parameter{Column: strcase.ToCamel(column), Type: tp, ThirdPkg: thirdPkg}
 }
 
-// IsInValid returns true if the statement is valid.
-func (c *Clause) IsInValid() bool {
+// IsValid returns true if the statement is valid.
+func (c *Clause) IsValid() bool {
 	if c == nil {
-		return true
+		return false
 	}
 
-	return !(c.Column != "" || c.OP != 0 || c.Left != nil || c.Right != nil)
+	return c.Column != "" || c.OP != 0 || c.Left != nil || c.Right != nil
 }
 
 // SQL returns the clause condition strings.
@@ -61,6 +61,7 @@ func (c *Clause) ParameterStructure(identifier string) (string, error) {
 	}
 
 	var writer = buffer.New()
+	writer.Write(`// %s is a %s parameter structure.`, c.ParameterStructureName(identifier), strcase.ToDelimited(identifier, ' '))
 	writer.Write(`type %s struct {`, c.ParameterStructureName(identifier))
 	for _, v := range parameters {
 		writer.Write("%s %s", v.Column, v.Type)

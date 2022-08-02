@@ -3,7 +3,7 @@ package spec
 import "fmt"
 
 func convertLimit(limit *Limit, table *Table, comment Comment) *Limit {
-	if limit.IsInValid() {
+	if !limit.IsValid() {
 		return limit
 	}
 
@@ -25,7 +25,7 @@ func convertByItems(byItems ByItems, table *Table, comment Comment) (ByItems, er
 }
 
 func convertByItem(byItem *ByItem, table *Table, comment Comment) (*ByItem, error) {
-	if byItem.IsInValid() {
+	if !byItem.IsValid() {
 		return byItem, nil
 	}
 
@@ -43,7 +43,7 @@ func convertByItem(byItem *ByItem, table *Table, comment Comment) (*ByItem, erro
 }
 
 func convertClause(clause *Clause, table *Table, comment Comment) (*Clause, error) {
-	if clause.IsInValid() {
+	if !clause.IsValid() {
 		return clause, nil
 	}
 

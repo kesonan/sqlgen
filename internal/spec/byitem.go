@@ -32,20 +32,21 @@ type ByItem struct {
 	Comment Comment
 }
 
-func (b *ByItem) IsInValid() bool {
+func (b *ByItem) IsValid() bool {
 	if b == nil {
-		return true
+		return false
 	}
-	return len(b.Column) == 0
+
+	return len(b.Column) > 0
 }
 
-func (b ByItems) IsInValid() bool {
+func (b ByItems) IsValid() bool {
 	if len(b) == 0 {
-		return true
+		return false
 	}
 
 	for _, v := range b {
-		if v.IsInValid() {
+		if v.IsValid() {
 			return true
 		}
 	}
@@ -67,6 +68,7 @@ func (b ByItems) ParameterStructure(identifier string) (string, error) {
 	}
 
 	var writer = buffer.New()
+	writer.Write(`// %s is a %s parameter structure.`, b.ParameterStructureName(identifier), strcase.ToDelimited(identifier, ' '))
 	writer.Write(`type %s struct {`, b.ParameterStructureName(identifier))
 	for _, v := range parameters {
 		writer.Write("%s %s", v.Column, v.Type)
@@ -110,7 +112,7 @@ func (b ByItems) Parameters(pkg string) (string, error) {
 
 // ParameterStructureName returns the parameter structure name.
 func (b ByItems) ParameterStructureName(identifier string) string {
-	if b.IsInValid() {
+	if !b.IsValid() {
 		return ""
 	}
 
@@ -123,6 +125,7 @@ func (b ByItems) marshal() (sql string, parameters parameter.Parameters, err err
 	if len(b) == 0 {
 		return
 	}
+
 	var sqlJoin []string
 	var ps = parameter.New()
 	for _, v := range b {

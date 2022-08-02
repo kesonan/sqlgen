@@ -21,6 +21,12 @@ type {{UpperCamel $.Table.Name}}Model struct {
 type {{UpperCamel $.Table.Name}} struct { {{range $.Table.Columns}}
     {{UpperCamel .Name}} {{.GoType}} `gorm:"{{if IsPrimary .Name}}primaryKey;{{end}}{{if .AutoIncrement}}autoIncrement;{{end}}column:{{.Name}}" json:"{{LowerCamel .Name}}"`{{end}}
 }
+{{range $stmt := .SelectStmt}}{{if $stmt.Where.IsValid}}{{$stmt.Where.ParameterStructure "Where"}}
+{{end}}{{if $stmt.GroupBy.IsValid}}{{$stmt.GroupBy.ParameterStructure "GroupBy"}}
+{{end}}{{if $stmt.Having.IsValid}}{{$stmt.Having.ParameterStructure "Having"}}
+{{end}}{{if $stmt.OrderBy.IsValid}}{{$stmt.OrderBy.ParameterStructure "OrderBy"}}
+{{end}}{{if $stmt.Limit.IsValid}}{{$stmt.Limit.ParameterStructure}}{{end}}
+{{end}}
 
 // TableName returns the table name. it implemented by gorm.Tabler.
 func ({{UpperCamel $.Table.Name}}) TableName() string {
@@ -35,13 +41,7 @@ func (m *{{UpperCamel $.Table.Name}}Model) Create(ctx context.Context, data ...*
 
     return m.db.Create(&data).Error
 }
-
 {{range $stmt := .SelectStmt}}
-{{if $stmt.Where.IsInValid}}{{$stmt.Where.ParameterStructure "Where"}}{{else}}{{end}}
-{{if $stmt.GroupBy.IsValid}}{{$stmt.GroupBy.ParameterStructure "GroupBy"}}{{else}}{{end}}
-{{if $stmt.Having.IsValid}}{{$stmt.Having.ParameterStructure "Having"}}{{else}}{{end}}
-{{if $stmt.OrderBy.IsValid}}{{$stmt.OrderBy.ParameterStructure "OrderBy"}}{{else}}{{end}}
-{{if $stmt.Limit.IsValid}}{{$stmt.Limit.ParameterStructure}}{{else}}{{end}}
 func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if $stmt.Where.IsValid}} , where {{$stmt.Where.ParameterStructureName "Where"}}{{end}}){
 
 }{{end}}

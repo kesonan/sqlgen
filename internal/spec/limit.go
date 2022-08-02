@@ -11,11 +11,11 @@ import (
 	"github.com/anqiansong/sqlgen/internal/set"
 )
 
-func (l *Limit) IsInValid() bool {
+func (l *Limit) IsValid() bool {
 	if l == nil {
-		return true
+		return false
 	}
-	return l.Count == 0
+	return l.Count > 0
 }
 
 // SQL returns the clause condition strings.
@@ -32,6 +32,7 @@ func (l *Limit) ParameterStructure() (string, error) {
 	}
 
 	var writer = buffer.New()
+	writer.Write(`// %s is a limit parameter structure.`, l.ParameterStructureName())
 	writer.Write(`type %s struct {`, l.ParameterStructureName())
 	for _, v := range parameters {
 		writer.Write("%s %s", v.Column, v.Type)
@@ -75,7 +76,7 @@ func (l *Limit) Parameters(pkg string) (string, error) {
 
 // ParameterStructureName returns the parameter structure name.
 func (l *Limit) ParameterStructureName() string {
-	if l.IsInValid() {
+	if !l.IsValid() {
 		return ""
 	}
 

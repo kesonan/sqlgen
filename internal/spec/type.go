@@ -62,7 +62,7 @@ func (c Column) DataType() (parameter.Parameter, error) {
 	}
 	goType, ok := typeMapper[key]
 	if !ok {
-		return parameter.Parameter{}, fmt.Errorf("unsupported type}: %v", c.TP)
+		return parameter.Parameter{}, fmt.Errorf("unsupported type: %v", c.TP)
 	}
 
 	return NewParameter(c.Name, goType, key.thirdPkg), nil
