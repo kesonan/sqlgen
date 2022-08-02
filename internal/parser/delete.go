@@ -1,6 +1,8 @@
 package parser
 
 import (
+	"strings"
+
 	"github.com/pingcap/parser/ast"
 
 	"github.com/anqiansong/sqlgen/internal/spec"
@@ -10,6 +12,11 @@ func parseDelete(stmt *ast.DeleteStmt) (spec.DML, error) {
 	var ret spec.DeleteStmt
 	var text = stmt.Text()
 	comment, err := parseLineComment(text)
+	if err != nil {
+		return nil, err
+	}
+
+	sql, err := NewSqlScanner(text).ScanAndTrim()
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +58,7 @@ func parseDelete(stmt *ast.DeleteStmt) (spec.DML, error) {
 	}
 
 	ret.Comment = comment
-	ret.SQL = stmt.Text()
+	ret.SQL = strings.TrimSpace(sql)
 	ret.Action = spec.ActionDelete
 	ret.From = tableName
 	return &ret, nil

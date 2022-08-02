@@ -6,6 +6,11 @@ import (
 	"strings"
 )
 
+func TrimWhiteSpace(s string) string {
+	ret := TrimNewLine(s)
+	return TrimSpace(ret)
+}
+
 func TrimNewLine(s string) string {
 	var replacer = strings.NewReplacer("\r", "", "\n", "")
 	return replacer.Replace(s)

@@ -50,7 +50,7 @@ func (c *Clause) IsValid() bool {
 // SQL returns the clause condition strings.
 func (c *Clause) SQL() (string, error) {
 	sql, _, err := c.marshal()
-	return sql, err
+	return fmt.Sprintf("`%s`", sql), err
 }
 
 // ParameterStructure returns the parameter type structure.
@@ -133,11 +133,11 @@ func (c *Clause) marshal() (sql string, parameters parameter.Parameters, err err
 		if len(leftSQL) > 0 {
 			sqlList = append(sqlList, leftSQL)
 		}
-		if len(leftSQL) > 0 {
+		if len(rightSQL) > 0 {
 			sqlList = append(sqlList, rightSQL)
 		}
 
-		sql = strings.Join(sqlList, Operator[c.OP])
+		sql = strings.Join(sqlList, " "+Operator[c.OP]+" ")
 	case EQ, GE, GT, In, LE, LT, Like, NE, Not, NotIn, NotLike:
 		sql = fmt.Sprintf("%s %s ?", c.Column, Operator[c.OP])
 		p, err := c.ColumnInfo.DataType()
@@ -156,6 +156,24 @@ func (c *Clause) marshal() (sql string, parameters parameter.Parameters, err err
 		ps.Add(
 			NewParameter(fmt.Sprintf("%s%sStart", c.Column, OpName[c.OP]), p.Type, p.ThirdPkg),
 			NewParameter(fmt.Sprintf("%s%sEnd", c.Column, OpName[c.OP]), p.Type, p.ThirdPkg))
+	case Parentheses:
+		leftSQL, leftParameter, err := c.Left.marshal()
+		if err != nil {
+			return "", nil, err
+		}
+
+		// assert right clause is nil
+		//rightSQL, rightParameter, err := c.Right.marshal()
+		//if err != nil {
+		//	return "", nil, err
+		//}
+
+		ps.Add(leftParameter...)
+		//ps.Add(rightParameter...)
+
+		if len(leftSQL) > 0 {
+			sql = fmt.Sprintf("( %s )", leftSQL)
+		}
 	default:
 		// ignores 'case'
 	}

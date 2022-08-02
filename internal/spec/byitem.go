@@ -57,7 +57,7 @@ func (b ByItems) IsValid() bool {
 // SQL returns the clause condition strings.
 func (b ByItems) SQL() (string, error) {
 	sql, _, err := b.marshal()
-	return sql, err
+	return fmt.Sprintf("`%s`", sql), err
 }
 
 // ParameterStructure returns the parameter type structure.

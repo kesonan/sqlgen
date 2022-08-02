@@ -96,3 +96,68 @@ func Test_parseFuncName(t *testing.T) {
 		assert.Equal(t, c.expected, actual)
 	}
 }
+
+func Test_trimComment(t *testing.T) {
+	test := []struct {
+		input  string
+		expect string
+		err    bool
+	}{
+		{},
+		{
+			input:  " ",
+			expect: " ",
+		},
+		{
+			input:  "-",
+			expect: "-",
+		},
+		{
+			input:  "--",
+			expect: "",
+		},
+		{
+			input: `--foo--bar
+foo`,
+			expect: "foo",
+		},
+		{
+			input: `--foo--bar
+foo
+bar`,
+			expect: "foo bar",
+		},
+		{
+			input:  `/**/foo`,
+			expect: "foo",
+		},
+		{
+			input:  `foo/**/ bar`,
+			expect: "foo bar",
+		},
+		{
+			input: `foo/**/ 
+--foo
+/*--*/
+bar`,
+			expect: "foo bar",
+		},
+		{
+			input: "/*",
+			err:   true,
+		},
+		{
+			input: "/**",
+			err:   true,
+		},
+	}
+	for _, v := range test {
+		s := NewSqlScanner(v.input)
+		actual, err := s.ScanAndTrim()
+		if v.err {
+			assert.Error(t, err)
+			continue
+		}
+		assert.Equal(t, v.expect, actual)
+	}
+}

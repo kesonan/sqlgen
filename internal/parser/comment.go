@@ -6,9 +6,17 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"text/scanner"
 
 	"github.com/anqiansong/sqlgen/internal/spec"
 	"github.com/anqiansong/sqlgen/internal/stringx"
+)
+
+const (
+	plainTextMode = iota
+	lineCommentMode
+	docCommentOpenMode
+	docCommentCloseMode
 )
 
 var (
@@ -16,6 +24,149 @@ var (
 	fnPrefix          = "fn:"
 	fnRegex           = `(?m)^[a-zA-Z]\w*`
 )
+
+type segment struct {
+	start, end int
+}
+
+type sqlScanner struct {
+	*scanner.Scanner
+	mode       int
+	source     string
+	startIndex int
+	segments   []segment
+	trim       string
+}
+
+func NewSqlScanner(s string) *sqlScanner {
+	var sc scanner.Scanner
+	return &sqlScanner{
+		Scanner: sc.Init(strings.NewReader(s)),
+		mode:    plainTextMode,
+		source:  s,
+		trim:    s,
+	}
+}
+
+// ScanAndTrim ignores non comment text.
+func (s *sqlScanner) ScanAndTrim() (string, error) {
+	for tok := s.Next(); tok != scanner.EOF; tok = s.Next() {
+		switch tok {
+		case '-':
+			s.enterLineCommentMode()
+		case '/':
+			err := s.enterDocCommentMode()
+			if err != nil {
+				return "", err
+			}
+		}
+	}
+
+	if len(s.segments) == 0 {
+		return s.source, nil
+	}
+
+	var list []string
+	for i := 0; i < len(s.segments); i++ {
+		var segment string
+		if i == 0 {
+			if s.segments[i].start > 0 {
+				segment = s.source[:s.segments[i].start]
+				var r = strings.ReplaceAll(segment, "\n", " ")
+				list = append(list, r)
+			}
+		}
+		if i != len(s.segments)-1 {
+			segment = s.source[s.segments[i].end:s.segments[i+1].start]
+		} else {
+			segment = s.source[s.segments[i].end:]
+		}
+
+		s := stringx.TrimWhiteSpace(segment)
+		if len(s) == 0 {
+			continue
+		}
+
+		var r = strings.ReplaceAll(segment, "\n", " ")
+		list = append(list, r)
+	}
+
+	return strings.Join(list, ""), nil
+}
+
+func (s *sqlScanner) enterDocCommentMode() error {
+	var position = s.CurrentPosition()
+	s.startIndex = position - 1
+	if s.startIndex < 0 {
+		s.startIndex = 0
+	}
+	tok := s.Next()
+	if tok != '*' {
+		s.startIndex = 0
+		return nil
+	}
+
+	s.mode = docCommentOpenMode
+	for {
+		tok := s.Next()
+		if tok == scanner.EOF {
+			s.mode = plainTextMode
+			return fmt.Errorf("expected close flag '*/'")
+		}
+
+		if tok == '*' {
+			s.mode = docCommentCloseMode
+		} else if tok == '/' {
+			if s.mode == docCommentCloseMode {
+				s.segments = append(s.segments, segment{
+					start: s.startIndex,
+					end:   s.CurrentPosition(),
+				})
+			}
+			break
+		} else {
+			if s.mode == docCommentCloseMode {
+				s.mode = docCommentOpenMode
+			}
+		}
+	}
+	s.mode = plainTextMode
+	return nil
+}
+
+func (s *sqlScanner) CurrentPosition() int {
+	offset := s.Pos().Offset
+	if offset == 0 {
+		return 0
+	}
+	return offset
+}
+
+func (s *sqlScanner) enterLineCommentMode() {
+	var position = s.CurrentPosition()
+	s.startIndex = position - 1
+	if s.startIndex < 0 {
+		s.startIndex = 0
+	}
+	tok := s.Next()
+	if tok != '-' {
+		s.startIndex = 0
+		return
+	}
+
+	s.mode = lineCommentMode
+	for {
+		tok = s.Next()
+		if tok == scanner.EOF || tok == '\n' {
+			s.segments = append(s.segments, segment{
+				start: s.startIndex,
+				end:   s.CurrentPosition(),
+			})
+			break
+		}
+	}
+	s.mode = plainTextMode
+}
 
 func parseLineComment(sql string) (spec.Comment, error) {
 	r := bufio.NewReader(strings.NewReader(sql))

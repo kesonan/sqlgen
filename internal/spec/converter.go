@@ -52,12 +52,14 @@ func convertClause(clause *Clause, table *Table, comment Comment) (*Clause, erro
 	if clause.Column == WildCard {
 		return nil, fmt.Errorf("wildcard is not allowed in by item")
 	}
-	column, ok := table.GetColumnByName(clause.Column)
-	if !ok {
-		return nil, fmt.Errorf("column %q no found in table %q", clause.Column, table.Name)
+	if len(clause.Column) > 0 {
+		column, ok := table.GetColumnByName(clause.Column)
+		if !ok {
+			return nil, fmt.Errorf("column %q no found in table %q", clause.Column, table.Name)
+		}
+		clause.ColumnInfo = column
 	}
 
-	clause.ColumnInfo = column
 	leftClause, err := convertClause(clause.Left, table, comment)
 	if err != nil {
 		return nil, err

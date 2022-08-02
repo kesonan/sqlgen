@@ -11,6 +11,11 @@ import (
 	"github.com/anqiansong/sqlgen/internal/set"
 )
 
+const (
+	countField  = "count"
+	offsetFiled = "offset"
+)
+
 func (l *Limit) IsValid() bool {
 	if l == nil {
 		return false
@@ -21,7 +26,7 @@ func (l *Limit) IsValid() bool {
 // SQL returns the clause condition strings.
 func (l *Limit) SQL() (string, error) {
 	sql, _, err := l.marshal()
-	return sql, err
+	return fmt.Sprintf("`%s`", sql), err
 }
 
 // ParameterStructure returns the parameter type structure.
@@ -74,6 +79,16 @@ func (l *Limit) Parameters(pkg string) (string, error) {
 	return strings.Join(list, ", "), nil
 }
 
+// LimitParameter returns the parameter variables.
+func (l *Limit) LimitParameter(pkg string) string {
+	return fmt.Sprintf("%s.%s", pkg, strcase.ToCamel(countField))
+}
+
+// OffsetParameter returns the parameter variables.
+func (l *Limit) OffsetParameter(pkg string) string {
+	return fmt.Sprintf("%s.%s", pkg, strcase.ToCamel(offsetFiled))
+}
+
 // ParameterStructureName returns the parameter structure name.
 func (l *Limit) ParameterStructureName() string {
 	if !l.IsValid() {
@@ -83,6 +98,13 @@ func (l *Limit) ParameterStructureName() string {
 	return strcase.ToCamel(fmt.Sprintf("%sLimitParameter", l.Comment.FuncName))
 }
 
+func (l *Limit) One() bool {
+	if l == nil {
+		return false
+	}
+	return l.Count == 1
+}
+
 func (l *Limit) marshal() (sql string, parameters parameter.Parameters, err error) {
 	parameters = parameter.Empty
 	if l == nil {
@@ -90,10 +112,10 @@ func (l *Limit) marshal() (sql string, parameters parameter.Parameters, err erro
 	}
 
 	sql = fmt.Sprintf("limit %d", l.Count)
-	parameters = append(parameters, NewParameter("count", "uint", ""))
+	parameters = append(parameters, NewParameter(countField, "uint", ""))
 	if l.Offset > 0 {
 		sql = fmt.Sprintf("limit %d, %d", l.Offset, l.Count)
-		parameters = append(parameters, NewParameter("offset", "uint", ""))
+		parameters = append(parameters, NewParameter(offsetFiled, "uint", ""))
 	}
 
 	return

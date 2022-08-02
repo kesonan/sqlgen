@@ -31,7 +31,7 @@ func New() *p {
 func (p *p) Add(parameter ...Parameter) {
 	for _, v := range parameter {
 		for {
-			if p.s.Exists(v.Column) {
+			if p.s.Exists(v) {
 				v.Column = stringx.AutoIncrement(v.Column, 1)
 				continue
 			}

@@ -2,6 +2,7 @@ package parser
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/pingcap/parser/ast"
 	"github.com/pingcap/parser/opcode"
@@ -14,6 +15,11 @@ import (
 func parseSelect(stmt *ast.SelectStmt) (*spec.SelectStmt, error) {
 	var text = stmt.Text()
 	comment, err := parseLineComment(text)
+	if err != nil {
+		return nil, err
+	}
+
+	sql, err := NewSqlScanner(text).ScanAndTrim()
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +79,7 @@ func parseSelect(stmt *ast.SelectStmt) (*spec.SelectStmt, error) {
 	ret.From = tableName
 	ret.Distinct = stmt.Distinct
 	ret.Action = spec.ActionRead
-	ret.SQL = text
+	ret.SQL = strings.TrimSpace(sql)
 	ret.Columns = parseFieldList(stmt.Fields)
 
 	return &ret, nil

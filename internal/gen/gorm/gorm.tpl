@@ -22,9 +22,7 @@ type {{UpperCamel $.Table.Name}} struct { {{range $.Table.Columns}}
     {{UpperCamel .Name}} {{.GoType}} `gorm:"{{if IsPrimary .Name}}primaryKey;{{end}}{{if .AutoIncrement}}autoIncrement;{{end}}column:{{.Name}}" json:"{{LowerCamel .Name}}"`{{end}}
 }
 {{range $stmt := .SelectStmt}}{{if $stmt.Where.IsValid}}{{$stmt.Where.ParameterStructure "Where"}}
-{{end}}{{if $stmt.GroupBy.IsValid}}{{$stmt.GroupBy.ParameterStructure "GroupBy"}}
 {{end}}{{if $stmt.Having.IsValid}}{{$stmt.Having.ParameterStructure "Having"}}
-{{end}}{{if $stmt.OrderBy.IsValid}}{{$stmt.OrderBy.ParameterStructure "OrderBy"}}
 {{end}}{{if $stmt.Limit.IsValid}}{{$stmt.Limit.ParameterStructure}}{{end}}
 {{end}}
 
@@ -42,6 +40,17 @@ func (m *{{UpperCamel $.Table.Name}}Model) Create(ctx context.Context, data ...*
     return m.db.Create(&data).Error
 }
 {{range $stmt := .SelectStmt}}
-func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if $stmt.Where.IsValid}} , where {{$stmt.Where.ParameterStructureName "Where"}}{{end}}){
-
-}{{end}}
+// {{.FuncName}} is generated from sql:
+// {{$stmt.SQL}}
+func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if $stmt.Where.IsValid}}, where {{$stmt.Where.ParameterStructureName "Where"}}{{end}}{{if $stmt.Having.IsValid}}, having {{$stmt.Having.ParameterStructureName "Having"}}{{end}}{{if $stmt.Limit.IsValid}}, limit {{$stmt.Limit.ParameterStructureName}}{{end}})({{if $stmt.Limit.One}}*{{UpperCamel $.Table.Name}}, {{else}}[]*{{UpperCamel $.Table.Name}}, {{end}} error){
+    var result {{if $stmt.Limit.One}} = new({{UpperCamel $.Table.Name}}){{else}}[]*{{UpperCamel $.Table.Name}}{{end}}
+    var db = m.db.WithContext(ctx)
+    {{if $stmt.Where.IsValid}}db.Where({{$stmt.Where.SQL}}, {{$stmt.Where.Parameters "where"}})
+    {{end }}{{if $stmt.GroupBy.IsValid}}db.Group({{$stmt.GroupBy.SQL}})
+    {{end}}{{if $stmt.Having.IsValid}}db.Having({{$stmt.Having.SQL}}, {{$stmt.Having.Parameters "having"}})
+    {{end}}{{if $stmt.OrderBy.IsValid}}db.Order({{$stmt.OrderBy.SQL}})
+    {{end}}{{if $stmt.Limit.IsValid}}db{{if gt $stmt.Limit.Offset 0}}.Offset({{$stmt.Limit.OffsetParameter "limit"}}){{end}}.Limit({{$stmt.Limit.LimitParameter "limit"}})
+    {{end}}db.Find(&result)
+    return result, db.Error
+}
+{{end}}

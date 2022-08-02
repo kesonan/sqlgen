@@ -9,6 +9,7 @@ var _ DML = (*SelectStmt)(nil)
 var _ DML = (*DeleteStmt)(nil)
 
 // InsertStmt represents a insert statement.
+
 type InsertStmt struct {
 	// Action represents the db action.
 	Action Action

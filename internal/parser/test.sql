@@ -17,13 +17,8 @@ CREATE TABLE `user`
     UNIQUE KEY `mobile_index` (`mobile`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '用户表' COLLATE=utf8mb4_general_ci;
 
--- fn:FindOne
-select *, user, name
-from user
-where id not between 1 and 2
-    group by name
-    order by name desc
-    limit 1,10;
+-- fn:ListUsers
+select * from user where id = ? and (name=? or name = ?) group by id desc;
 
 -- fn: Update
 update user
