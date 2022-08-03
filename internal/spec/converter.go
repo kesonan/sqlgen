@@ -74,18 +74,18 @@ func convertClause(clause *Clause, table *Table, comment Comment) (*Clause, erro
 	return clause, nil
 }
 
-func convertColumn(table *Table, columns []string) ([]Column, error) {
-	var list []Column
+func convertColumn(table *Table, columns []string) Columns {
+	var list Columns
 	for _, c := range columns {
 		if c == WildCard {
-			return table.Columns, nil
+			return table.Columns
 		}
 
 		column, ok := table.GetColumnByName(c)
-		if !ok {
-			return nil, fmt.Errorf("column %q no found in table %q", c, table.Name)
+		if ok {
+			list = append(list, column)
 		}
-		list = append(list, column)
+
 	}
-	return list, nil
+	return list
 }

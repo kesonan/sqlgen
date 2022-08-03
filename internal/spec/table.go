@@ -9,7 +9,7 @@ import (
 // Table represents a table in the database.
 type Table struct {
 	// Columns is the list of columns in the table.
-	Columns []Column
+	Columns Columns
 	// Constraint is a struct that contains the constraints of a table.
 	// ConstraintForeignKey,ConstraintFulltext,ConstraintCheck are ignored.
 	Constraint Constraint
@@ -18,6 +18,8 @@ type Table struct {
 	// Name is the name of the table.
 	Name string
 }
+
+type Columns []Column
 
 // Column represents a column in a table.
 type Column struct {
@@ -58,6 +60,21 @@ type Constraint struct {
 	UniqueKey map[string][]string
 }
 
+// In returns true if Columns has specified column.
+func (cs Columns) In(name string) bool {
+	_, ok := cs.GetColumn(name)
+	return ok
+}
+
+func (cs Columns) GetColumn(name string) (Column, bool) {
+	for _, c := range cs {
+		if c.Name == name {
+			return c, true
+		}
+	}
+	return Column{}, false
+}
+
 // IsPrimary returns true if the column is part of the primary key.
 func (t *Table) IsPrimary(name string) bool {
 	for _, c := range t.Constraint.PrimaryKey {
@@ -78,8 +95,8 @@ func (t *Table) ColumnList() []string {
 }
 
 // PrimaryColumnList is a list of column names that are part of the primary key.
-func (t *Table) PrimaryColumnList() []Column {
-	var ret []Column
+func (t *Table) PrimaryColumnList() Columns {
+	var ret Columns
 	for _, list := range t.Constraint.PrimaryKey {
 		for _, name := range list {
 			c, ok := t.GetColumnByName(name)

@@ -75,12 +75,14 @@ func parseSelect(stmt *ast.SelectStmt) (*spec.SelectStmt, error) {
 
 		ret.Limit = limit
 	}
+	columnNames, selectFieldSQL := parseFieldList(stmt.Fields)
 
 	ret.From = tableName
+	ret.SelectSQL = selectFieldSQL
 	ret.Distinct = stmt.Distinct
 	ret.Action = spec.ActionRead
 	ret.SQL = strings.TrimSpace(sql)
-	ret.Columns = parseFieldList(stmt.Fields)
+	ret.Columns = columnNames
 
 	return &ret, nil
 }
@@ -333,20 +335,29 @@ func parseLimit(limit *ast.Limit) (*spec.Limit, error) {
 	return &ret, nil
 }
 
-func parseFieldList(fieldList *ast.FieldList) []string {
+func parseFieldList(fieldList *ast.FieldList) ([]string, string) {
 	if fieldList == nil {
-		return nil
+		return nil, ""
 	}
 
+	var selectField []string
 	var columnSet = set.From()
 	for _, f := range fieldList.Fields {
 		if f.WildCard != nil {
-			return []string{spec.WildCard}
+			selectField = append(selectField, spec.WildCard)
+			columnSet.Add(spec.WildCard)
+			continue
 		}
-		columnSet.Add(f.Text())
+		if len(f.AsName.String()) > 0 {
+			selectField = append(selectField, f.AsName.String())
+			columnSet.Add(f.AsName.String())
+		} else {
+			selectField = append(selectField, f.Text())
+			columnSet.Add(f.Text())
+		}
 	}
 
-	return columnSet.String()
+	return columnSet.String(), strings.Join(selectField, ", ")
 }
 
 func parseColumns(cols []*ast.ColumnName) ([]string, error) {

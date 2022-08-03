@@ -31,19 +31,13 @@ func from(table *Table, dml []DML) (Context, error) {
 		if d.TableName() == table.Name {
 			switch v := d.(type) {
 			case *InsertStmt:
-				columns, err := convertColumn(table, v.Columns)
-				if err != nil {
-					return Context{}, err
-				}
+				columns := convertColumn(table, v.Columns)
 				v.ColumnInfo = columns
 				v.TableInfo = table
 				ctx.InsertStmt = append(ctx.InsertStmt, v)
 			case *SelectStmt:
-				columns, err := convertColumn(table, v.Columns)
-				if err != nil {
-					return Context{}, err
-				}
-
+				columns := convertColumn(table, v.Columns)
+				var err error
 				v.GroupBy, err = convertByItems(v.GroupBy, table, v.Comment)
 				if err != nil {
 					return Context{}, err
@@ -69,10 +63,8 @@ func from(table *Table, dml []DML) (Context, error) {
 				v.FromInfo = table
 				ctx.SelectStmt = append(ctx.SelectStmt, v)
 			case *UpdateStmt:
-				columns, err := convertColumn(table, v.Columns)
-				if err != nil {
-					return Context{}, err
-				}
+				columns := convertColumn(table, v.Columns)
+				var err error
 
 				v.Where, err = convertClause(v.Where, table, v.Comment)
 				if err != nil {

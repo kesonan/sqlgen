@@ -17,8 +17,8 @@ CREATE TABLE `user`
     UNIQUE KEY `mobile_index` (`mobile`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '用户表' COLLATE=utf8mb4_general_ci;
 
--- fn:ListUsers
-select * from user where id = ? and (name=? or name = ?) group by id desc;
+-- fn:Count
+select count(1) AS count,max(id) AS maxID,min(id) AS minID,concat(name,"_test") AS s, name from user;
 
 -- fn: Update
 update user

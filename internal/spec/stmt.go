@@ -1,5 +1,12 @@
 package spec
 
+import (
+	_ "embed"
+	"fmt"
+
+	"github.com/iancoleman/strcase"
+)
+
 // WildCard is a wildcard column.
 const WildCard = "*"
 
@@ -24,15 +31,24 @@ type InsertStmt struct {
 
 	// the below data are from table
 	// ColumnInfo are the column info which are convert from Columns.
-	ColumnInfo []Column
+	ColumnInfo Columns
 	// TableInfo is the table info which is convert from Table.
 	TableInfo *Table
+}
+
+// Field represents a select filed.
+type Field struct {
+	ASName        string
+	ColumnName    string
+	ColumnSQLType string
 }
 
 // SelectStmt represents a select statement.
 type SelectStmt struct {
 	// Action represents the db action.
 	Action Action
+	// SelectSQL represents the select filed sql.
+	SelectSQL string
 	// Columns represents the operation columns.
 	Columns []string
 	// Comment represents a sql comment.
@@ -56,7 +72,7 @@ type SelectStmt struct {
 
 	// the below data are from table
 	// ColumnInfo are the column info which are convert from Columns.
-	ColumnInfo []Column
+	ColumnInfo Columns
 	// FromInfo is the table info which is convert from From.
 	FromInfo *Table
 }
@@ -104,7 +120,7 @@ type UpdateStmt struct {
 
 	// the below data are from table
 	// ColumnInfo are the column info which are convert from Columns.
-	ColumnInfo []Column
+	ColumnInfo Columns
 	// TableInfo is the table info which is convert from Table.
 	TableInfo *Table
 }
@@ -143,6 +159,48 @@ func (s *SelectStmt) SQLText() string {
 
 func (s *SelectStmt) TableName() string {
 	return s.From
+}
+
+func (s *SelectStmt) ReceiverName() string {
+	if s.HasASName() {
+		return strcase.ToCamel(fmt.Sprintf("%sResult", s.FuncName))
+	}
+	return strcase.ToCamel(s.TableName())
+}
+
+//go:embed column.tpl
+var fieldTpl string
+
+func (s *SelectStmt) ReceiverStructure() string {
+	//receiverName := s.ReceiverName()
+	//if strings.EqualFold(receiverName, s.TableName()) {
+	//	// Use table struct
+	//	return ""
+	//}
+	//var buf = buffer.New()
+	//buf.Write(`type %s struct {`, receiverName)
+	//for _, v := range s.Columns {
+	//	t := templatex.New()
+	//	t.AppendFuncMap(template.FuncMap{
+	//		"IsPrimary": func() bool {
+	//			return s.FromInfo.IsPrimary(v)
+	//		},
+	//	})
+	//	t.MustParse(fieldTpl)
+	//}
+	return ""
+}
+
+func (s *SelectStmt) HasASName() bool {
+	for _, c := range s.Columns {
+		if c == WildCard {
+			continue
+		}
+		if !s.ColumnInfo.In(c) {
+			return true
+		}
+	}
+	return false
 }
 
 func (s *SelectStmt) validate() error {

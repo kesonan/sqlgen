@@ -23,7 +23,8 @@ type {{UpperCamel $.Table.Name}} struct { {{range $.Table.Columns}}
 }
 {{range $stmt := .SelectStmt}}{{if $stmt.Where.IsValid}}{{$stmt.Where.ParameterStructure "Where"}}
 {{end}}{{if $stmt.Having.IsValid}}{{$stmt.Having.ParameterStructure "Having"}}
-{{end}}{{if $stmt.Limit.IsValid}}{{$stmt.Limit.ParameterStructure}}{{end}}
+{{end}}{{if $stmt.Limit.IsValid}}{{$stmt.Limit.ParameterStructure}}
+{{end}}{{$stmt.ReceiverStructure}}
 {{end}}
 
 // TableName returns the table name. it implemented by gorm.Tabler.
@@ -43,7 +44,7 @@ func (m *{{UpperCamel $.Table.Name}}Model) Create(ctx context.Context, data ...*
 // {{.FuncName}} is generated from sql:
 // {{$stmt.SQL}}
 func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if $stmt.Where.IsValid}}, where {{$stmt.Where.ParameterStructureName "Where"}}{{end}}{{if $stmt.Having.IsValid}}, having {{$stmt.Having.ParameterStructureName "Having"}}{{end}}{{if $stmt.Limit.IsValid}}, limit {{$stmt.Limit.ParameterStructureName}}{{end}})({{if $stmt.Limit.One}}*{{UpperCamel $.Table.Name}}, {{else}}[]*{{UpperCamel $.Table.Name}}, {{end}} error){
-    var result {{if $stmt.Limit.One}} = new({{UpperCamel $.Table.Name}}){{else}}[]*{{UpperCamel $.Table.Name}}{{end}}
+    var result {{if $stmt.Limit.One}} = new({{$stmt.ReceiverName}}){{else}}[]*{{$stmt.ReceiverName}}{{end}}
     var db = m.db.WithContext(ctx)
     {{if $stmt.Where.IsValid}}db.Where({{$stmt.Where.SQL}}, {{$stmt.Where.Parameters "where"}})
     {{end }}{{if $stmt.GroupBy.IsValid}}db.Group({{$stmt.GroupBy.SQL}})
@@ -52,5 +53,13 @@ func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if 
     {{end}}{{if $stmt.Limit.IsValid}}db{{if gt $stmt.Limit.Offset 0}}.Offset({{$stmt.Limit.OffsetParameter "limit"}}){{end}}.Limit({{$stmt.Limit.LimitParameter "limit"}})
     {{end}}db.Find(&result)
     return result, db.Error
+}
+{{end}}
+
+{{range $stmt := .UpdateStmt}}
+// {{.FuncName}} is generated from sql:
+// {{$stmt.SQL}}
+func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context){
+
 }
 {{end}}
