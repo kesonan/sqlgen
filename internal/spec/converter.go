@@ -89,3 +89,33 @@ func convertColumn(table *Table, columns []string) Columns {
 	}
 	return list
 }
+
+func convertField(table *Table, fields []Field) (Columns, error) {
+	var list Columns
+	var m = map[string]struct{}{}
+	for _, f := range fields {
+		name := f.ColumnName
+		if len(f.ASName) > 0 {
+			name = f.ASName
+		}
+		if _, ok := m[name]; ok {
+			continue
+		}
+		m[name] = struct{}{}
+		if name == WildCard {
+			list = append(list, table.Columns...)
+			continue
+		}
+
+		column, ok := table.GetColumnByName(name)
+		if ok {
+			list = append(list, column)
+		} else {
+			list = append(list, Column{
+				Name: name,
+				TP:   f.TP,
+			})
+		}
+	}
+	return list, nil
+}

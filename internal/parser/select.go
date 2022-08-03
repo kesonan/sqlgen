@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/pingcap/parser/ast"
+	"github.com/pingcap/parser/mysql"
 	"github.com/pingcap/parser/opcode"
 	"github.com/pingcap/parser/test_driver"
 
@@ -81,7 +82,7 @@ func parseSelect(stmt *ast.SelectStmt) (*spec.SelectStmt, error) {
 	ret.SelectSQL = selectFieldSQL
 	ret.Distinct = stmt.Distinct
 	ret.Action = spec.ActionRead
-	ret.SQL = strings.TrimSpace(sql)
+	ret.SQL = sql
 	ret.Columns = columnNames
 
 	return &ret, nil
@@ -335,9 +336,9 @@ func parseLimit(limit *ast.Limit) (*spec.Limit, error) {
 	return &ret, nil
 }
 
-func parseFieldList(fieldList *ast.FieldList) ([]string, string) {
+func parseFieldList(fieldList *ast.FieldList) (spec.Fields, string) {
 	if fieldList == nil {
-		return nil, ""
+		return spec.Fields{}, ""
 	}
 
 	var selectField []string
@@ -345,19 +346,83 @@ func parseFieldList(fieldList *ast.FieldList) ([]string, string) {
 	for _, f := range fieldList.Fields {
 		if f.WildCard != nil {
 			selectField = append(selectField, spec.WildCard)
-			columnSet.Add(spec.WildCard)
+			columnSet.Add(spec.Field{
+				ColumnName: spec.WildCard,
+			})
 			continue
 		}
-		if len(f.AsName.String()) > 0 {
-			selectField = append(selectField, f.AsName.String())
-			columnSet.Add(f.AsName.String())
-		} else {
-			selectField = append(selectField, f.Text())
-			columnSet.Add(f.Text())
+
+		columnName, tp, err := parseSelectField(f.Expr)
+		if err != nil {
+			return nil, ""
+		}
+
+		selectField = append(selectField, f.Text())
+		columnSet.Add(spec.Field{
+			ASName:     f.AsName.String(),
+			ColumnName: columnName,
+			TP:         tp,
+		})
+	}
+
+	var fields spec.Fields
+	columnSet.Range(func(v interface{}) {
+		fields = append(fields, v.(spec.Field))
+	})
+
+	return fields, strings.Join(selectField, ", ")
+}
+
+func parseSelectField(node ast.ExprNode) (string, byte, error) {
+	switch v := node.(type) {
+	case *ast.ColumnNameExpr:
+		columnName, err := parseColumn(v.Name)
+		if err != nil {
+			return "", mysql.TypeUnspecified, err
+		}
+		return columnName, mysql.TypeUnspecified, nil
+	case *ast.AggregateFuncExpr:
+		return parseAggregateFuncExpr(v)
+	default:
+		return "", mysql.TypeUnspecified, fmt.Errorf("unsupported select field: %t", v)
+	}
+}
+
+func parseAggregateFuncExpr(node *ast.AggregateFuncExpr) (string, byte, error) {
+	funcName := node.F
+	args := node.Args
+	getColumnInfo := func() (string, error) {
+		if len(args) != 0 {
+			return "", fmt.Errorf("unsupported aggregate function: %s, missing args", funcName)
+		}
+		if len(args) > 1 {
+			return "", fmt.Errorf("unsupported aggregate function: %s, expected one arg", funcName)
+		}
+		arg := args[0]
+		switch v := arg.(type) {
+		case *ast.ColumnNameExpr:
+			columnName, err := parseColumn(v.Name)
+			if err != nil {
+				return "", err
+			}
+
+			return columnName, nil
+		default:
+			return "", nil
 		}
 	}
 
-	return columnSet.String(), strings.Join(selectField, ", ")
+	name, err := getColumnInfo()
+	if err != nil {
+		return "", mysql.TypeUnspecified, err
+	}
+
+	tp, ok := funcMap[strings.ToLower(funcName)]
+	if ok {
+		return name, tp, nil
+	}
+
+	return name, mysql.TypeUnspecified, nil
 }
 
 func parseColumns(cols []*ast.ColumnName) ([]string, error) {

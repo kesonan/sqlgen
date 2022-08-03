@@ -54,3 +54,17 @@ func IsNumber(s string) (uint64, bool) {
 	}
 	return num, true
 }
+
+func FormatIdentifiers(s string) string {
+	var list = strings.FieldsFunc(s, func(r rune) bool {
+		return r == ' ' || r == '\t' || r == '\r' || r == '\n' || r == '\f'
+	})
+	var target []string
+	for _, v := range list {
+		if len(v) > 0 {
+			target = append(target, v)
+		}
+	}
+
+	return strings.Join(target, " ")
+}

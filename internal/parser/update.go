@@ -1,8 +1,6 @@
 package parser
 
 import (
-	"strings"
-
 	"github.com/pingcap/parser/ast"
 
 	"github.com/anqiansong/sqlgen/internal/spec"
@@ -69,7 +67,7 @@ func parseUpdate(stmt *ast.UpdateStmt) (spec.DML, error) {
 	}
 
 	ret.Comment = comment
-	ret.SQL = strings.TrimSpace(sql)
+	ret.SQL = sql
 	ret.Action = spec.ActionUpdate
 	ret.Table = tableName
 

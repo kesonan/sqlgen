@@ -87,11 +87,10 @@ func (s *sqlScanner) ScanAndTrim() (string, error) {
 			continue
 		}
 
-		var r = strings.ReplaceAll(segment, "\n", " ")
-		list = append(list, r)
+		list = append(list, segment)
 	}
 
-	return strings.Join(list, ""), nil
+	return stringx.FormatIdentifiers(strings.Join(list, "")), nil
 }
 
 func (s *sqlScanner) enterDocCommentMode() error {

@@ -1,8 +1,6 @@
 package parser
 
 import (
-	"strings"
-
 	"github.com/pingcap/parser/ast"
 
 	"github.com/anqiansong/sqlgen/internal/spec"
@@ -34,7 +32,7 @@ func parseInsert(stmt *ast.InsertStmt) (*spec.InsertStmt, error) {
 
 	ret.Table = tableName
 	ret.Action = spec.ActionCreate
-	ret.SQL = strings.TrimSpace(sql)
+	ret.SQL = sql
 	ret.Columns = columns
 
 	return &ret, nil

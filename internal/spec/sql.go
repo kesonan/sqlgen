@@ -36,8 +36,11 @@ func from(table *Table, dml []DML) (Context, error) {
 				v.TableInfo = table
 				ctx.InsertStmt = append(ctx.InsertStmt, v)
 			case *SelectStmt:
-				columns := convertColumn(table, v.Columns)
-				var err error
+				columns, err := convertField(table, v.Columns)
+				if err != nil {
+					return Context{}, err
+				}
+
 				v.GroupBy, err = convertByItems(v.GroupBy, table, v.Comment)
 				if err != nil {
 					return Context{}, err

@@ -18,7 +18,7 @@ CREATE TABLE `user`
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '用户表' COLLATE=utf8mb4_general_ci;
 
 -- fn:Count
-select count(1) AS count,max(id) AS maxID,min(id) AS minID,concat(name,"_test") AS s, name from user;
+select count(1) AS count,sum(id) AS sum,avg(id) AS avg,max(id) AS maxID,min(id) AS minID,abs(id) AS abs from user;
 
 -- fn: Update
 update user

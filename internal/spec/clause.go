@@ -49,12 +49,20 @@ func (c *Clause) IsValid() bool {
 
 // SQL returns the clause condition strings.
 func (c *Clause) SQL() (string, error) {
+	if !c.IsValid() {
+		return "", nil
+	}
+
 	sql, _, err := c.marshal()
 	return fmt.Sprintf("`%s`", sql), err
 }
 
 // ParameterStructure returns the parameter type structure.
 func (c *Clause) ParameterStructure(identifier string) (string, error) {
+	if !c.IsValid() {
+		return "", nil
+	}
+
 	_, parameters, err := c.marshal()
 	if err != nil {
 		return "", err
@@ -74,11 +82,18 @@ func (c *Clause) ParameterStructure(identifier string) (string, error) {
 
 // ParameterStructureName returns the parameter structure name.
 func (c *Clause) ParameterStructureName(identifier string) string {
+	if !c.IsValid() {
+		return ""
+	}
 	return strcase.ToCamel(fmt.Sprintf("%s%sParameter", c.Comment.FuncName, identifier))
 }
 
 // ParameterThirdImports returns the third package imports.
 func (c *Clause) ParameterThirdImports() (string, error) {
+	if !c.IsValid() {
+		return "", nil
+	}
+
 	_, parameters, err := c.marshal()
 	if err != nil {
 		return "", err
@@ -96,6 +111,10 @@ func (c *Clause) ParameterThirdImports() (string, error) {
 
 // Parameters returns the parameter variables.
 func (c *Clause) Parameters(pkg string) (string, error) {
+	if !c.IsValid() {
+		return "", nil
+	}
+
 	_, parameters, err := c.marshal()
 	if err != nil {
 		return "", err
@@ -109,11 +128,11 @@ func (c *Clause) Parameters(pkg string) (string, error) {
 }
 
 func (c *Clause) marshal() (sql string, parameters parameter.Parameters, err error) {
-	parameters = parameter.Empty
-	if c == nil {
+	if !c.IsValid() {
 		return
 	}
 
+	parameters = parameter.Empty
 	var ps = parameter.New()
 	switch c.OP {
 	case And, Or:

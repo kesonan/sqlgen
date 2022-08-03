@@ -36,11 +36,13 @@ type InsertStmt struct {
 	TableInfo *Table
 }
 
+type Fields []Field
+
 // Field represents a select filed.
 type Field struct {
-	ASName        string
-	ColumnName    string
-	ColumnSQLType string
+	ASName     string
+	ColumnName string
+	TP         byte
 }
 
 // SelectStmt represents a select statement.
@@ -50,7 +52,7 @@ type SelectStmt struct {
 	// SelectSQL represents the select filed sql.
 	SelectSQL string
 	// Columns represents the operation columns.
-	Columns []string
+	Columns []Field
 	// Comment represents a sql comment.
 	Comment
 	// Distinct represents the select distinct flag.
@@ -192,11 +194,8 @@ func (s *SelectStmt) ReceiverStructure() string {
 }
 
 func (s *SelectStmt) HasASName() bool {
-	for _, c := range s.Columns {
-		if c == WildCard {
-			continue
-		}
-		if !s.ColumnInfo.In(c) {
+	for _, f := range s.Columns {
+		if len(f.ASName) > 0 {
 			return true
 		}
 	}
