@@ -38,27 +38,27 @@ func from(table *Table, dml []DML) (Context, error) {
 			case *SelectStmt:
 				columns, err := convertField(table, v.Columns)
 				if err != nil {
-					return Context{}, err
+					return ctx, err
 				}
 
 				v.GroupBy, err = convertByItems(v.GroupBy, table, v.Comment)
 				if err != nil {
-					return Context{}, err
+					return ctx, err
 				}
 
 				v.Having, err = convertClause(v.Having, table, v.Comment)
 				if err != nil {
-					return Context{}, err
+					return ctx, err
 				}
 
 				v.Where, err = convertClause(v.Where, table, v.Comment)
 				if err != nil {
-					return Context{}, err
+					return ctx, err
 				}
 
 				v.OrderBy, err = convertByItems(v.OrderBy, table, v.Comment)
 				if err != nil {
-					return Context{}, err
+					return ctx, err
 				}
 
 				v.Limit = convertLimit(v.Limit, table, v.Comment)
@@ -71,12 +71,12 @@ func from(table *Table, dml []DML) (Context, error) {
 
 				v.Where, err = convertClause(v.Where, table, v.Comment)
 				if err != nil {
-					return Context{}, err
+					return ctx, err
 				}
 
 				v.OrderBy, err = convertByItems(v.OrderBy, table, v.Comment)
 				if err != nil {
-					return Context{}, err
+					return ctx, err
 				}
 
 				v.TableInfo = table
@@ -87,7 +87,7 @@ func from(table *Table, dml []DML) (Context, error) {
 				var err error
 				v.OrderBy, err = convertByItems(v.OrderBy, table, v.Comment)
 				if err != nil {
-					return Context{}, err
+					return ctx, err
 				}
 
 				v.FromInfo = table
