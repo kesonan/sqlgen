@@ -18,4 +18,4 @@ CREATE TABLE `user`
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '用户表' COLLATE=utf8mb4_general_ci;
 
 -- fn: demo
-select x from user;
+select id,name,max(id) AS maxID from user having maxID > 0;

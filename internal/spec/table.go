@@ -62,6 +62,9 @@ type Constraint struct {
 
 // Has returns true if Columns has specified column.
 func (cs Columns) Has(name string) bool {
+	if cs == nil {
+		return false
+	}
 	_, ok := cs.GetColumn(name)
 	return ok
 }

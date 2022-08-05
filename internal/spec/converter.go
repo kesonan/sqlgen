@@ -46,7 +46,7 @@ func convertByItem(byItem *ByItem, table *Table, comment Comment) (*ByItem, erro
 	return byItem, nil
 }
 
-func convertClause(clause *Clause, table *Table, comment Comment) (*Clause, error) {
+func convertClause(clause *Clause, table *Table, comment Comment, rows Columns) (*Clause, error) {
 	if !clause.IsValid() {
 		return clause, nil
 	}
@@ -58,17 +58,24 @@ func convertClause(clause *Clause, table *Table, comment Comment) (*Clause, erro
 	}
 	if len(clause.Column) > 0 {
 		column, ok := table.GetColumnByName(clause.Column)
+		if ok {
+			clause.ColumnInfo = column
+		}
+
+		// for case: select max(id) AS maxID from t having maxID > 0;
+		column, ok = rows.GetColumn(clause.Column)
 		if !ok {
 			return nil, fmt.Errorf("column %q no found in table %q", clause.Column, table.Name)
 		}
+
 		clause.ColumnInfo = column
 	}
 
-	leftClause, err := convertClause(clause.Left, table, comment)
+	leftClause, err := convertClause(clause.Left, table, comment, rows)
 	if err != nil {
 		return nil, err
 	}
-	rightClause, err := convertClause(clause.Right, table, comment)
+	rightClause, err := convertClause(clause.Right, table, comment, rows)
 	if err != nil {
 		return nil, err
 	}

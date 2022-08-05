@@ -46,12 +46,12 @@ func from(table *Table, dml []DML) (Context, error) {
 					return ctx, err
 				}
 
-				v.Having, err = convertClause(v.Having, table, v.Comment)
+				v.Having, err = convertClause(v.Having, table, v.Comment, columns)
 				if err != nil {
 					return ctx, err
 				}
 
-				v.Where, err = convertClause(v.Where, table, v.Comment)
+				v.Where, err = convertClause(v.Where, table, v.Comment, columns)
 				if err != nil {
 					return ctx, err
 				}
@@ -69,7 +69,7 @@ func from(table *Table, dml []DML) (Context, error) {
 				columns := convertColumn(table, v.Columns)
 				var err error
 
-				v.Where, err = convertClause(v.Where, table, v.Comment)
+				v.Where, err = convertClause(v.Where, table, v.Comment, columns)
 				if err != nil {
 					return ctx, err
 				}
@@ -85,7 +85,7 @@ func from(table *Table, dml []DML) (Context, error) {
 				ctx.UpdateStmt = append(ctx.UpdateStmt, v)
 			case *DeleteStmt:
 				var err error
-				v.Where, err = convertClause(v.Where, table, v.Comment)
+				v.Where, err = convertClause(v.Where, table, v.Comment, nil)
 				if err != nil {
 					return ctx, err
 				}

@@ -370,8 +370,9 @@ func parseFieldList(fieldList *ast.FieldList, from string) (spec.Fields, string,
 	var isAllAggregate = true
 	for _, f := range fieldList.Fields {
 		if f.WildCard != nil {
-			if f.WildCard.Table.String() != from {
-				return nil, "", false, fmt.Errorf("wildcard table %s not match from %s", f.WildCard.Table.String(), from)
+			wildcardTable := f.WildCard.Table.String()
+			if len(wildcardTable) > 0 && wildcardTable != from {
+				return nil, "", false, fmt.Errorf("wildcard table %q not match from %q", f.WildCard.Table.String(), from)
 			}
 			selectField = append(selectField, spec.WildCard)
 			columnSet.Add(spec.Field{
@@ -419,7 +420,7 @@ func parseSelectField(node ast.ExprNode, hasAsName bool, table string) (string, 
 		return columnName, columnName, mysql.TypeUnspecified, false, nil
 	case *ast.AggregateFuncExpr:
 		if !hasAsName {
-			return "", "", 0, false, fmt.Errorf("aggregate function must have AS name")
+			return "", "", 0, false, fmt.Errorf("aggregate function %q must have AS name", v.F)
 		}
 		f, funcSql, t, err := parseAggregateFuncExpr(v, table)
 		if err != nil {
@@ -497,7 +498,7 @@ func parseColumn(col *ast.ColumnName, table string) (string, error) {
 	}
 	colTable := col.Table.String()
 	if len(colTable) > 0 && colTable != table {
-		return "", fmt.Errorf("column table %s not match from %s", colTable, table)
+		return "", fmt.Errorf("column table %q not match from %q", colTable, table)
 	}
 
 	return col.Name.O, nil
