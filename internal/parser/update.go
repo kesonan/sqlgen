@@ -29,7 +29,7 @@ func parseUpdate(stmt *ast.UpdateStmt) (spec.DML, error) {
 	}
 
 	if stmt.Where != nil {
-		where, err := parseExprNode(stmt.Where)
+		where, err := parseExprNode(stmt.Where, tableName)
 		if err != nil {
 			return nil, errorNearBy(err, text)
 		}
@@ -38,7 +38,7 @@ func parseUpdate(stmt *ast.UpdateStmt) (spec.DML, error) {
 	}
 
 	if stmt.Order != nil {
-		orderBy, err := parseOrderBy(stmt.Order)
+		orderBy, err := parseOrderBy(stmt.Order, tableName)
 		if err != nil {
 			return nil, errorNearBy(err, text)
 		}
@@ -56,7 +56,7 @@ func parseUpdate(stmt *ast.UpdateStmt) (spec.DML, error) {
 	}
 
 	for _, a := range stmt.List {
-		colName, err := parseColumn(a.Column)
+		colName, err := parseColumn(a.Column, tableName)
 		if err != nil {
 			return nil, errorNearBy(err, text)
 		}

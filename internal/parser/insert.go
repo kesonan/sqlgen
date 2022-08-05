@@ -25,7 +25,7 @@ func parseInsert(stmt *ast.InsertStmt) (*spec.InsertStmt, error) {
 		return nil, errorNearBy(err, text)
 	}
 
-	columns, err := parseColumns(stmt.Columns)
+	columns, err := parseColumns(stmt.Columns, tableName)
 	if err != nil {
 		return nil, errorNearBy(err, text)
 	}

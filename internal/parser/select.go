@@ -33,7 +33,7 @@ func parseSelect(stmt *ast.SelectStmt) (*spec.SelectStmt, error) {
 	}
 
 	if stmt.Where != nil {
-		where, err := parseExprNode(stmt.Where)
+		where, err := parseExprNode(stmt.Where, tableName)
 		if err != nil {
 			return nil, errorNearBy(err, text)
 		}
@@ -42,7 +42,7 @@ func parseSelect(stmt *ast.SelectStmt) (*spec.SelectStmt, error) {
 	}
 
 	if stmt.GroupBy != nil {
-		groupBy, err := parseGroupBy(stmt.GroupBy)
+		groupBy, err := parseGroupBy(stmt.GroupBy, tableName)
 		if err != nil {
 			return nil, errorNearBy(err, text)
 		}
@@ -51,7 +51,7 @@ func parseSelect(stmt *ast.SelectStmt) (*spec.SelectStmt, error) {
 	}
 
 	if stmt.Having != nil {
-		having, err := parseHaving(stmt.Having)
+		having, err := parseHaving(stmt.Having, tableName)
 		if err != nil {
 			return nil, errorNearBy(err, text)
 		}
@@ -60,7 +60,7 @@ func parseSelect(stmt *ast.SelectStmt) (*spec.SelectStmt, error) {
 	}
 
 	if stmt.OrderBy != nil {
-		orderBy, err := parseOrderBy(stmt.OrderBy)
+		orderBy, err := parseOrderBy(stmt.OrderBy, tableName)
 		if err != nil {
 			return nil, errorNearBy(err, text)
 		}
@@ -76,9 +76,9 @@ func parseSelect(stmt *ast.SelectStmt) (*spec.SelectStmt, error) {
 
 		ret.Limit = limit
 	}
-	columnNames, selectFieldSQL, isAllAggregate, err := parseFieldList(stmt.Fields)
+	columnNames, selectFieldSQL, isAllAggregate, err := parseFieldList(stmt.Fields, tableName)
 	if err != nil {
-		return nil, err
+		return nil, errorNearBy(err, text)
 	}
 
 	if isAllAggregate && !ret.Limit.IsValid() {
@@ -126,7 +126,7 @@ func convertOP(in opcode.Op) (spec.OP, error) {
 		return 0, fmt.Errorf("unsupported opcode %s", in)
 	}
 }
-func parseExprNode(node ast.ExprNode) (*spec.Clause, error) {
+func parseExprNode(node ast.ExprNode, table string) (*spec.Clause, error) {
 	if node == nil {
 		return nil, errorInvalidExprNode
 	}
@@ -139,12 +139,12 @@ func parseExprNode(node ast.ExprNode) (*spec.Clause, error) {
 			return nil, err
 		}
 
-		leftClause, err := parseExprNode(v.L)
+		leftClause, err := parseExprNode(v.L, table)
 		if err != nil {
 			return nil, err
 		}
 
-		rightClause, err := parseExprNode(v.R)
+		rightClause, err := parseExprNode(v.R, table)
 		if err != nil {
 			return nil, err
 		}
@@ -166,7 +166,7 @@ func parseExprNode(node ast.ExprNode) (*spec.Clause, error) {
 			}
 		}
 	case *ast.ColumnNameExpr:
-		colName, err := parseColumn(v.Name)
+		colName, err := parseColumn(v.Name, table)
 		if err != nil {
 			return nil, err
 		}
@@ -178,7 +178,7 @@ func parseExprNode(node ast.ExprNode) (*spec.Clause, error) {
 	case *test_driver.ValueExpr, *test_driver.ParamMarkerExpr:
 		// ignores it
 	case *ast.ParenthesesExpr:
-		c, err := parseExprNode(v.Expr)
+		c, err := parseExprNode(v.Expr, table)
 		if err != nil {
 			return nil, err
 		}
@@ -195,7 +195,7 @@ func parseExprNode(node ast.ExprNode) (*spec.Clause, error) {
 			inOP = spec.NotIn
 		}
 
-		c, err := parseExprNode(v.Expr)
+		c, err := parseExprNode(v.Expr, table)
 		if err != nil {
 			return nil, err
 		}
@@ -212,7 +212,7 @@ func parseExprNode(node ast.ExprNode) (*spec.Clause, error) {
 			likeOP = spec.NotLike
 		}
 
-		c, err := parseExprNode(v.Expr)
+		c, err := parseExprNode(v.Expr, table)
 		if err != nil {
 			return nil, err
 		}
@@ -229,7 +229,7 @@ func parseExprNode(node ast.ExprNode) (*spec.Clause, error) {
 			betweenOP = spec.NotBetween
 		}
 
-		c, err := parseExprNode(v.Expr)
+		c, err := parseExprNode(v.Expr, table)
 		if err != nil {
 			return nil, err
 		}
@@ -247,11 +247,11 @@ func parseExprNode(node ast.ExprNode) (*spec.Clause, error) {
 	return &clause, nil
 }
 
-func parseGroupBy(groupBy *ast.GroupByClause) (spec.ByItems, error) {
+func parseGroupBy(groupBy *ast.GroupByClause, table string) (spec.ByItems, error) {
 	var ret spec.ByItems
 	var groupByItem = groupBy.Items
 	for _, item := range groupByItem {
-		clause, err := parseExprNode(item.Expr)
+		clause, err := parseExprNode(item.Expr, table)
 		if err != nil {
 			return nil, err
 		}
@@ -283,19 +283,19 @@ func getAllColumns(clause *spec.Clause) []string {
 	return columnSet.String()
 }
 
-func parseHaving(having *ast.HavingClause) (*spec.Clause, error) {
+func parseHaving(having *ast.HavingClause, table string) (*spec.Clause, error) {
 	if having == nil {
 		return nil, errorMissingHaving
 	}
 
-	return parseExprNode(having.Expr)
+	return parseExprNode(having.Expr, table)
 }
 
-func parseOrderBy(orderBy *ast.OrderByClause) (spec.ByItems, error) {
+func parseOrderBy(orderBy *ast.OrderByClause, table string) (spec.ByItems, error) {
 	var byItem = orderBy.Items
 	var ret spec.ByItems
 	for _, item := range byItem {
-		clauses, err := parseExprNode(item.Expr)
+		clauses, err := parseExprNode(item.Expr, table)
 		if err != nil {
 			return nil, err
 		}
@@ -360,7 +360,7 @@ func parseLimit(limit *ast.Limit) (*spec.Limit, error) {
 	return &ret, nil
 }
 
-func parseFieldList(fieldList *ast.FieldList) (spec.Fields, string, bool, error) {
+func parseFieldList(fieldList *ast.FieldList, from string) (spec.Fields, string, bool, error) {
 	if fieldList == nil {
 		return spec.Fields{}, "", false, nil
 	}
@@ -370,6 +370,9 @@ func parseFieldList(fieldList *ast.FieldList) (spec.Fields, string, bool, error)
 	var isAllAggregate = true
 	for _, f := range fieldList.Fields {
 		if f.WildCard != nil {
+			if f.WildCard.Table.String() != from {
+				return nil, "", false, fmt.Errorf("wildcard table %s not match from %s", f.WildCard.Table.String(), from)
+			}
 			selectField = append(selectField, spec.WildCard)
 			columnSet.Add(spec.Field{
 				ColumnName: spec.WildCard,
@@ -378,7 +381,7 @@ func parseFieldList(fieldList *ast.FieldList) (spec.Fields, string, bool, error)
 			continue
 		}
 
-		columnName, funcSql, tp, aggregate, err := parseSelectField(f.Expr, len(f.AsName.String()) > 0)
+		columnName, funcSql, tp, aggregate, err := parseSelectField(f.Expr, len(f.AsName.String()) > 0, from)
 		if err != nil {
 			return nil, "", false, err
 		}
@@ -406,10 +409,10 @@ func parseFieldList(fieldList *ast.FieldList) (spec.Fields, string, bool, error)
 	return fields, strings.Join(selectField, ", "), isAllAggregate, nil
 }
 
-func parseSelectField(node ast.ExprNode, hasAsName bool) (string, string, byte, bool, error) {
+func parseSelectField(node ast.ExprNode, hasAsName bool, table string) (string, string, byte, bool, error) {
 	switch v := node.(type) {
 	case *ast.ColumnNameExpr:
-		columnName, err := parseColumn(v.Name)
+		columnName, err := parseColumn(v.Name, table)
 		if err != nil {
 			return "", "", mysql.TypeUnspecified, false, err
 		}
@@ -418,17 +421,17 @@ func parseSelectField(node ast.ExprNode, hasAsName bool) (string, string, byte, 
 		if !hasAsName {
 			return "", "", 0, false, fmt.Errorf("aggregate function must have AS name")
 		}
-		f, funcSql, t, err := parseAggregateFuncExpr(v)
+		f, funcSql, t, err := parseAggregateFuncExpr(v, table)
 		if err != nil {
 			return "", "", 0, false, err
 		}
 		return f, funcSql, t, true, nil
 	default:
-		return "", "", mysql.TypeUnspecified, false, fmt.Errorf("unsupported select field: %t", v)
+		return "", "", mysql.TypeUnspecified, false, fmt.Errorf("unsupported select field: %T", v)
 	}
 }
 
-func parseAggregateFuncExpr(node *ast.AggregateFuncExpr) (string, string, byte, error) {
+func parseAggregateFuncExpr(node *ast.AggregateFuncExpr, from string) (string, string, byte, error) {
 	funcName := node.F
 	args := node.Args
 	getColumnInfo := func() (string, string, error) {
@@ -441,7 +444,7 @@ func parseAggregateFuncExpr(node *ast.AggregateFuncExpr) (string, string, byte, 
 		arg := args[0]
 		switch v := arg.(type) {
 		case *ast.ColumnNameExpr:
-			columnName, err := parseColumn(v.Name)
+			columnName, err := parseColumn(v.Name, from)
 			if err != nil {
 				return "", "", err
 			}
@@ -472,10 +475,10 @@ func parseAggregateFuncExpr(node *ast.AggregateFuncExpr) (string, string, byte, 
 	return name, funcSql, mysql.TypeUnspecified, nil
 }
 
-func parseColumns(cols []*ast.ColumnName) ([]string, error) {
+func parseColumns(cols []*ast.ColumnName, table string) ([]string, error) {
 	var columnSet = set.From()
 	for _, col := range cols {
-		colName, err := parseColumn(col)
+		colName, err := parseColumn(col, table)
 		if err != nil {
 			return nil, err
 		}
@@ -488,12 +491,13 @@ func parseColumns(cols []*ast.ColumnName) ([]string, error) {
 	return columnSet.String(), nil
 }
 
-func parseColumn(col *ast.ColumnName) (string, error) {
+func parseColumn(col *ast.ColumnName, table string) (string, error) {
 	if col == nil {
 		return "", nil
 	}
-	if col.Table.String() != "" {
-		return "", errorTableRefer
+	colTable := col.Table.String()
+	if len(colTable) > 0 && colTable != table {
+		return "", fmt.Errorf("column table %s not match from %s", colTable, table)
 	}
 
 	return col.Name.O, nil

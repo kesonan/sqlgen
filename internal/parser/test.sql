@@ -17,5 +17,5 @@ CREATE TABLE `user`
     UNIQUE KEY `mobile_index` (`mobile`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '用户表' COLLATE=utf8mb4_general_ci;
 
--- fn: Case22
-select * from user where name like ?;
+-- fn: demo
+select user.*,user.id from user;
