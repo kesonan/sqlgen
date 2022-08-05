@@ -14,7 +14,7 @@ type Comment struct {
 
 func (c Comment) validate() error {
 	if len(c.FuncName) == 0 {
-		return fmt.Errorf("missing func name near '%s'", c.OriginText)
+		return fmt.Errorf("missing func name near %s", c.OriginText)
 	}
 	return nil
 }
