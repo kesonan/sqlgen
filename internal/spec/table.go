@@ -60,8 +60,8 @@ type Constraint struct {
 	UniqueKey map[string][]string
 }
 
-// In returns true if Columns has specified column.
-func (cs Columns) In(name string) bool {
+// Has returns true if Columns has specified column.
+func (cs Columns) Has(name string) bool {
 	_, ok := cs.GetColumn(name)
 	return ok
 }

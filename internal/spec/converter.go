@@ -1,6 +1,10 @@
 package spec
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/pingcap/parser/mysql"
+)
 
 func convertLimit(limit *Limit, table *Table, comment Comment) *Limit {
 	if !limit.IsValid() {
@@ -112,8 +116,13 @@ func convertField(table *Table, fields []Field) (Columns, error) {
 			if ok {
 				column.Name = name
 				list = append(list, column)
+			} else {
+				return nil, fmt.Errorf("column %q no found in table %q", f.ColumnName, table.Name)
 			}
 		} else {
+			if f.TP == mysql.TypeUnspecified {
+				return nil, fmt.Errorf("column %q no found in table %q", f.ColumnName, table.Name)
+			}
 			list = append(list, Column{
 				Name: name,
 				TP:   f.TP,

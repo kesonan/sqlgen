@@ -55,7 +55,7 @@ func (s *SelectStmt) TableName() string {
 }
 
 func (s *SelectStmt) ReceiverName() string {
-	if s.HasASName() {
+	if s.ContainsExtraColumns() {
 		return strcase.ToCamel(fmt.Sprintf("%sResult", s.FuncName))
 	}
 	return strcase.ToCamel(s.TableName())
@@ -86,9 +86,11 @@ func (s *SelectStmt) ReceiverStructure() string {
 	return buf.String()
 }
 
-func (s *SelectStmt) HasASName() bool {
+// ContainsExtraColumns returns true if the select statement contains extra columns.
+func (s *SelectStmt) ContainsExtraColumns() bool {
 	for _, f := range s.Columns {
-		if len(f.ASName) > 0 {
+		name := f.Name()
+		if !s.FromInfo.Columns.Has(name) {
 			return true
 		}
 	}

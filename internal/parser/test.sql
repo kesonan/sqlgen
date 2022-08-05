@@ -18,4 +18,4 @@ CREATE TABLE `user`
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '用户表' COLLATE=utf8mb4_general_ci;
 
 -- fn: demo
-select user.*,user.id from user;
+select x from user;
