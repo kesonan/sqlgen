@@ -21,6 +21,7 @@ func parseColumnDef(col *ast.ColumnDef) (*spec.Column, *spec.Constraint) {
 		column.Unsigned = mysql.HasUnsignedFlag(tp.Flag)
 		column.TP = tp.Tp
 	}
+
 	column.Name = col.Name.String()
 	for _, opt := range col.Options {
 		var tp = opt.Tp

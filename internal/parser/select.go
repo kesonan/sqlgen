@@ -374,6 +374,7 @@ func parseFieldList(fieldList *ast.FieldList) (spec.Fields, string, bool, error)
 			columnSet.Add(spec.Field{
 				ColumnName: spec.WildCard,
 			})
+			isAllAggregate = false
 			continue
 		}
 

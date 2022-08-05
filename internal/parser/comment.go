@@ -72,8 +72,7 @@ func (s *sqlScanner) ScanAndTrim() (string, error) {
 		if i == 0 {
 			if s.segments[i].start > 0 {
 				segment = s.source[:s.segments[i].start]
-				var r = strings.ReplaceAll(segment, "\n", " ")
-				list = append(list, r)
+				list = append(list, stringx.TrimNewLine(segment))
 			}
 		}
 		if i != len(s.segments)-1 {
@@ -99,6 +98,7 @@ func (s *sqlScanner) enterDocCommentMode() error {
 	if s.startIndex < 0 {
 		s.startIndex = 0
 	}
+
 	tok := s.Next()
 	if tok != '*' {
 		s.startIndex = 0
@@ -176,6 +176,7 @@ func parseLineComment(sql string) (spec.Comment, error) {
 		if err != nil {
 			break
 		}
+
 		comment.LineText = append(comment.LineText, string(line))
 		if bytes.HasPrefix(line, singleLineComment) {
 			var text = strings.TrimSpace(string(line[2:]))
@@ -208,5 +209,6 @@ func parseFuncName(text string) (string, error) {
 	if match {
 		return fn, nil
 	}
+
 	return "", fmt.Errorf("invalid function name: %s", fn)
 }

@@ -27,7 +27,7 @@ func parseInsert(stmt *ast.InsertStmt) (*spec.InsertStmt, error) {
 
 	columns, err := parseColumns(stmt.Columns)
 	if err != nil {
-		return nil, err
+		return nil, errorNearBy(err, text)
 	}
 
 	ret.Table = tableName
