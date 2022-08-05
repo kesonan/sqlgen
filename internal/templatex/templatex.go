@@ -6,6 +6,8 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path/filepath"
+	"strings"
 	"text/template"
 
 	"github.com/anqiansong/sqlgen/internal/format"
@@ -53,12 +55,17 @@ func (t *T) MustExecute(data interface{}) *T {
 }
 
 // MustSaveAs saves the template to the given filename, it will overwrite the file if it exists.
-func (t *T) MustSaveAs(filename string, fmt bool) {
+func (t *T) MustSaveAs(filename string, formatCode bool) {
 	var data []byte
 	var err error
-	if fmt {
+	if formatCode {
 		data, err = format.Source(t.buffer.Bytes())
-		log.Must(err)
+		if err != nil {
+			extension := filepath.Ext(filename)
+			errorFilename := strings.TrimSuffix(filename, extension) + ".error" + extension
+			ioutil.WriteFile(errorFilename, t.buffer.Bytes(), 0644)
+			log.Must(err)
+		}
 	} else {
 		data = t.buffer.Bytes()
 	}

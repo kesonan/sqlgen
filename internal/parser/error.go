@@ -14,6 +14,7 @@ var (
 	errorInvalidExpr            = errors.New("only expect column expr")
 	errorMissingHaving          = errors.New("missing having expr")
 	errorUnsupportedLimitExpr   = errors.New("unsupported limit expr")
+	errorParamMaker             = errors.New("marker expr")
 	errorTableRefer             = errors.New("unsupported table refer")
 )
 

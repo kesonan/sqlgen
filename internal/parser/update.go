@@ -11,12 +11,12 @@ func parseUpdate(stmt *ast.UpdateStmt) (spec.DML, error) {
 	var text = stmt.Text()
 	comment, err := parseLineComment(text)
 	if err != nil {
-		return nil, err
+		return nil, errorNearBy(err, text)
 	}
 
 	sql, err := NewSqlScanner(text).ScanAndTrim()
 	if err != nil {
-		return nil, err
+		return nil, errorNearBy(err, text)
 	}
 
 	if stmt.MultipleTable {

@@ -24,7 +24,10 @@ func TestParse(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(ctx[0].DeleteStmt[0].Where.SQL())
+
+	ctxOne := ctx[0]
+	selectOne := ctxOne.SelectStmt[0]
+	fmt.Println(selectOne)
 }
 
 func TestFrom(t *testing.T) {

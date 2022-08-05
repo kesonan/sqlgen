@@ -76,14 +76,18 @@ func parseSelect(stmt *ast.SelectStmt) (*spec.SelectStmt, error) {
 
 		ret.Limit = limit
 	}
-	columnNames, selectFieldSQL, isAllAggregate := parseFieldList(stmt.Fields)
+	columnNames, selectFieldSQL, isAllAggregate, err := parseFieldList(stmt.Fields)
+	if err != nil {
+		return nil, err
+	}
+
 	if isAllAggregate && !ret.Limit.IsValid() {
 		ret.Limit = &spec.Limit{
 			Count: 1,
 		}
 	}
 	ret.From = tableName
-	ret.SelectSQL = selectFieldSQL
+	ret.SelectSQL = fmt.Sprintf("`%s`", selectFieldSQL)
 	ret.Distinct = stmt.Distinct
 	ret.Action = spec.ActionRead
 	ret.SQL = sql
@@ -309,40 +313,56 @@ func parseOrderBy(orderBy *ast.OrderByClause) (spec.ByItems, error) {
 	return ret, nil
 }
 
+const (
+	countMarkerDefaultValue  = 10
+	offsetMarkerDefaultValue = 1
+)
+
 func parseLimit(limit *ast.Limit) (*spec.Limit, error) {
 	var count = limit.Count
 	var offset = limit.Offset
 	var ret spec.Limit
 	parseValue := func(node ast.ExprNode) (int64, error) {
-		value, ok := node.(*test_driver.ValueExpr)
-		if !ok {
+		switch v := node.(type) {
+		case *test_driver.ValueExpr:
+			return v.Datum.GetInt64(), nil
+		case *test_driver.ParamMarkerExpr:
+			return 0, errorParamMaker
+		default:
 			return 0, errorUnsupportedLimitExpr
 		}
-		return value.Datum.GetInt64(), nil
 	}
 
 	if count != nil {
 		count, err := parseValue(count)
 		if err != nil {
-			return nil, err
+			if err != errorParamMaker {
+				return nil, err
+			}
+			ret.Count = countMarkerDefaultValue
+		} else {
+			ret.Count = count
 		}
-		ret.Count = count
 	}
 
 	if offset != nil {
 		offset, err := parseValue(offset)
 		if err != nil {
-			return nil, err
+			if err != errorParamMaker {
+				return nil, err
+			}
+			ret.Offset = offsetMarkerDefaultValue
+		} else {
+			ret.Offset = offset
 		}
-		ret.Offset = offset
 	}
 
 	return &ret, nil
 }
 
-func parseFieldList(fieldList *ast.FieldList) (spec.Fields, string, bool) {
+func parseFieldList(fieldList *ast.FieldList) (spec.Fields, string, bool, error) {
 	if fieldList == nil {
-		return spec.Fields{}, "", false
+		return spec.Fields{}, "", false, nil
 	}
 
 	var selectField []string
@@ -357,16 +377,19 @@ func parseFieldList(fieldList *ast.FieldList) (spec.Fields, string, bool) {
 			continue
 		}
 
-		columnName, tp, aggregate, err := parseSelectField(f.Expr)
+		columnName, funcSql, tp, aggregate, err := parseSelectField(f.Expr, len(f.AsName.String()) > 0)
 		if err != nil {
-			return nil, "", false
+			return nil, "", false, err
 		}
 
 		if !aggregate {
 			isAllAggregate = false
 		}
 
-		selectField = append(selectField, f.Text())
+		if len(f.AsName.String()) > 0 {
+			funcSql = fmt.Sprintf("%s AS %s", funcSql, f.AsName.String())
+		}
+		selectField = append(selectField, funcSql)
 		columnSet.Add(spec.Field{
 			ASName:     f.AsName.String(),
 			ColumnName: columnName,
@@ -379,63 +402,73 @@ func parseFieldList(fieldList *ast.FieldList) (spec.Fields, string, bool) {
 		fields = append(fields, v.(spec.Field))
 	})
 
-	return fields, strings.Join(selectField, ", "), isAllAggregate
+	return fields, strings.Join(selectField, ", "), isAllAggregate, nil
 }
 
-func parseSelectField(node ast.ExprNode) (string, byte, bool, error) {
+func parseSelectField(node ast.ExprNode, hasAsName bool) (string, string, byte, bool, error) {
 	switch v := node.(type) {
 	case *ast.ColumnNameExpr:
 		columnName, err := parseColumn(v.Name)
 		if err != nil {
-			return "", mysql.TypeUnspecified, false, err
+			return "", "", mysql.TypeUnspecified, false, err
 		}
-		return columnName, mysql.TypeUnspecified, false, nil
+		return columnName, columnName, mysql.TypeUnspecified, false, nil
 	case *ast.AggregateFuncExpr:
-		f, t, err := parseAggregateFuncExpr(v)
-		if err != nil {
-			return "", 0, false, err
+		if !hasAsName {
+			return "", "", 0, false, fmt.Errorf("aggregate function must have AS name")
 		}
-		return f, t, true, nil
+		f, funcSql, t, err := parseAggregateFuncExpr(v)
+		if err != nil {
+			return "", "", 0, false, err
+		}
+		return f, funcSql, t, true, nil
 	default:
-		return "", mysql.TypeUnspecified, false, fmt.Errorf("unsupported select field: %t", v)
+		return "", "", mysql.TypeUnspecified, false, fmt.Errorf("unsupported select field: %t", v)
 	}
 }
 
-func parseAggregateFuncExpr(node *ast.AggregateFuncExpr) (string, byte, error) {
+func parseAggregateFuncExpr(node *ast.AggregateFuncExpr) (string, string, byte, error) {
 	funcName := node.F
 	args := node.Args
-	getColumnInfo := func() (string, error) {
+	getColumnInfo := func() (string, string, error) {
 		if len(args) == 0 {
-			return "", fmt.Errorf("unsupported aggregate function: %s, missing args", funcName)
+			return "", "", fmt.Errorf("unsupported aggregate function: %s, missing args", funcName)
 		}
 		if len(args) > 1 {
-			return "", fmt.Errorf("unsupported aggregate function: %s, expected one arg", funcName)
+			return "", "", fmt.Errorf("unsupported aggregate function: %s, expected one arg", funcName)
 		}
 		arg := args[0]
 		switch v := arg.(type) {
 		case *ast.ColumnNameExpr:
 			columnName, err := parseColumn(v.Name)
 			if err != nil {
-				return "", err
+				return "", "", err
 			}
 
-			return columnName, nil
+			return columnName, "", nil
+		case *test_driver.ValueExpr:
+			return "", fmt.Sprintf("%v", v.Datum.GetValue()), nil
 		default:
-			return "", nil
+			return "", "", nil
 		}
 	}
 
-	name, err := getColumnInfo()
+	name, value, err := getColumnInfo()
 	if err != nil {
-		return "", mysql.TypeUnspecified, err
+		return "", "", mysql.TypeUnspecified, err
 	}
 
+	var arg = name
+	if len(value) > 0 {
+		arg = value
+	}
+	var funcSql = fmt.Sprintf("%s(%s)", funcName, arg)
 	tp, ok := funcMap[strings.ToLower(funcName)]
 	if ok {
-		return name, tp, nil
+		return name, funcSql, tp, nil
 	}
 
-	return name, mysql.TypeUnspecified, nil
+	return name, funcSql, mysql.TypeUnspecified, nil
 }
 
 func parseColumns(cols []*ast.ColumnName) ([]string, error) {

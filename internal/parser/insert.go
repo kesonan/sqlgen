@@ -10,12 +10,12 @@ func parseInsert(stmt *ast.InsertStmt) (*spec.InsertStmt, error) {
 	var text = stmt.Text()
 	comment, err := parseLineComment(text)
 	if err != nil {
-		return nil, err
+		return nil, errorNearBy(err, text)
 	}
 
 	sql, err := NewSqlScanner(text).ScanAndTrim()
 	if err != nil {
-		return nil, err
+		return nil, errorNearBy(err, text)
 	}
 
 	var ret spec.InsertStmt
