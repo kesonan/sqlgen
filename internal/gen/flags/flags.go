@@ -95,7 +95,7 @@ func runFromSQL(arg RunArg) error {
 		ret.DML = append(ret.DML, dxl.DML...)
 	}
 
-	return run(&ret, arg.Mode)
+	return run(&ret, arg.Mode, arg.Output)
 }
 
 func runFromDSN(arg RunArg) error {
@@ -104,10 +104,10 @@ func runFromDSN(arg RunArg) error {
 		return err
 	}
 
-	return run(dxl, arg.Mode)
+	return run(dxl, arg.Mode, arg.Output)
 }
 
-var funcMap = map[Mode]func(dxl *spec.DXL) error{
+var funcMap = map[Mode]func(dxl *spec.DXL, output string) error{
 	SQL:  sql.Run,
 	GORM: gorm.Run,
 	XORM: xorm.Run,
@@ -115,10 +115,10 @@ var funcMap = map[Mode]func(dxl *spec.DXL) error{
 	BUN:  bun.Run,
 }
 
-func run(dxl *spec.DXL, mode Mode) error {
+func run(dxl *spec.DXL, mode Mode, output string) error {
 	fn, ok := funcMap[mode]
 	if !ok {
 		return nil
 	}
-	return fn(dxl)
+	return fn(dxl, output)
 }

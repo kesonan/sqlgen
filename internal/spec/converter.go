@@ -107,9 +107,12 @@ func convertField(table *Table, fields []Field) (Columns, error) {
 			continue
 		}
 
-		column, ok := table.GetColumnByName(name)
-		if ok {
-			list = append(list, column)
+		if len(f.ColumnName) > 0 {
+			column, ok := table.GetColumnByName(f.ColumnName)
+			if ok {
+				column.Name = name
+				list = append(list, column)
+			}
 		} else {
 			list = append(list, Column{
 				Name: name,

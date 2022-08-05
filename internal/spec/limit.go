@@ -105,6 +105,13 @@ func (l *Limit) One() bool {
 	return l.Count == 1
 }
 
+func (l *Limit) Multiple() bool {
+	if l == nil {
+		return false
+	}
+	return l.Count > 1
+}
+
 func (l *Limit) marshal() (sql string, parameters parameter.Parameters, err error) {
 	parameters = parameter.Empty
 	if l == nil {
@@ -112,10 +119,10 @@ func (l *Limit) marshal() (sql string, parameters parameter.Parameters, err erro
 	}
 
 	sql = fmt.Sprintf("limit %d", l.Count)
-	parameters = append(parameters, NewParameter(countField, "uint", ""))
+	parameters = append(parameters, NewParameter(countField, "int", ""))
 	if l.Offset > 0 {
 		sql = fmt.Sprintf("limit %d, %d", l.Offset, l.Count)
-		parameters = append(parameters, NewParameter(offsetFiled, "uint", ""))
+		parameters = append(parameters, NewParameter(offsetFiled, "int", ""))
 	}
 
 	return

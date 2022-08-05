@@ -85,6 +85,11 @@ func from(table *Table, dml []DML) (Context, error) {
 				ctx.UpdateStmt = append(ctx.UpdateStmt, v)
 			case *DeleteStmt:
 				var err error
+				v.Where, err = convertClause(v.Where, table, v.Comment)
+				if err != nil {
+					return ctx, err
+				}
+
 				v.OrderBy, err = convertByItems(v.OrderBy, table, v.Comment)
 				if err != nil {
 					return ctx, err

@@ -1,1 +1,1 @@
-{{UpperCamel .Name}} {{.GoType}} `gorm:"{{if IsPrimary .Name}}primaryKey;{{end}}{{if .AutoIncrement}}autoIncrement;{{end}}column:{{.Name}}" json:"{{LowerCamel .Name}}"`{{end}}
+{{UpperCamel .Name}} {{.GoType}} `gorm:"column:{{.Name}}" json:"{{LowerCamel .Name}}"`

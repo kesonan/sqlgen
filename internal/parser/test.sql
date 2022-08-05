@@ -17,19 +17,43 @@ CREATE TABLE `user`
     UNIQUE KEY `mobile_index` (`mobile`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '用户表' COLLATE=utf8mb4_general_ci;
 
--- fn:Count
-select count(1) AS count,sum(id) AS sum,avg(id) AS avg,max(id) AS maxID,min(id) AS minID,abs(id) AS abs from user;
+-- -- fn: FindOne
+-- select * from user where id = ? limit 1;
+--
+-- -- fn: ListUsers
+-- -- select * from user where id > ? limit ?, ?;
+-- select * from user where id > ? limit 1, 10;
+--
+-- -- fn: ListUserCount
+-- select count(1) AS count from user where id > ?;
+--
+-- -- fn: FindByName
+-- select * from user where name = ? limit 1;
+--
+-- -- fn: FindByMobile
+-- select * from user where mobile = ? limit 1;
+--
+-- -- fn: ListUserInRange
+-- -- select * from user where create_time > ? and create_time < ? order by create_time desc limit ?,?;
+-- select * from user where create_time > ? and create_time < ? order by create_time desc limit 1,10;
+--
+-- -- fn: ListUserCountInRange
+-- select count(1) AS count from user where create_time > ? and create_time < ?;
 
--- fn: Update
-update user
-set name = 'test'
-where id = 1;
+-- fn: FindMaxID
+select max(id) AS maxID from user;
 
--- fn: Insert
-insert into user (user, name, password, mobile)
-values ('test', 'test', 'test', 'test');
-
--- fn: Delete
-delete
-from user
-where id = 1;
+-- -- fn: UpdateUser
+-- update user set name = ?,mobile = ?, password = ?, nickname = ?, type = ?, update_time = ? where id = ?;
+--
+-- -- fn: UpdateByName
+-- update user set mobile = ?, password = ?, nickname = ?, type = ?, update_time = ? where name = ?;
+--
+-- -- fn: CreateOne
+-- insert into user (user, name, password, mobile, nickname, type, create_time, update_time) values (?, ?, ?, ?, ?, ?, ?, ?);
+--
+-- -- fn: DeleteOne
+-- delete from user where id = ?;
+--
+-- -- fn: DeleteByName
+-- delete from user where name = ?;

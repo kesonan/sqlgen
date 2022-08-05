@@ -24,7 +24,7 @@ func TestParse(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(ctx[0].SelectStmt[0].Where.ParameterStructure("OrderBy"))
+	fmt.Println(ctx[0].DeleteStmt[0].Where.SQL())
 }
 
 func TestFrom(t *testing.T) {

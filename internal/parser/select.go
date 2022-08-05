@@ -76,8 +76,12 @@ func parseSelect(stmt *ast.SelectStmt) (*spec.SelectStmt, error) {
 
 		ret.Limit = limit
 	}
-	columnNames, selectFieldSQL := parseFieldList(stmt.Fields)
-
+	columnNames, selectFieldSQL, isAllAggregate := parseFieldList(stmt.Fields)
+	if isAllAggregate && !ret.Limit.IsValid() {
+		ret.Limit = &spec.Limit{
+			Count: 1,
+		}
+	}
 	ret.From = tableName
 	ret.SelectSQL = selectFieldSQL
 	ret.Distinct = stmt.Distinct
@@ -336,13 +340,14 @@ func parseLimit(limit *ast.Limit) (*spec.Limit, error) {
 	return &ret, nil
 }
 
-func parseFieldList(fieldList *ast.FieldList) (spec.Fields, string) {
+func parseFieldList(fieldList *ast.FieldList) (spec.Fields, string, bool) {
 	if fieldList == nil {
-		return spec.Fields{}, ""
+		return spec.Fields{}, "", false
 	}
 
 	var selectField []string
 	var columnSet = set.From()
+	var isAllAggregate = true
 	for _, f := range fieldList.Fields {
 		if f.WildCard != nil {
 			selectField = append(selectField, spec.WildCard)
@@ -352,9 +357,13 @@ func parseFieldList(fieldList *ast.FieldList) (spec.Fields, string) {
 			continue
 		}
 
-		columnName, tp, err := parseSelectField(f.Expr)
+		columnName, tp, aggregate, err := parseSelectField(f.Expr)
 		if err != nil {
-			return nil, ""
+			return nil, "", false
+		}
+
+		if !aggregate {
+			isAllAggregate = false
 		}
 
 		selectField = append(selectField, f.Text())
@@ -370,21 +379,25 @@ func parseFieldList(fieldList *ast.FieldList) (spec.Fields, string) {
 		fields = append(fields, v.(spec.Field))
 	})
 
-	return fields, strings.Join(selectField, ", ")
+	return fields, strings.Join(selectField, ", "), isAllAggregate
 }
 
-func parseSelectField(node ast.ExprNode) (string, byte, error) {
+func parseSelectField(node ast.ExprNode) (string, byte, bool, error) {
 	switch v := node.(type) {
 	case *ast.ColumnNameExpr:
 		columnName, err := parseColumn(v.Name)
 		if err != nil {
-			return "", mysql.TypeUnspecified, err
+			return "", mysql.TypeUnspecified, false, err
 		}
-		return columnName, mysql.TypeUnspecified, nil
+		return columnName, mysql.TypeUnspecified, false, nil
 	case *ast.AggregateFuncExpr:
-		return parseAggregateFuncExpr(v)
+		f, t, err := parseAggregateFuncExpr(v)
+		if err != nil {
+			return "", 0, false, err
+		}
+		return f, t, true, nil
 	default:
-		return "", mysql.TypeUnspecified, fmt.Errorf("unsupported select field: %t", v)
+		return "", mysql.TypeUnspecified, false, fmt.Errorf("unsupported select field: %t", v)
 	}
 }
 
@@ -392,7 +405,7 @@ func parseAggregateFuncExpr(node *ast.AggregateFuncExpr) (string, byte, error) {
 	funcName := node.F
 	args := node.Args
 	getColumnInfo := func() (string, error) {
-		if len(args) != 0 {
+		if len(args) == 0 {
 			return "", fmt.Errorf("unsupported aggregate function: %s, missing args", funcName)
 		}
 		if len(args) > 1 {
