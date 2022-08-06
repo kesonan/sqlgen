@@ -1,0 +1,1 @@
+{{UpperCamel .Name}} {{.GoType}} `gorm:"column:{{.Name}}" json:"{{LowerCamel .Name}}"`
