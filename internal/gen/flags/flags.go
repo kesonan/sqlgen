@@ -37,10 +37,10 @@ type RunArg struct {
 
 func Run(arg RunArg) {
 	var err error
-	if len(arg.Filename) > 0 {
-		err = runFromSQL(arg)
-	} else if len(arg.DSN) > 0 {
+	if len(arg.DSN) > 0 {
 		err = runFromDSN(arg)
+	} else if len(arg.Filename) > 0 {
+		err = runFromSQL(arg)
 	} else {
 		err = fmt.Errorf("missing dsn or filename")
 	}
