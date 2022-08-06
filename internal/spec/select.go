@@ -90,6 +90,9 @@ func (s *SelectStmt) ReceiverStructure() string {
 func (s *SelectStmt) ContainsExtraColumns() bool {
 	for _, f := range s.Columns {
 		name := f.Name()
+		if name == WildCard {
+			continue
+		}
 		if !s.FromInfo.Columns.Has(name) {
 			return true
 		}

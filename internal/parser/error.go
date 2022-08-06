@@ -14,7 +14,6 @@ var (
 	errorMissingHaving          = errors.New("missing having expr")
 	errorUnsupportedLimitExpr   = errors.New("unsupported limit expr")
 	errorParamMaker             = errors.New("marker expr")
-	errorTableRefer             = errors.New("unsupported table refer")
 )
 
 func errorNearBy(err error, text string) error {
