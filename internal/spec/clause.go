@@ -72,7 +72,12 @@ func (c *Clause) ParameterStructure(identifier string) (string, error) {
 	writer.Write(`// %s is a %s parameter structure.`, c.ParameterStructureName(identifier), strcase.ToDelimited(identifier, ' '))
 	writer.Write(`type %s struct {`, c.ParameterStructureName(identifier))
 	for _, v := range parameters {
-		writer.Write("%s %s", v.Column, v.Type)
+		if c.OP == In || c.OP == NotIn {
+			writer.Write("%s []%s", v.Column, v.Type)
+		} else {
+			writer.Write("%s %s", v.Column, v.Type)
+		}
+
 	}
 
 	writer.Write(`}`)
