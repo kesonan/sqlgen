@@ -60,12 +60,12 @@ func convertClause(clause *Clause, table *Table, comment Comment, rows Columns) 
 		column, ok := table.GetColumnByName(clause.Column)
 		if ok {
 			clause.ColumnInfo = column
-		}
-
-		// for case: select max(id) AS maxID from t having maxID > 0;
-		column, ok = rows.GetColumn(clause.Column)
-		if !ok {
-			return nil, fmt.Errorf("column %q no found in table %q", clause.Column, table.Name)
+		} else {
+			// for case: select max(id) AS maxID from t having maxID > 0;
+			column, ok = rows.GetColumn(clause.Column)
+			if !ok {
+				return nil, fmt.Errorf("column %q no found in table %q", clause.Column, table.Name)
+			}
 		}
 
 		clause.ColumnInfo = column
@@ -87,9 +87,14 @@ func convertClause(clause *Clause, table *Table, comment Comment, rows Columns) 
 
 func convertColumn(table *Table, columns []string) Columns {
 	var list Columns
+	var m = map[string]struct{}{}
 	for _, c := range columns {
+		if _, ok := m[c]; ok {
+			continue
+		}
 		if c == WildCard {
-			return table.Columns
+			list = append(list, table.Columns...)
+			continue
 		}
 
 		column, ok := table.GetColumnByName(c)
