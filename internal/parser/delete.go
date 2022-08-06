@@ -29,7 +29,7 @@ func parseDelete(stmt *ast.DeleteStmt) (spec.DML, error) {
 	}
 
 	if stmt.Where != nil {
-		where, err := parseExprNode(stmt.Where, tableName)
+		where, err := parseExprNode(stmt.Where, tableName, exprTypeWhereClause)
 		if err != nil {
 			return nil, errorNearBy(err, text)
 		}

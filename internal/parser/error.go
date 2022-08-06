@@ -11,7 +11,6 @@ var (
 	errorUnsupportedUnionQuery  = errors.New("unsupported union query")
 	errorUnsupportedSubQuery    = errors.New("unsupported sub-query query")
 	errorInvalidExprNode        = errors.New("invalid expr node")
-	errorInvalidExpr            = errors.New("only expect column expr")
 	errorMissingHaving          = errors.New("missing having expr")
 	errorUnsupportedLimitExpr   = errors.New("unsupported limit expr")
 	errorParamMaker             = errors.New("marker expr")

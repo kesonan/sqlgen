@@ -17,12 +17,12 @@ func parseSelect(stmt *ast.SelectStmt) (*spec.SelectStmt, error) {
 	var text = stmt.Text()
 	comment, err := parseLineComment(text)
 	if err != nil {
-		return nil, err
+		return nil, errorNearBy(err, text)
 	}
 
 	sql, err := NewSqlScanner(text).ScanAndTrim()
 	if err != nil {
-		return nil, err
+		return nil, errorNearBy(err, text)
 	}
 
 	var ret spec.SelectStmt
@@ -33,7 +33,7 @@ func parseSelect(stmt *ast.SelectStmt) (*spec.SelectStmt, error) {
 	}
 
 	if stmt.Where != nil {
-		where, err := parseExprNode(stmt.Where, tableName)
+		where, err := parseExprNode(stmt.Where, tableName, exprTypeWhereClause)
 		if err != nil {
 			return nil, errorNearBy(err, text)
 		}
@@ -126,7 +126,27 @@ func convertOP(in opcode.Op) (spec.OP, error) {
 		return 0, fmt.Errorf("unsupported opcode %s", in)
 	}
 }
-func parseExprNode(node ast.ExprNode, table string) (*spec.Clause, error) {
+
+type exprType int
+
+const (
+	_ exprType = iota
+	exprTypeColumn
+	exprTypeWhereClause
+	exprTypeHavingClause
+	exprTypeGroupByItems
+	exprTypeOrderByItems
+)
+
+var exprTypeValue = [...]string{
+	exprTypeColumn:       "column expr",
+	exprTypeWhereClause:  "where clause",
+	exprTypeHavingClause: "having clause",
+	exprTypeGroupByItems: "group by items",
+	exprTypeOrderByItems: "order by items",
+}
+
+func parseExprNode(node ast.ExprNode, table string, exprType exprType) (*spec.Clause, error) {
 	if node == nil {
 		return nil, errorInvalidExprNode
 	}
@@ -139,12 +159,12 @@ func parseExprNode(node ast.ExprNode, table string) (*spec.Clause, error) {
 			return nil, err
 		}
 
-		leftClause, err := parseExprNode(v.L, table)
+		leftClause, err := parseExprNode(v.L, table, exprType)
 		if err != nil {
 			return nil, err
 		}
 
-		rightClause, err := parseExprNode(v.R, table)
+		rightClause, err := parseExprNode(v.R, table, exprType)
 		if err != nil {
 			return nil, err
 		}
@@ -178,7 +198,7 @@ func parseExprNode(node ast.ExprNode, table string) (*spec.Clause, error) {
 	case *test_driver.ValueExpr, *test_driver.ParamMarkerExpr:
 		// ignores it
 	case *ast.ParenthesesExpr:
-		c, err := parseExprNode(v.Expr, table)
+		c, err := parseExprNode(v.Expr, table, exprType)
 		if err != nil {
 			return nil, err
 		}
@@ -195,7 +215,7 @@ func parseExprNode(node ast.ExprNode, table string) (*spec.Clause, error) {
 			inOP = spec.NotIn
 		}
 
-		c, err := parseExprNode(v.Expr, table)
+		c, err := parseExprNode(v.Expr, table, exprType)
 		if err != nil {
 			return nil, err
 		}
@@ -212,7 +232,7 @@ func parseExprNode(node ast.ExprNode, table string) (*spec.Clause, error) {
 			likeOP = spec.NotLike
 		}
 
-		c, err := parseExprNode(v.Expr, table)
+		c, err := parseExprNode(v.Expr, table, exprType)
 		if err != nil {
 			return nil, err
 		}
@@ -229,7 +249,7 @@ func parseExprNode(node ast.ExprNode, table string) (*spec.Clause, error) {
 			betweenOP = spec.NotBetween
 		}
 
-		c, err := parseExprNode(v.Expr, table)
+		c, err := parseExprNode(v.Expr, table, exprType)
 		if err != nil {
 			return nil, err
 		}
@@ -241,7 +261,7 @@ func parseExprNode(node ast.ExprNode, table string) (*spec.Clause, error) {
 			clause.Left = c
 		}
 	default:
-		return nil, errorInvalidExpr
+		return nil, fmt.Errorf("[%s]: unsupported expr node %T ", exprTypeValue[exprType], v)
 	}
 
 	return &clause, nil
@@ -251,7 +271,7 @@ func parseGroupBy(groupBy *ast.GroupByClause, table string) (spec.ByItems, error
 	var ret spec.ByItems
 	var groupByItem = groupBy.Items
 	for _, item := range groupByItem {
-		clause, err := parseExprNode(item.Expr, table)
+		clause, err := parseExprNode(item.Expr, table, exprTypeGroupByItems)
 		if err != nil {
 			return nil, err
 		}
@@ -288,14 +308,14 @@ func parseHaving(having *ast.HavingClause, table string) (*spec.Clause, error) {
 		return nil, errorMissingHaving
 	}
 
-	return parseExprNode(having.Expr, table)
+	return parseExprNode(having.Expr, table, exprTypeHavingClause)
 }
 
 func parseOrderBy(orderBy *ast.OrderByClause, table string) (spec.ByItems, error) {
 	var byItem = orderBy.Items
 	var ret spec.ByItems
 	for _, item := range byItem {
-		clauses, err := parseExprNode(item.Expr, table)
+		clauses, err := parseExprNode(item.Expr, table, exprTypeOrderByItems)
 		if err != nil {
 			return nil, err
 		}
@@ -419,12 +439,12 @@ func parseSelectField(node ast.ExprNode, hasAsName bool, table string) (string, 
 		}
 		return columnName, columnName, mysql.TypeUnspecified, false, nil
 	case *ast.AggregateFuncExpr:
-		if !hasAsName {
-			return "", "", 0, false, fmt.Errorf("aggregate function %q must have AS name", v.F)
-		}
 		f, funcSql, t, err := parseAggregateFuncExpr(v, table)
 		if err != nil {
 			return "", "", 0, false, err
+		}
+		if !hasAsName {
+			return "", "", 0, false, fmt.Errorf("aggregate function %q must have AS name", funcSql)
 		}
 		return f, funcSql, t, true, nil
 	default:
