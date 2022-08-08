@@ -7,25 +7,25 @@ import (
 	"fmt"
 	"time"
 
-	"gorm.io/gorm"
+	"xorm.io/xorm"
 )
 
 // UserModel represents a user model.
 type UserModel struct {
-	db gorm.DB
+	engine *xorm.Engine
 }
 
 // User represents a user struct data.
 type User struct {
-	Id         uint64    `gorm:"primaryKey;autoIncrement;column:id" json:"id"`
-	Name       string    `gorm:"column:name" json:"name"`
-	Password   string    `gorm:"column:password" json:"password"`
-	Mobile     string    `gorm:"column:mobile" json:"mobile"`
-	Gender     string    `gorm:"column:gender" json:"gender"`
-	Nickname   string    `gorm:"column:nickname" json:"nickname"`
-	Type       int8      `gorm:"column:type" json:"type"`
-	CreateTime time.Time `gorm:"column:create_time" json:"createTime"`
-	UpdateTime time.Time `gorm:"column:update_time" json:"updateTime"`
+	Id         uint64    `xorm:"pk autoincr 'id'" json:"id"`
+	Name       string    `xorm:"'name'" json:"name"`
+	Password   string    `xorm:"'password'" json:"password"`
+	Mobile     string    `xorm:"'mobile'" json:"mobile"`
+	Gender     string    `xorm:"'gender'" json:"gender"`
+	Nickname   string    `xorm:"'nickname'" json:"nickname"`
+	Type       int8      `xorm:"'type'" json:"type"`
+	CreateTime time.Time `xorm:"'create_time'" json:"createTime"`
+	UpdateTime time.Time `xorm:"'update_time'" json:"updateTime"`
 }
 
 // DeleteWhereParameter is a where parameter structure.
@@ -44,49 +44,49 @@ type DeleteByNameAndMobileWhereParameter struct {
 	Mobile string
 }
 
-// TableName returns the table name. it implemented by gorm.Tabler.
 func (User) TableName() string {
 	return "user"
 }
 
-// Create creates  user data.
-func (m *UserModel) Create(ctx context.Context, data ...*User) error {
+// Insert creates  user data.
+func (m *UserModel) Insert(ctx context.Context, data ...*User) error {
 	if len(data) == 0 {
 		return fmt.Errorf("data is empty")
 	}
 
-	db := m.db.WithContext(ctx)
+	var session = m.engine.Context(ctx)
 	var list []User
 	for _, v := range data {
 		list = append(list, *v)
 	}
 
-	return db.Create(&list).Error
+	_, err := session.Insert(&list)
+	return err
 }
 
 // Delete is generated from sql:
 // delete from user where id = ?;
 func (m *UserModel) Delete(ctx context.Context, where DeleteWhereParameter) error {
-	var db = m.db.WithContext(ctx)
-	db.Where(`id = ?`, where.Id)
-	db.Delete(&User{})
-	return db.Error
+	var session = m.engine.Context(ctx)
+	session.Where(`id = ?`, where.Id)
+	_, err := session.Delete(&User{})
+	return err
 }
 
 // DeleteByName is generated from sql:
 // delete from user where name = ?;
 func (m *UserModel) DeleteByName(ctx context.Context, where DeleteByNameWhereParameter) error {
-	var db = m.db.WithContext(ctx)
-	db.Where(`name = ?`, where.Name)
-	db.Delete(&User{})
-	return db.Error
+	var session = m.engine.Context(ctx)
+	session.Where(`name = ?`, where.Name)
+	_, err := session.Delete(&User{})
+	return err
 }
 
 // DeleteByNameAndMobile is generated from sql:
 // delete from user where name = ? and mobile = ?;
 func (m *UserModel) DeleteByNameAndMobile(ctx context.Context, where DeleteByNameAndMobileWhereParameter) error {
-	var db = m.db.WithContext(ctx)
-	db.Where(`name = ? AND mobile = ?`, where.Name, where.Mobile)
-	db.Delete(&User{})
-	return db.Error
+	var session = m.engine.Context(ctx)
+	session.Where(`name = ? AND mobile = ?`, where.Name, where.Mobile)
+	_, err := session.Delete(&User{})
+	return err
 }

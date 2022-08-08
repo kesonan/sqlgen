@@ -7,20 +7,21 @@ import (
     "fmt"
     "time"
 
-    "gorm.io/gorm"
+    "xorm.io/xorm"
 
     "github.com/shopspring/decimal"
 )
 
 // {{UpperCamel $.Table.Name}}Model represents a {{$.Table.Name}} model.
 type {{UpperCamel $.Table.Name}}Model struct {
-    db gorm.DB
+    engine *xorm.Engine
 }
 
 // {{UpperCamel $.Table.Name}} represents a {{$.Table.Name}} struct data.
 type {{UpperCamel $.Table.Name}} struct { {{range $.Table.Columns}}
-    {{UpperCamel .Name}} {{.GoType}} `gorm:"{{if IsPrimary .Name}}primaryKey;{{end}}{{if .AutoIncrement}}autoIncrement;{{end}}column:{{.Name}}" json:"{{LowerCamel .Name}}"`{{end}}
+{{UpperCamel .Name}} {{.GoType}} `xorm:"{{if IsPrimary .Name}}pk {{end}}{{if .AutoIncrement}}autoincr {{end}}'{{.Name}}'" json:"{{LowerCamel .Name}}"`{{end}}
 }
+
 {{range $stmt := .SelectStmt}}{{if $stmt.Where.IsValid}}{{$stmt.Where.ParameterStructure "Where"}}
 {{end}}{{if $stmt.Having.IsValid}}{{$stmt.Having.ParameterStructure "Having"}}
 {{end}}{{if $stmt.Limit.Multiple}}{{$stmt.Limit.ParameterStructure}}
@@ -37,39 +38,39 @@ type {{UpperCamel $.Table.Name}} struct { {{range $.Table.Columns}}
 {{end}}
 {{end}}
 
-// TableName returns the table name. it implemented by gorm.Tabler.
-func ({{UpperCamel $.Table.Name}}) TableName() string {
+func ({{UpperCamel $.Table.Name}}) TableName() string{
     return "{{$.Table.Name}}"
 }
 
-// Create creates  {{$.Table.Name}} data.
-func (m *{{UpperCamel $.Table.Name}}Model) Create(ctx context.Context, data ...*{{UpperCamel $.Table.Name}}) error {
+// Insert creates  {{$.Table.Name}} data.
+func (m *{{UpperCamel $.Table.Name}}Model) Insert(ctx context.Context, data ...*{{UpperCamel $.Table.Name}}) error {
     if len(data)==0{
         return fmt.Errorf("data is empty")
     }
 
-    db:=m.db.WithContext(ctx)
+    var session = m.engine.Context(ctx)
     var list []{{UpperCamel $.Table.Name}}
-    for _,v:=range data{
+    for _,v := range data{
         list = append(list,*v)
     }
 
-    return db.Create(&list).Error
+    _,err := session.Insert(&list)
+    return err
 }
 {{range $stmt := .SelectStmt}}
 // {{.FuncName}} is generated from sql:
 // {{$stmt.SQL}}
 func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if $stmt.Where.IsValid}}, where {{$stmt.Where.ParameterStructureName "Where"}}{{end}}{{if $stmt.Having.IsValid}}, having {{$stmt.Having.ParameterStructureName "Having"}}{{end}}{{if $stmt.Limit.Multiple}}, limit {{$stmt.Limit.ParameterStructureName}}{{end}})({{if $stmt.Limit.One}}*{{$stmt.ReceiverName}}, {{else}}[]*{{$stmt.ReceiverName}}, {{end}} error){
     var result {{if $stmt.Limit.One}} = new({{$stmt.ReceiverName}}){{else}}[]*{{$stmt.ReceiverName}}{{end}}
-    var db = m.db.WithContext(ctx)
-    db.Select({{$stmt.SelectSQL}})
-    {{if $stmt.Where.IsValid}}db.Where({{$stmt.Where.SQL}}, {{$stmt.Where.Parameters "where"}})
-    {{end }}{{if $stmt.GroupBy.IsValid}}db.Group({{$stmt.GroupBy.SQL}})
-    {{end}}{{if $stmt.Having.IsValid}}db.Having({{$stmt.Having.SQL}}, {{$stmt.Having.Parameters "having"}})
-    {{end}}{{if $stmt.OrderBy.IsValid}}db.Order({{$stmt.OrderBy.SQL}})
-    {{end}}{{if $stmt.Limit.IsValid}}db{{if gt $stmt.Limit.Offset 0}}.Offset({{$stmt.Limit.OffsetParameter "limit"}}){{end}}.Limit({{if $stmt.Limit.One}}1{{else}}{{$stmt.Limit.LimitParameter "limit"}}{{end}})
-    {{end}}db.Find({{if $stmt.Limit.One}}result{{else}}&result{{end}})
-    return result, db.Error
+    var session = m.engine.Context(ctx)
+    session.Select({{$stmt.SelectSQL}})
+    {{if $stmt.Where.IsValid}}session.Where({{$stmt.Where.SQL}}, {{$stmt.Where.Parameters "where"}})
+    {{end }}{{if $stmt.GroupBy.IsValid}}session.GroupBy({{$stmt.GroupBy.SQL}})
+    {{end}}{{if $stmt.Having.IsValid}}session.Having(fmt.Sprintf({{HavingSprintf $stmt.Having.SQL}}, {{$stmt.Having.Parameters "having"}}))
+    {{end}}{{if $stmt.OrderBy.IsValid}}session.OrderBy({{$stmt.OrderBy.SQL}})
+    {{end}}{{if $stmt.Limit.IsValid}}session.Limit({{if $stmt.Limit.One}}1{{else}}{{$stmt.Limit.LimitParameter "limit"}}{{end}}{{if gt $stmt.Limit.Offset 0}}, {{$stmt.Limit.OffsetParameter "limit"}}{{end}})
+    {{end}}{{if $stmt.Limit.One}}_,{{end}} err := session{{if $stmt.Limit.One}}.Get({{if $stmt.Limit.One}}result{{end}}){{else}}.Find(&result){{end}}
+    return result, err
 }
 {{end}}
 
@@ -77,16 +78,16 @@ func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if 
 // {{.FuncName}} is generated from sql:
 // {{$stmt.SQL}}
 func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context, data *{{UpperCamel $.Table.Name}}{{if $stmt.Where.IsValid}}, where {{$stmt.Where.ParameterStructureName "Where"}}{{end}}{{if $stmt.Limit.Multiple}}, limit {{$stmt.Limit.ParameterStructureName}}{{end}}) error {
-    var db = m.db.WithContext(ctx)
-    db.Model(&{{UpperCamel $.Table.Name}}{})
-    {{if $stmt.Where.IsValid}}db.Where({{$stmt.Where.SQL}}, {{$stmt.Where.Parameters "where"}})
-    {{end}}{{if $stmt.OrderBy.IsValid}}db.Order({{$stmt.OrderBy.SQL}})
-    {{end}}{{if $stmt.Limit.IsValid}}db{{if gt $stmt.Limit.Offset 0}}.Offset({{$stmt.Limit.OffsetParameter "limit"}}){{end}}.Limit({{if $stmt.Limit.One}}1{{else}}{{$stmt.Limit.LimitParameter "limit"}}{{end}})
-    {{end}}db.Updates(map[string]interface{}{
+    var session = m.engine.Context(ctx)
+    session.Table(&{{UpperCamel $.Table.Name}}{})
+    {{if $stmt.Where.IsValid}}session.Where({{$stmt.Where.SQL}}, {{$stmt.Where.Parameters "where"}})
+    {{end}}{{if $stmt.OrderBy.IsValid}}session.OrderBy({{$stmt.OrderBy.SQL}})
+    {{end}}{{if $stmt.Limit.IsValid}}session.Limit({{if $stmt.Limit.One}}1{{else}}{{$stmt.Limit.LimitParameter "limit"}}{{end}}{{if gt $stmt.Limit.Offset 0}}, {{$stmt.Limit.OffsetParameter "limit"}}{{end}})
+    {{end}}_, err := session.Update(map[string]interface{}{
         {{range $name := $stmt.Columns}}"{{$name}}": data.{{UpperCamel $name}},
         {{end}}
     })
-    return db.Error
+    return err
 }
 {{end}}
 
@@ -94,11 +95,11 @@ func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context, dat
 // {{.FuncName}} is generated from sql:
 // {{$stmt.SQL}}
 func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if $stmt.Where.IsValid}}, where {{$stmt.Where.ParameterStructureName "Where"}}{{end}}{{if $stmt.Limit.Multiple}}, limit {{$stmt.Limit.ParameterStructureName}}{{end}}) error {
-    var db = m.db.WithContext(ctx)
-    {{if $stmt.Where.IsValid}}db.Where({{$stmt.Where.SQL}}, {{$stmt.Where.Parameters "where"}})
-    {{end}}{{if $stmt.OrderBy.IsValid}}db.Order({{$stmt.OrderBy.SQL}})
-    {{end}}{{if $stmt.Limit.IsValid}}db{{if gt $stmt.Limit.Offset 0}}.Offset({{$stmt.Limit.OffsetParameter "limit"}}){{end}}.Limit({{if $stmt.Limit.One}}1{{else}}{{$stmt.Limit.LimitParameter "limit"}}{{end}})
-    {{end}}db.Delete(&{{UpperCamel $.Table.Name}}{})
-    return db.Error
+    var session = m.engine.Context(ctx)
+    {{if $stmt.Where.IsValid}}session.Where({{$stmt.Where.SQL}}, {{$stmt.Where.Parameters "where"}})
+    {{end}}{{if $stmt.OrderBy.IsValid}}session.Order({{$stmt.OrderBy.SQL}})
+    {{end}}{{if $stmt.Limit.IsValid}}session.Limit({{if $stmt.Limit.One}}1{{else}}{{$stmt.Limit.LimitParameter "limit"}}{{end}}{{if gt $stmt.Limit.Offset 0}}, {{$stmt.Limit.OffsetParameter "limit"}}{{end}})
+    {{end}}_, err := session.Delete(&{{UpperCamel $.Table.Name}}{})
+    return err
 }
 {{end}}
