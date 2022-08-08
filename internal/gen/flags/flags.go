@@ -107,7 +107,7 @@ func runFromDSN(arg RunArg) error {
 	return run(dxl, arg.Mode, arg.Output)
 }
 
-var funcMap = map[Mode]func(dxl *spec.DXL, output string) error{
+var funcMap = map[Mode]func(context []spec.Context, output string) error{
 	SQL:  sql.Run,
 	GORM: gorm.Run,
 	XORM: xorm.Run,
@@ -116,9 +116,15 @@ var funcMap = map[Mode]func(dxl *spec.DXL, output string) error{
 }
 
 func run(dxl *spec.DXL, mode Mode, output string) error {
+	ctx, err := spec.From(dxl)
+	if err != nil {
+		return err
+	}
+
 	fn, ok := funcMap[mode]
 	if !ok {
 		return nil
 	}
-	return fn(dxl, output)
+
+	return fn(ctx, output)
 }
