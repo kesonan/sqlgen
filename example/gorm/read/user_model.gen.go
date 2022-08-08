@@ -268,7 +268,12 @@ func (m *UserModel) Create(ctx context.Context, data ...*User) error {
 	}
 
 	db := m.db.WithContext(ctx)
-	return db.Create(&data).Error
+	var list []User
+	for _, v := range data {
+		list = append(list, *v)
+	}
+
+	return db.Create(&list).Error
 }
 
 // FindOne is generated from sql:
@@ -279,7 +284,7 @@ func (m *UserModel) FindOne(ctx context.Context, where FindOneWhereParameter) (*
 	db.Select(`*`)
 	db.Where(`id = ?`, where.Id)
 	db.Limit(1)
-	db.Find(&result)
+	db.Find(result)
 	return result, db.Error
 }
 
@@ -291,7 +296,7 @@ func (m *UserModel) FindByName(ctx context.Context, where FindByNameWhereParamet
 	db.Select(`*`)
 	db.Where(`name = ?`, where.Name)
 	db.Limit(1)
-	db.Find(&result)
+	db.Find(result)
 	return result, db.Error
 }
 
@@ -303,7 +308,7 @@ func (m *UserModel) FindOnePart(ctx context.Context, where FindOnePartWhereParam
 	db.Select(`id, name, nickname`)
 	db.Where(`id = ?`, where.Id)
 	db.Limit(1)
-	db.Find(&result)
+	db.Find(result)
 	return result, db.Error
 }
 
@@ -315,7 +320,7 @@ func (m *UserModel) FindByNamePart(ctx context.Context, where FindByNamePartWher
 	db.Select(`id, name, nickname`)
 	db.Where(`name = ?`, where.Name)
 	db.Limit(1)
-	db.Find(&result)
+	db.Find(result)
 	return result, db.Error
 }
 
@@ -336,7 +341,7 @@ func (m *UserModel) FindAllCount(ctx context.Context) (*FindAllCountResult, erro
 	var db = m.db.WithContext(ctx)
 	db.Select(`count(1) AS count`)
 	db.Limit(1)
-	db.Find(&result)
+	db.Find(result)
 	return result, db.Error
 }
 
@@ -357,7 +362,7 @@ func (m *UserModel) FindAllPartCount(ctx context.Context) (*FindAllPartCountResu
 	var db = m.db.WithContext(ctx)
 	db.Select(`count(id) AS count`)
 	db.Limit(1)
-	db.Find(&result)
+	db.Find(result)
 	return result, db.Error
 }
 
@@ -369,7 +374,7 @@ func (m *UserModel) FindOneByNameAndPassword(ctx context.Context, where FindOneB
 	db.Select(`*`)
 	db.Where(`name = ? AND password = ?`, where.Name, where.Password)
 	db.Limit(1)
-	db.Find(&result)
+	db.Find(result)
 	return result, db.Error
 }
 
@@ -450,7 +455,7 @@ func (m *UserModel) FindOneByNameLike(ctx context.Context, where FindOneByNameLi
 	db.Select(`*`)
 	db.Where(`name LIKE ?`, where.Name)
 	db.Limit(1)
-	db.Find(&result)
+	db.Find(result)
 	return result, db.Error
 }
 

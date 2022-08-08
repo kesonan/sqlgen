@@ -49,7 +49,12 @@ func (m *{{UpperCamel $.Table.Name}}Model) Create(ctx context.Context, data ...*
     }
 
     db:=m.db.WithContext(ctx)
-    return db.Create(&data).Error
+    var list []{{UpperCamel $.Table.Name}}
+    for _,v:=range data{
+        list = append(list,*v)
+    }
+
+    return db.Create(&list).Error
 }
 {{range $stmt := .SelectStmt}}
 // {{.FuncName}} is generated from sql:
@@ -63,7 +68,7 @@ func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if 
     {{end}}{{if $stmt.Having.IsValid}}db.Having({{$stmt.Having.SQL}}, {{$stmt.Having.Parameters "having"}})
     {{end}}{{if $stmt.OrderBy.IsValid}}db.Order({{$stmt.OrderBy.SQL}})
     {{end}}{{if $stmt.Limit.IsValid}}db{{if gt $stmt.Limit.Offset 0}}.Offset({{$stmt.Limit.OffsetParameter "limit"}}){{end}}.Limit({{if $stmt.Limit.One}}1{{else}}{{$stmt.Limit.LimitParameter "limit"}}{{end}})
-    {{end}}db.Find(&result)
+    {{end}}db.Find({{if $stmt.Limit.One}}result{{else}}&result{{end}})
     return result, db.Error
 }
 {{end}}

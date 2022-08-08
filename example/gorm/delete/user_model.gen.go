@@ -56,7 +56,12 @@ func (m *UserModel) Create(ctx context.Context, data ...*User) error {
 	}
 
 	db := m.db.WithContext(ctx)
-	return db.Create(&data).Error
+	var list []User
+	for _, v := range data {
+		list = append(list, *v)
+	}
+
+	return db.Create(&list).Error
 }
 
 // Delete is generated from sql:
