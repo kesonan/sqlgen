@@ -104,15 +104,14 @@ group by name
 having typeCount > ?
 order by id desc limit 10;
 
--- example15: list user by primary key, group by name desc, having count(type) > ?, order by id desc, limit 10, offset 10
+-- example15: list user by primary key, group by name desc, having count(type) > ?, order by id desc, limit 10, 10
 -- fn: ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10
 select *, count(type) AS typeCount
 from user
 where id > ?
 group by name
 having typeCount > ?
-order by id desc limit 10
-offset 10;
+order by id desc limit 10, 10;
 
 -- example16: find one by name like
 -- fn: FindOneByNameLike

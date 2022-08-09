@@ -433,7 +433,7 @@ func (m *UserModel) ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10(ctx 
 }
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10 is generated from sql:
-// select *, count(type) AS typeCount from user where id > ? group by name having typeCount > ? order by id desc limit 10 offset 10;
+// select *, count(type) AS typeCount from user where id > ? group by name having typeCount > ? order by id desc limit 10, 10;
 func (m *UserModel) ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10(ctx context.Context, where ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10WhereParameter, having ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10HavingParameter, limit ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10LimitParameter) ([]*ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10Result, error) {
 	var result []*ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10Result
 	var db = m.db.WithContext(ctx)

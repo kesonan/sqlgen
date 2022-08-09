@@ -87,7 +87,7 @@ func parseSelect(stmt *ast.SelectStmt) (*spec.SelectStmt, error) {
 		}
 	}
 	ret.From = tableName
-	ret.SelectSQL = fmt.Sprintf("`%s`", selectFieldSQL)
+	ret.SelectSQL = fmt.Sprintf("%s", selectFieldSQL)
 	ret.Distinct = stmt.Distinct
 	ret.Action = spec.ActionRead
 	ret.SQL = sql
