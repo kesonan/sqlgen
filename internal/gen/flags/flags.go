@@ -7,6 +7,7 @@ import (
 
 	"github.com/anqiansong/sqlgen/internal/gen/bun"
 	"github.com/anqiansong/sqlgen/internal/gen/gorm"
+	"github.com/anqiansong/sqlgen/internal/gen/sql"
 	"github.com/anqiansong/sqlgen/internal/gen/sqlx"
 	"github.com/anqiansong/sqlgen/internal/gen/xorm"
 	"github.com/anqiansong/sqlgen/internal/log"
@@ -20,7 +21,8 @@ const sqlExt = ".sql"
 type Mode int
 
 const (
-	GORM Mode = iota
+	SQL Mode = iota
+	GORM
 	XORM
 	SQLX
 	BUN
@@ -106,6 +108,7 @@ func runFromDSN(arg RunArg) error {
 }
 
 var funcMap = map[Mode]func(context []spec.Context, output string) error{
+	SQL:  sql.Run,
 	GORM: gorm.Run,
 	XORM: xorm.Run,
 	SQLX: sqlx.Run,

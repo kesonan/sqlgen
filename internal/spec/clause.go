@@ -162,8 +162,16 @@ func (c *Clause) marshal() (sql string, parameters parameter.Parameters, err err
 		}
 
 		sql = strings.Join(sqlList, " "+Operator[c.OP]+" ")
-	case EQ, GE, GT, In, LE, LT, Like, NE, Not, NotIn, NotLike:
+	case EQ, GE, GT, LE, LT, Like, NE, Not, NotLike:
 		sql = fmt.Sprintf("%s %s ?", c.Column, Operator[c.OP])
+		p, err := c.ColumnInfo.DataType()
+		if err != nil {
+			return "", nil, err
+		}
+
+		ps.Add(p)
+	case In, NotIn:
+		sql = fmt.Sprintf("%s %s (?)", c.Column, Operator[c.OP])
 		p, err := c.ColumnInfo.DataType()
 		if err != nil {
 			return "", nil, err
