@@ -4,33 +4,36 @@ package model
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
-	"gorm.io/gorm"
+	"xorm.io/builder"
 )
 
 // UserModel represents a user model.
 type UserModel struct {
-	db gorm.DB
+	db      *sql.Conn
+	scanner Scanner
 }
 
 // User represents a user struct data.
 type User struct {
-	Id         uint64    `gorm:"primaryKey;autoIncrement;column:id" json:"id"`
-	Name       string    `gorm:"column:name" json:"name"`
-	Password   string    `gorm:"column:password" json:"password"`
-	Mobile     string    `gorm:"column:mobile" json:"mobile"`
-	Gender     string    `gorm:"column:gender" json:"gender"`
-	Nickname   string    `gorm:"column:nickname" json:"nickname"`
-	Type       int8      `gorm:"column:type" json:"type"`
-	CreateTime time.Time `gorm:"column:create_time" json:"createTime"`
-	UpdateTime time.Time `gorm:"column:update_time" json:"updateTime"`
+	Id         uint64    `json:"id"`
+	Name       string    `json:"name"`
+	Password   string    `json:"password"`
+	Mobile     string    `json:"mobile"`
+	Gender     string    `json:"gender"`
+	Nickname   string    `json:"nickname"`
+	Type       int8      `json:"type"`
+	CreateTime time.Time `json:"createTime"`
+	UpdateTime time.Time `json:"updateTime"`
 }
 
 // FindOneWhereParameter is a where parameter structure.
 type FindOneWhereParameter struct {
-	Id uint64
+	Id   uint64
+	Name string
 }
 
 // FindByNameWhereParameter is a where parameter structure.
@@ -256,320 +259,459 @@ type ComplexQueryWhereParameter struct {
 	Name6               string
 }
 
-// TableName returns the table name. it implemented by gorm.Tabler.
-func (User) TableName() string {
-	return "user"
-}
-
-// NewUserModel returns a new user model.
-func NewUserModel(db gorm.DB) *UserModel {
-	return &UserModel{db: db}
+// NewUserModel creates a new user model.
+func NewUserModel(db *sql.Conn, scanner Scanner) *UserModel {
+	return &UserModel{
+		db:      db,
+		scanner: scanner,
+	}
 }
 
 // Create creates  user data.
-func (m *UserModel) Create(ctx context.Context, data ...*User) error {
+func (m *UserModel) Create(ctx context.Context, data ...*User) (err error) {
 	if len(data) == 0 {
 		return fmt.Errorf("data is empty")
 	}
 
-	db := m.db.WithContext(ctx)
-	var list []User
-	for _, v := range data {
-		list = append(list, *v)
+	var stmt *sql.Stmt
+	stmt, err = m.db.PrepareContext(ctx, "INSERT INTO user (`name`, `password`, `mobile`, `gender`, `nickname`, `type`, `create_time`, `update_time`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+	if err != nil {
+		return
 	}
-
-	return db.Create(&list).Error
+	defer func() {
+		err = stmt.Close()
+	}()
+	for _, v := range data {
+		_, err = stmt.ExecContext(ctx, v.Name, v.Password, v.Mobile, v.Gender, v.Nickname, v.Type, v.CreateTime, v.UpdateTime)
+		if err != nil {
+			return
+		}
+	}
+	return
 }
 
 // FindOne is generated from sql:
-// select * from user where id = ? limit 1;
+// select * from user where id = ? and name in (?) limit 1;
 func (m *UserModel) FindOne(ctx context.Context, where FindOneWhereParameter) (*User, error) {
 	var result = new(User)
-	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
-	db.Where(`id = ?`, where.Id)
-	db.Limit(1)
-	db.Find(result)
-	return result, db.Error
+	b := builder.Select(`*`)
+	b.From("`user`")
+	b.Where(builder.Expr(`id = ? AND name IN (?)`, where.Id, where.Name))
+	b.Limit(1)
+	query, args, err := b.ToSQL()
+	row := m.db.QueryRowContext(ctx, query, args...)
+	if err := row.Err(); err != nil {
+		return nil, err
+	}
+	err = m.scanner.ScanRow(row, result)
+	return result, err
+
 }
 
 // FindByName is generated from sql:
 // select * from user where name = ? limit 1;
 func (m *UserModel) FindByName(ctx context.Context, where FindByNameWhereParameter) (*User, error) {
 	var result = new(User)
-	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
-	db.Where(`name = ?`, where.Name)
-	db.Limit(1)
-	db.Find(result)
-	return result, db.Error
+	b := builder.Select(`*`)
+	b.From("`user`")
+	b.Where(builder.Expr(`name = ?`, where.Name))
+	b.Limit(1)
+	query, args, err := b.ToSQL()
+	row := m.db.QueryRowContext(ctx, query, args...)
+	if err := row.Err(); err != nil {
+		return nil, err
+	}
+	err = m.scanner.ScanRow(row, result)
+	return result, err
+
 }
 
 // FindOnePart is generated from sql:
 // select id, name, nickname from user where id = ? limit 1;
 func (m *UserModel) FindOnePart(ctx context.Context, where FindOnePartWhereParameter) (*User, error) {
 	var result = new(User)
-	var db = m.db.WithContext(ctx)
-	db.Select(`id, name, nickname`)
-	db.Where(`id = ?`, where.Id)
-	db.Limit(1)
-	db.Find(result)
-	return result, db.Error
+	b := builder.Select(`id, name, nickname`)
+	b.From("`user`")
+	b.Where(builder.Expr(`id = ?`, where.Id))
+	b.Limit(1)
+	query, args, err := b.ToSQL()
+	row := m.db.QueryRowContext(ctx, query, args...)
+	if err := row.Err(); err != nil {
+		return nil, err
+	}
+	err = m.scanner.ScanRow(row, result)
+	return result, err
+
 }
 
 // FindByNamePart is generated from sql:
 // select id, name, nickname from user where name = ? limit 1;
 func (m *UserModel) FindByNamePart(ctx context.Context, where FindByNamePartWhereParameter) (*User, error) {
 	var result = new(User)
-	var db = m.db.WithContext(ctx)
-	db.Select(`id, name, nickname`)
-	db.Where(`name = ?`, where.Name)
-	db.Limit(1)
-	db.Find(result)
-	return result, db.Error
+	b := builder.Select(`id, name, nickname`)
+	b.From("`user`")
+	b.Where(builder.Expr(`name = ?`, where.Name))
+	b.Limit(1)
+	query, args, err := b.ToSQL()
+	row := m.db.QueryRowContext(ctx, query, args...)
+	if err := row.Err(); err != nil {
+		return nil, err
+	}
+	err = m.scanner.ScanRow(row, result)
+	return result, err
+
 }
 
 // FindAll is generated from sql:
 // select * from user;
 func (m *UserModel) FindAll(ctx context.Context) ([]*User, error) {
 	var result []*User
-	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
-	db.Find(&result)
-	return result, db.Error
+	b := builder.Select(`*`)
+	b.From("`user`")
+	query, args, err := b.ToSQL()
+	rows, err := m.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	err = m.scanner.ScanRows(rows, result)
+	return result, err
 }
 
 // FindAllCount is generated from sql:
 // select count(*) AS count from user;
 func (m *UserModel) FindAllCount(ctx context.Context) (*FindAllCountResult, error) {
 	var result = new(FindAllCountResult)
-	var db = m.db.WithContext(ctx)
-	db.Select(`count(1) AS count`)
-	db.Limit(1)
-	db.Find(result)
-	return result, db.Error
+	b := builder.Select(`count(1) AS count`)
+	b.From("`user`")
+	b.Limit(1)
+	query, args, err := b.ToSQL()
+	row := m.db.QueryRowContext(ctx, query, args...)
+	if err := row.Err(); err != nil {
+		return nil, err
+	}
+	err = m.scanner.ScanRow(row, result)
+	return result, err
+
 }
 
 // FindAllPart is generated from sql:
 // select id, name, nickname from user;
 func (m *UserModel) FindAllPart(ctx context.Context) ([]*User, error) {
 	var result []*User
-	var db = m.db.WithContext(ctx)
-	db.Select(`id, name, nickname`)
-	db.Find(&result)
-	return result, db.Error
+	b := builder.Select(`id, name, nickname`)
+	b.From("`user`")
+	query, args, err := b.ToSQL()
+	rows, err := m.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	err = m.scanner.ScanRows(rows, result)
+	return result, err
 }
 
 // FindAllPartCount is generated from sql:
 // select count(id) AS count from user;
 func (m *UserModel) FindAllPartCount(ctx context.Context) (*FindAllPartCountResult, error) {
 	var result = new(FindAllPartCountResult)
-	var db = m.db.WithContext(ctx)
-	db.Select(`count(id) AS count`)
-	db.Limit(1)
-	db.Find(result)
-	return result, db.Error
+	b := builder.Select(`count(id) AS count`)
+	b.From("`user`")
+	b.Limit(1)
+	query, args, err := b.ToSQL()
+	row := m.db.QueryRowContext(ctx, query, args...)
+	if err := row.Err(); err != nil {
+		return nil, err
+	}
+	err = m.scanner.ScanRow(row, result)
+	return result, err
+
 }
 
 // FindOneByNameAndPassword is generated from sql:
 // select * from user where name = ? and password = ? limit 1;
 func (m *UserModel) FindOneByNameAndPassword(ctx context.Context, where FindOneByNameAndPasswordWhereParameter) (*User, error) {
 	var result = new(User)
-	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
-	db.Where(`name = ? AND password = ?`, where.Name, where.Password)
-	db.Limit(1)
-	db.Find(result)
-	return result, db.Error
+	b := builder.Select(`*`)
+	b.From("`user`")
+	b.Where(builder.Expr(`name = ? AND password = ?`, where.Name, where.Password))
+	b.Limit(1)
+	query, args, err := b.ToSQL()
+	row := m.db.QueryRowContext(ctx, query, args...)
+	if err := row.Err(); err != nil {
+		return nil, err
+	}
+	err = m.scanner.ScanRow(row, result)
+	return result, err
+
 }
 
 // ListUserByNameAsc is generated from sql:
 // select * from user where id > ? group by name;
 func (m *UserModel) ListUserByNameAsc(ctx context.Context, where ListUserByNameAscWhereParameter) ([]*User, error) {
 	var result []*User
-	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
-	db.Where(`id > ?`, where.Id)
-	db.Group(`name`)
-	db.Find(&result)
-	return result, db.Error
+	b := builder.Select(`*`)
+	b.From("`user`")
+	b.Where(builder.Expr(`id > ?`, where.Id))
+	b.GroupBy(`name`)
+	query, args, err := b.ToSQL()
+	rows, err := m.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	err = m.scanner.ScanRows(rows, result)
+	return result, err
 }
 
 // ListUserByNameAscHavingCountTypeGt is generated from sql:
 // select *, count(type) AS typeCount from user where id > ? group by name having typeCount > ?;
 func (m *UserModel) ListUserByNameAscHavingCountTypeGt(ctx context.Context, where ListUserByNameAscHavingCountTypeGtWhereParameter, having ListUserByNameAscHavingCountTypeGtHavingParameter) ([]*ListUserByNameAscHavingCountTypeGtResult, error) {
 	var result []*ListUserByNameAscHavingCountTypeGtResult
-	var db = m.db.WithContext(ctx)
-	db.Select(`*, count(type) AS typeCount`)
-	db.Where(`id > ?`, where.Id)
-	db.Group(`name`)
-	db.Having(`typeCount > ?`, having.TypeCount)
-	db.Find(&result)
-	return result, db.Error
+	b := builder.Select(`*, count(type) AS typeCount`)
+	b.From("`user`")
+	b.Where(builder.Expr(`id > ?`, where.Id))
+	b.GroupBy(`name`)
+	b.Having(fmt.Sprintf(`typeCount > %v`, having.TypeCount))
+	query, args, err := b.ToSQL()
+	rows, err := m.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	err = m.scanner.ScanRows(rows, result)
+	return result, err
 }
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDesc is generated from sql:
 // select *, count(type) AS typeCount from user where id > ? group by name having typeCount > ? order by id desc;
 func (m *UserModel) ListUserByNameDescHavingCountTypeGtOrderByIdDesc(ctx context.Context, where ListUserByNameDescHavingCountTypeGtOrderByIdDescWhereParameter, having ListUserByNameDescHavingCountTypeGtOrderByIdDescHavingParameter) ([]*ListUserByNameDescHavingCountTypeGtOrderByIdDescResult, error) {
 	var result []*ListUserByNameDescHavingCountTypeGtOrderByIdDescResult
-	var db = m.db.WithContext(ctx)
-	db.Select(`*, count(type) AS typeCount`)
-	db.Where(`id > ?`, where.Id)
-	db.Group(`name`)
-	db.Having(`typeCount > ?`, having.TypeCount)
-	db.Order(`id desc`)
-	db.Find(&result)
-	return result, db.Error
+	b := builder.Select(`*, count(type) AS typeCount`)
+	b.From("`user`")
+	b.Where(builder.Expr(`id > ?`, where.Id))
+	b.GroupBy(`name`)
+	b.Having(fmt.Sprintf(`typeCount > %v`, having.TypeCount))
+	b.OrderBy(`id desc`)
+	query, args, err := b.ToSQL()
+	rows, err := m.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	err = m.scanner.ScanRows(rows, result)
+	return result, err
 }
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10 is generated from sql:
 // select *, count(type) AS typeCount from user where id > ? group by name having typeCount > ? order by id desc limit 10;
 func (m *UserModel) ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10(ctx context.Context, where ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10WhereParameter, having ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10HavingParameter, limit ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10LimitParameter) ([]*ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Result, error) {
 	var result []*ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Result
-	var db = m.db.WithContext(ctx)
-	db.Select(`*, count(type) AS typeCount`)
-	db.Where(`id > ?`, where.Id)
-	db.Group(`name`)
-	db.Having(`typeCount > ?`, having.TypeCount)
-	db.Order(`id desc`)
-	db.Limit(limit.Count)
-	db.Find(&result)
-	return result, db.Error
+	b := builder.Select(`*, count(type) AS typeCount`)
+	b.From("`user`")
+	b.Where(builder.Expr(`id > ?`, where.Id))
+	b.GroupBy(`name`)
+	b.Having(fmt.Sprintf(`typeCount > %v`, having.TypeCount))
+	b.OrderBy(`id desc`)
+	b.Limit(limit.Count)
+	query, args, err := b.ToSQL()
+	rows, err := m.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	err = m.scanner.ScanRows(rows, result)
+	return result, err
 }
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10 is generated from sql:
 // select *, count(type) AS typeCount from user where id > ? group by name having typeCount > ? order by id desc limit 10, 10;
 func (m *UserModel) ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10(ctx context.Context, where ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10WhereParameter, having ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10HavingParameter, limit ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10LimitParameter) ([]*ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10Result, error) {
 	var result []*ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10Result
-	var db = m.db.WithContext(ctx)
-	db.Select(`*, count(type) AS typeCount`)
-	db.Where(`id > ?`, where.Id)
-	db.Group(`name`)
-	db.Having(`typeCount > ?`, having.TypeCount)
-	db.Order(`id desc`)
-	db.Offset(limit.Offset).Limit(limit.Count)
-	db.Find(&result)
-	return result, db.Error
+	b := builder.Select(`*, count(type) AS typeCount`)
+	b.From("`user`")
+	b.Where(builder.Expr(`id > ?`, where.Id))
+	b.GroupBy(`name`)
+	b.Having(fmt.Sprintf(`typeCount > %v`, having.TypeCount))
+	b.OrderBy(`id desc`)
+	b.Limit(limit.Count, limit.Offset)
+	query, args, err := b.ToSQL()
+	rows, err := m.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	err = m.scanner.ScanRows(rows, result)
+	return result, err
 }
 
 // FindOneByNameLike is generated from sql:
 // select * from user where name like ? limit 1;
 func (m *UserModel) FindOneByNameLike(ctx context.Context, where FindOneByNameLikeWhereParameter) (*User, error) {
 	var result = new(User)
-	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
-	db.Where(`name LIKE ?`, where.Name)
-	db.Limit(1)
-	db.Find(result)
-	return result, db.Error
+	b := builder.Select(`*`)
+	b.From("`user`")
+	b.Where(builder.Expr(`name LIKE ?`, where.Name))
+	b.Limit(1)
+	query, args, err := b.ToSQL()
+	row := m.db.QueryRowContext(ctx, query, args...)
+	if err := row.Err(); err != nil {
+		return nil, err
+	}
+	err = m.scanner.ScanRow(row, result)
+	return result, err
+
 }
 
 // FindAllByNameNotLike is generated from sql:
 // select * from user where name not like ?;
 func (m *UserModel) FindAllByNameNotLike(ctx context.Context, where FindAllByNameNotLikeWhereParameter) ([]*User, error) {
 	var result []*User
-	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
-	db.Where(`name NOT LIKE ?`, where.Name)
-	db.Find(&result)
-	return result, db.Error
+	b := builder.Select(`*`)
+	b.From("`user`")
+	b.Where(builder.Expr(`name NOT LIKE ?`, where.Name))
+	query, args, err := b.ToSQL()
+	rows, err := m.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	err = m.scanner.ScanRows(rows, result)
+	return result, err
 }
 
 // FindAllByIdIn is generated from sql:
 // select * from user where id in (?);
 func (m *UserModel) FindAllByIdIn(ctx context.Context, where FindAllByIdInWhereParameter) ([]*User, error) {
 	var result []*User
-	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
-	db.Where(`id IN (?)`, where.Id)
-	db.Find(&result)
-	return result, db.Error
+	b := builder.Select(`*`)
+	b.From("`user`")
+	b.Where(builder.Expr(`id IN (?)`, where.Id))
+	query, args, err := b.ToSQL()
+	rows, err := m.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	err = m.scanner.ScanRows(rows, result)
+	return result, err
 }
 
 // FindAllByIdNotIn is generated from sql:
 // select * from user where id not in (?);
 func (m *UserModel) FindAllByIdNotIn(ctx context.Context, where FindAllByIdNotInWhereParameter) ([]*User, error) {
 	var result []*User
-	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
-	db.Where(`id NOT IN (?)`, where.Id)
-	db.Find(&result)
-	return result, db.Error
+	b := builder.Select(`*`)
+	b.From("`user`")
+	b.Where(builder.Expr(`id NOT IN (?)`, where.Id))
+	query, args, err := b.ToSQL()
+	rows, err := m.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	err = m.scanner.ScanRows(rows, result)
+	return result, err
 }
 
 // FindAllByIdBetween is generated from sql:
 // select * from user where id between ? and ?;
 func (m *UserModel) FindAllByIdBetween(ctx context.Context, where FindAllByIdBetweenWhereParameter) ([]*User, error) {
 	var result []*User
-	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
-	db.Where(`id BETWEEN ? AND ?`, where.IdBetweenStart, where.IdBetweenEnd)
-	db.Find(&result)
-	return result, db.Error
+	b := builder.Select(`*`)
+	b.From("`user`")
+	b.Where(builder.Expr(`id BETWEEN ? AND ?`, where.IdBetweenStart, where.IdBetweenEnd))
+	query, args, err := b.ToSQL()
+	rows, err := m.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	err = m.scanner.ScanRows(rows, result)
+	return result, err
 }
 
 // FindAllByIdNotBetween is generated from sql:
 // select * from user where id not between ? and ?;
 func (m *UserModel) FindAllByIdNotBetween(ctx context.Context, where FindAllByIdNotBetweenWhereParameter) ([]*User, error) {
 	var result []*User
-	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
-	db.Where(`id NOT BETWEEN ? AND ?`, where.IdNotBetweenStart, where.IdNotBetweenEnd)
-	db.Find(&result)
-	return result, db.Error
+	b := builder.Select(`*`)
+	b.From("`user`")
+	b.Where(builder.Expr(`id NOT BETWEEN ? AND ?`, where.IdNotBetweenStart, where.IdNotBetweenEnd))
+	query, args, err := b.ToSQL()
+	rows, err := m.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	err = m.scanner.ScanRows(rows, result)
+	return result, err
 }
 
 // FindAllByIdGte is generated from sql:
 // select * from user where id >= ?;
 func (m *UserModel) FindAllByIdGte(ctx context.Context, where FindAllByIdGteWhereParameter) ([]*User, error) {
 	var result []*User
-	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
-	db.Where(`id >= ?`, where.Id)
-	db.Find(&result)
-	return result, db.Error
+	b := builder.Select(`*`)
+	b.From("`user`")
+	b.Where(builder.Expr(`id >= ?`, where.Id))
+	query, args, err := b.ToSQL()
+	rows, err := m.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	err = m.scanner.ScanRows(rows, result)
+	return result, err
 }
 
 // FindAllByIdLte is generated from sql:
 // select * from user where id <= ?;
 func (m *UserModel) FindAllByIdLte(ctx context.Context, where FindAllByIdLteWhereParameter) ([]*User, error) {
 	var result []*User
-	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
-	db.Where(`id <= ?`, where.Id)
-	db.Find(&result)
-	return result, db.Error
+	b := builder.Select(`*`)
+	b.From("`user`")
+	b.Where(builder.Expr(`id <= ?`, where.Id))
+	query, args, err := b.ToSQL()
+	rows, err := m.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	err = m.scanner.ScanRows(rows, result)
+	return result, err
 }
 
 // FindAllByIdNeq is generated from sql:
 // select * from user where id != ?;
 func (m *UserModel) FindAllByIdNeq(ctx context.Context, where FindAllByIdNeqWhereParameter) ([]*User, error) {
 	var result []*User
-	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
-	db.Where(`id != ?`, where.Id)
-	db.Find(&result)
-	return result, db.Error
+	b := builder.Select(`*`)
+	b.From("`user`")
+	b.Where(builder.Expr(`id != ?`, where.Id))
+	query, args, err := b.ToSQL()
+	rows, err := m.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	err = m.scanner.ScanRows(rows, result)
+	return result, err
 }
 
 // FindAllByIdInOrNotIn is generated from sql:
 // select * from user where id in (?) or id not in (?);
 func (m *UserModel) FindAllByIdInOrNotIn(ctx context.Context, where FindAllByIdInOrNotInWhereParameter) ([]*User, error) {
 	var result []*User
-	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
-	db.Where(`id IN (?) OR id NOT IN (?)`, where.Id, where.Id1)
-	db.Find(&result)
-	return result, db.Error
+	b := builder.Select(`*`)
+	b.From("`user`")
+	b.Where(builder.Expr(`id IN (?) OR id NOT IN (?)`, where.Id, where.Id1))
+	query, args, err := b.ToSQL()
+	rows, err := m.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	err = m.scanner.ScanRows(rows, result)
+	return result, err
 }
 
 // ComplexQuery is generated from sql:
 // select * from user where id > ? and id < ? and id != ? and id in (?) and id not in (?) and id between ? and ? and id not between ? and ? and id >= ? and id <= ? and id != ? and name like ? and name not like ? and name in (?) and name not in (?) and name between ? and ? and name not between ? and ? and name >= ? and name <= ? and name != ?;
 func (m *UserModel) ComplexQuery(ctx context.Context, where ComplexQueryWhereParameter) ([]*User, error) {
 	var result []*User
-	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
-	db.Where(`id > ? AND id < ? AND id != ? AND id IN (?) AND id NOT IN (?) AND id BETWEEN ? AND ? AND id NOT BETWEEN ? AND ? AND id >= ? AND id <= ? AND id != ? AND name LIKE ? AND name NOT LIKE ? AND name IN (?) AND name NOT IN (?) AND name BETWEEN ? AND ? AND name NOT BETWEEN ? AND ? AND name >= ? AND name <= ? AND name != ?`, where.Id, where.Id1, where.Id2, where.Id3, where.Id4, where.IdBetweenStart, where.IdBetweenEnd, where.IdNotBetweenStart, where.IdNotBetweenEnd, where.Id5, where.Id6, where.Id7, where.Name, where.Name1, where.Name2, where.Name3, where.NameBetweenStart, where.NameBetweenEnd, where.NameNotBetweenStart, where.NameNotBetweenEnd, where.Name4, where.Name5, where.Name6)
-	db.Find(&result)
-	return result, db.Error
+	b := builder.Select(`*`)
+	b.From("`user`")
+	b.Where(builder.Expr(`id > ? AND id < ? AND id != ? AND id IN (?) AND id NOT IN (?) AND id BETWEEN ? AND ? AND id NOT BETWEEN ? AND ? AND id >= ? AND id <= ? AND id != ? AND name LIKE ? AND name NOT LIKE ? AND name IN (?) AND name NOT IN (?) AND name BETWEEN ? AND ? AND name NOT BETWEEN ? AND ? AND name >= ? AND name <= ? AND name != ?`, where.Id, where.Id1, where.Id2, where.Id3, where.Id4, where.IdBetweenStart, where.IdBetweenEnd, where.IdNotBetweenStart, where.IdNotBetweenEnd, where.Id5, where.Id6, where.Id7, where.Name, where.Name1, where.Name2, where.Name3, where.NameBetweenStart, where.NameBetweenEnd, where.NameNotBetweenStart, where.NameNotBetweenEnd, where.Name4, where.Name5, where.Name6))
+	query, args, err := b.ToSQL()
+	rows, err := m.db.QueryContext(ctx, query, args...)
+	if err != nil {
+		return nil, err
+	}
+	err = m.scanner.ScanRows(rows, result)
+	return result, err
 }

@@ -42,6 +42,11 @@ func ({{UpperCamel $.Table.Name}}) TableName() string {
     return "{{$.Table.Name}}"
 }
 
+// New{{UpperCamel $.Table.Name}}Model returns a new {{$.Table.Name}} model.
+func New{{UpperCamel $.Table.Name}}Model (db gorm.DB) *{{UpperCamel $.Table.Name}}Model {
+    return &{{UpperCamel $.Table.Name}}Model{db: db}
+}
+
 // Create creates  {{$.Table.Name}} data.
 func (m *{{UpperCamel $.Table.Name}}Model) Create(ctx context.Context, data ...*{{UpperCamel $.Table.Name}}) error {
     if len(data)==0{

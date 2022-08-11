@@ -12,7 +12,7 @@ import (
 
 // UserModel represents a user model.
 type UserModel struct {
-	engine *xorm.Engine
+	engine xorm.EngineInterface
 }
 
 // User represents a user struct data.
@@ -260,6 +260,11 @@ func (User) TableName() string {
 	return "user"
 }
 
+// NewUserModel returns a new user model.
+func NewUserModel(engine xorm.EngineInterface) *UserModel {
+	return &UserModel{engine: engine}
+}
+
 // Insert creates  user data.
 func (m *UserModel) Insert(ctx context.Context, data ...*User) error {
 	if len(data) == 0 {
@@ -476,7 +481,7 @@ func (m *UserModel) FindAllByIdIn(ctx context.Context, where FindAllByIdInWhereP
 	var result []*User
 	var session = m.engine.Context(ctx)
 	session.Select(`*`)
-	session.Where(`id IN ?`, where.Id)
+	session.Where(`id IN (?)`, where.Id)
 	err := session.Find(&result)
 	return result, err
 }
@@ -487,7 +492,7 @@ func (m *UserModel) FindAllByIdNotIn(ctx context.Context, where FindAllByIdNotIn
 	var result []*User
 	var session = m.engine.Context(ctx)
 	session.Select(`*`)
-	session.Where(`id NOT IN ?`, where.Id)
+	session.Where(`id NOT IN (?)`, where.Id)
 	err := session.Find(&result)
 	return result, err
 }
@@ -553,7 +558,7 @@ func (m *UserModel) FindAllByIdInOrNotIn(ctx context.Context, where FindAllByIdI
 	var result []*User
 	var session = m.engine.Context(ctx)
 	session.Select(`*`)
-	session.Where(`id IN ? OR id NOT IN ?`, where.Id, where.Id1)
+	session.Where(`id IN (?) OR id NOT IN (?)`, where.Id, where.Id1)
 	err := session.Find(&result)
 	return result, err
 }
@@ -564,7 +569,7 @@ func (m *UserModel) ComplexQuery(ctx context.Context, where ComplexQueryWherePar
 	var result []*User
 	var session = m.engine.Context(ctx)
 	session.Select(`*`)
-	session.Where(`id > ? AND id < ? AND id != ? AND id IN ? AND id NOT IN ? AND id BETWEEN ? AND ? AND id NOT BETWEEN ? AND ? AND id >= ? AND id <= ? AND id != ? AND name LIKE ? AND name NOT LIKE ? AND name IN ? AND name NOT IN ? AND name BETWEEN ? AND ? AND name NOT BETWEEN ? AND ? AND name >= ? AND name <= ? AND name != ?`, where.Id, where.Id1, where.Id2, where.Id3, where.Id4, where.IdBetweenStart, where.IdBetweenEnd, where.IdNotBetweenStart, where.IdNotBetweenEnd, where.Id5, where.Id6, where.Id7, where.Name, where.Name1, where.Name2, where.Name3, where.NameBetweenStart, where.NameBetweenEnd, where.NameNotBetweenStart, where.NameNotBetweenEnd, where.Name4, where.Name5, where.Name6)
+	session.Where(`id > ? AND id < ? AND id != ? AND id IN (?) AND id NOT IN (?) AND id BETWEEN ? AND ? AND id NOT BETWEEN ? AND ? AND id >= ? AND id <= ? AND id != ? AND name LIKE ? AND name NOT LIKE ? AND name IN (?) AND name NOT IN (?) AND name BETWEEN ? AND ? AND name NOT BETWEEN ? AND ? AND name >= ? AND name <= ? AND name != ?`, where.Id, where.Id1, where.Id2, where.Id3, where.Id4, where.IdBetweenStart, where.IdBetweenEnd, where.IdNotBetweenStart, where.IdNotBetweenEnd, where.Id5, where.Id6, where.Id7, where.Name, where.Name1, where.Name2, where.Name3, where.NameBetweenStart, where.NameBetweenEnd, where.NameNotBetweenStart, where.NameNotBetweenEnd, where.Name4, where.Name5, where.Name6)
 	err := session.Find(&result)
 	return result, err
 }

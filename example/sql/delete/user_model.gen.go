@@ -28,6 +28,22 @@ type User struct {
 	UpdateTime time.Time `json:"updateTime"`
 }
 
+// DeleteWhereParameter is a where parameter structure.
+type DeleteWhereParameter struct {
+	Id uint64
+}
+
+// DeleteByNameWhereParameter is a where parameter structure.
+type DeleteByNameWhereParameter struct {
+	Name string
+}
+
+// DeleteByNameAndMobileWhereParameter is a where parameter structure.
+type DeleteByNameAndMobileWhereParameter struct {
+	Name   string
+	Mobile string
+}
+
 // NewUserModel creates a new user model.
 func NewUserModel(db *sql.Conn, scanner Scanner) *UserModel {
 	return &UserModel{

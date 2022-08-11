@@ -19,7 +19,16 @@ var sqlGenTpl string
 //go:embed sql_custom.tpl
 var sqlCustomTpl string
 
+//go:embed scanner.tpl
+var scannerTpl string
+
 func Run(list []spec.Context, output string) error {
+	var scannerFilename = filepath.Join(output, "scanner.go")
+	scanner := templatex.New()
+	scanner.MustParse(scannerTpl)
+	scanner.MustExecute(nil)
+	scanner.MustSave(scannerFilename, true)
+
 	for _, ctx := range list {
 		var genFilename = filepath.Join(output, fmt.Sprintf("%s_model.gen.go", ctx.Table.Name))
 		var customFilename = filepath.Join(output, fmt.Sprintf("%s_model.go", ctx.Table.Name))
@@ -51,6 +60,10 @@ func Run(list []spec.Context, output string) error {
 					values = append(values, fmt.Sprintf("%s.%s", pkg, strcase.ToCamel(v.Name)))
 				}
 				return strings.Join(values, ", ")
+			},
+			"HavingSprintf": func(format string) string {
+				format = strings.ReplaceAll(format, "?", "%v")
+				return format
 			},
 		})
 		gen.MustParse(sqlGenTpl)
