@@ -7,6 +7,8 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
+
+	"xorm.io/builder"
 )
 
 // UserModel represents a user model.
@@ -30,18 +32,33 @@ type User struct {
 
 // DeleteWhereParameter is a where parameter structure.
 type DeleteWhereParameter struct {
-	Id uint64
+	IdEqual uint64
 }
 
 // DeleteByNameWhereParameter is a where parameter structure.
 type DeleteByNameWhereParameter struct {
-	Name string
+	NameEqual string
 }
 
 // DeleteByNameAndMobileWhereParameter is a where parameter structure.
 type DeleteByNameAndMobileWhereParameter struct {
-	Name   string
-	Mobile string
+	NameEqual   string
+	MobileEqual string
+}
+
+// DeleteOrderByIDWhereParameter is a where parameter structure.
+type DeleteOrderByIDWhereParameter struct {
+	IdEqual uint64
+}
+
+// DeleteOrderByIDLimitWhereParameter is a where parameter structure.
+type DeleteOrderByIDLimitWhereParameter struct {
+	IdEqual uint64
+}
+
+// DeleteOrderByIDLimitLimitParameter is a limit parameter structure.
+type DeleteOrderByIDLimitLimitParameter struct {
+	Count int
 }
 
 // NewUserModel creates a new user model.
@@ -73,4 +90,77 @@ func (m *UserModel) Create(ctx context.Context, data ...*User) (err error) {
 		}
 	}
 	return
+}
+
+// Delete is generated from sql:
+// delete from user where id = ?;
+func (m *UserModel) Delete(ctx context.Context, where DeleteWhereParameter) error {
+	b := builder.Delete()
+	b.From("`user`")
+	b.Where(builder.Expr(`id = ?`, where.IdEqual))
+	query, args, err := b.ToSQL()
+	if err != nil {
+		return err
+	}
+	_, err = m.db.ExecContext(ctx, query, args...)
+	return err
+}
+
+// DeleteByName is generated from sql:
+// delete from user where name = ?;
+func (m *UserModel) DeleteByName(ctx context.Context, where DeleteByNameWhereParameter) error {
+	b := builder.Delete()
+	b.From("`user`")
+	b.Where(builder.Expr(`name = ?`, where.NameEqual))
+	query, args, err := b.ToSQL()
+	if err != nil {
+		return err
+	}
+	_, err = m.db.ExecContext(ctx, query, args...)
+	return err
+}
+
+// DeleteByNameAndMobile is generated from sql:
+// delete from user where name = ? and mobile = ?;
+func (m *UserModel) DeleteByNameAndMobile(ctx context.Context, where DeleteByNameAndMobileWhereParameter) error {
+	b := builder.Delete()
+	b.From("`user`")
+	b.Where(builder.Expr(`name = ? AND mobile = ?`, where.NameEqual, where.MobileEqual))
+	query, args, err := b.ToSQL()
+	if err != nil {
+		return err
+	}
+	_, err = m.db.ExecContext(ctx, query, args...)
+	return err
+}
+
+// DeleteOrderByID is generated from sql:
+// delete from user where id = ? order by id desc;
+func (m *UserModel) DeleteOrderByID(ctx context.Context, where DeleteOrderByIDWhereParameter) error {
+	b := builder.Delete()
+	b.From("`user`")
+	b.Where(builder.Expr(`id = ?`, where.IdEqual))
+	b.OrderBy(`id desc`)
+	query, args, err := b.ToSQL()
+	if err != nil {
+		return err
+	}
+	_, err = m.db.ExecContext(ctx, query, args...)
+	return err
+}
+
+// DeleteOrderByIDLimit is generated from sql:
+// delete from user where id = ? order by id desc limit 10;
+func (m *UserModel) DeleteOrderByIDLimit(ctx context.Context, where DeleteOrderByIDLimitWhereParameter, limit DeleteOrderByIDLimitLimitParameter) error {
+	b := builder.Delete()
+	b.From("`user`")
+	b.Where(builder.Expr(`id = ?`, where.IdEqual))
+	b.OrderBy(`id desc`)
+	b.Limit(limit.Count)
+	query, args, err := b.ToSQL()
+	if err != nil {
+		return err
+	}
+	_, err = m.db.ExecContext(ctx, query, args...)
+	return err
 }

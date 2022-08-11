@@ -32,23 +32,23 @@ type User struct {
 
 // FindOneWhereParameter is a where parameter structure.
 type FindOneWhereParameter struct {
-	Id   uint64
-	Name string
+	IdEqual uint64
+	NameIn  []string
 }
 
 // FindByNameWhereParameter is a where parameter structure.
 type FindByNameWhereParameter struct {
-	Name string
+	NameEqual string
 }
 
 // FindOnePartWhereParameter is a where parameter structure.
 type FindOnePartWhereParameter struct {
-	Id uint64
+	IdEqual uint64
 }
 
 // FindByNamePartWhereParameter is a where parameter structure.
 type FindByNamePartWhereParameter struct {
-	Name string
+	NameEqual string
 }
 
 // FindAllCountResult is a find all count result.
@@ -63,23 +63,23 @@ type FindAllPartCountResult struct {
 
 // FindOneByNameAndPasswordWhereParameter is a where parameter structure.
 type FindOneByNameAndPasswordWhereParameter struct {
-	Name     string
-	Password string
+	NameEqual     string
+	PasswordEqual string
 }
 
 // ListUserByNameAscWhereParameter is a where parameter structure.
 type ListUserByNameAscWhereParameter struct {
-	Id uint64
+	IdGT uint64
 }
 
 // ListUserByNameAscHavingCountTypeGtWhereParameter is a where parameter structure.
 type ListUserByNameAscHavingCountTypeGtWhereParameter struct {
-	Id uint64
+	IdGT uint64
 }
 
 // ListUserByNameAscHavingCountTypeGtHavingParameter is a having parameter structure.
 type ListUserByNameAscHavingCountTypeGtHavingParameter struct {
-	TypeCount int8
+	TypeCountGT int8
 }
 
 // ListUserByNameAscHavingCountTypeGtResult is a list user by name asc having count type gt result.
@@ -98,12 +98,12 @@ type ListUserByNameAscHavingCountTypeGtResult struct {
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescWhereParameter is a where parameter structure.
 type ListUserByNameDescHavingCountTypeGtOrderByIdDescWhereParameter struct {
-	Id uint64
+	IdGT uint64
 }
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescHavingParameter is a having parameter structure.
 type ListUserByNameDescHavingCountTypeGtOrderByIdDescHavingParameter struct {
-	TypeCount int8
+	TypeCountGT int8
 }
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescResult is a list user by name desc having count type gt order by id desc result.
@@ -122,12 +122,12 @@ type ListUserByNameDescHavingCountTypeGtOrderByIdDescResult struct {
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10WhereParameter is a where parameter structure.
 type ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10WhereParameter struct {
-	Id uint64
+	IdGT uint64
 }
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10HavingParameter is a having parameter structure.
 type ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10HavingParameter struct {
-	TypeCount int8
+	TypeCountGT int8
 }
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10LimitParameter is a limit parameter structure.
@@ -151,12 +151,12 @@ type ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Result struct {
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10WhereParameter is a where parameter structure.
 type ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10WhereParameter struct {
-	Id uint64
+	IdGT uint64
 }
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10HavingParameter is a having parameter structure.
 type ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10HavingParameter struct {
-	TypeCount int8
+	TypeCountGT int8
 }
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10LimitParameter is a limit parameter structure.
@@ -181,22 +181,22 @@ type ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10Result struc
 
 // FindOneByNameLikeWhereParameter is a where parameter structure.
 type FindOneByNameLikeWhereParameter struct {
-	Name string
+	NameLike string
 }
 
 // FindAllByNameNotLikeWhereParameter is a where parameter structure.
 type FindAllByNameNotLikeWhereParameter struct {
-	Name string
+	NameNotLike string
 }
 
 // FindAllByIdInWhereParameter is a where parameter structure.
 type FindAllByIdInWhereParameter struct {
-	Id []uint64
+	IdIn []uint64
 }
 
 // FindAllByIdNotInWhereParameter is a where parameter structure.
 type FindAllByIdNotInWhereParameter struct {
-	Id []uint64
+	IdNotIn []uint64
 }
 
 // FindAllByIdBetweenWhereParameter is a where parameter structure.
@@ -213,50 +213,50 @@ type FindAllByIdNotBetweenWhereParameter struct {
 
 // FindAllByIdGteWhereParameter is a where parameter structure.
 type FindAllByIdGteWhereParameter struct {
-	Id uint64
+	IdGE uint64
 }
 
 // FindAllByIdLteWhereParameter is a where parameter structure.
 type FindAllByIdLteWhereParameter struct {
-	Id uint64
+	IdLE uint64
 }
 
 // FindAllByIdNeqWhereParameter is a where parameter structure.
 type FindAllByIdNeqWhereParameter struct {
-	Id uint64
+	IdNE uint64
 }
 
 // FindAllByIdInOrNotInWhereParameter is a where parameter structure.
 type FindAllByIdInOrNotInWhereParameter struct {
-	Id  uint64
-	Id1 uint64
+	IdIn    []uint64
+	IdNotIn []uint64
 }
 
 // ComplexQueryWhereParameter is a where parameter structure.
 type ComplexQueryWhereParameter struct {
-	Id                  uint64
-	Id1                 uint64
-	Id2                 uint64
-	Id3                 uint64
-	Id4                 uint64
+	IdGT                uint64
+	IdLT                uint64
+	IdNE                uint64
+	IdIn                []uint64
+	IdNotIn             []uint64
 	IdBetweenStart      uint64
 	IdBetweenEnd        uint64
 	IdNotBetweenStart   uint64
 	IdNotBetweenEnd     uint64
-	Id5                 uint64
-	Id6                 uint64
-	Id7                 uint64
-	Name                string
-	Name1               string
-	Name2               string
-	Name3               string
+	IdGE                uint64
+	IdLE                uint64
+	IdNE1               uint64
+	NameLike            string
+	NameNotLike         string
+	NameIn              []string
+	NameNotIn           []string
 	NameBetweenStart    string
 	NameBetweenEnd      string
 	NameNotBetweenStart string
 	NameNotBetweenEnd   string
-	Name4               string
-	Name5               string
-	Name6               string
+	NameGE              string
+	NameLE              string
+	NameNE              string
 }
 
 // NewUserModel creates a new user model.
@@ -291,12 +291,12 @@ func (m *UserModel) Create(ctx context.Context, data ...*User) (err error) {
 }
 
 // FindOne is generated from sql:
-// select * from user where id = ? and name in (?) limit 1;
+// select * from user where id = ? and name in (?,?,?) limit 1;
 func (m *UserModel) FindOne(ctx context.Context, where FindOneWhereParameter) (*User, error) {
 	var result = new(User)
 	b := builder.Select(`*`)
 	b.From("`user`")
-	b.Where(builder.Expr(`id = ? AND name IN (?)`, where.Id, where.Name))
+	b.Where(builder.Expr(`id = ? AND name IN (?)`, where.IdEqual, where.NameIn))
 	b.Limit(1)
 	query, args, err := b.ToSQL()
 	row := m.db.QueryRowContext(ctx, query, args...)
@@ -314,7 +314,7 @@ func (m *UserModel) FindByName(ctx context.Context, where FindByNameWhereParamet
 	var result = new(User)
 	b := builder.Select(`*`)
 	b.From("`user`")
-	b.Where(builder.Expr(`name = ?`, where.Name))
+	b.Where(builder.Expr(`name = ?`, where.NameEqual))
 	b.Limit(1)
 	query, args, err := b.ToSQL()
 	row := m.db.QueryRowContext(ctx, query, args...)
@@ -332,7 +332,7 @@ func (m *UserModel) FindOnePart(ctx context.Context, where FindOnePartWhereParam
 	var result = new(User)
 	b := builder.Select(`id, name, nickname`)
 	b.From("`user`")
-	b.Where(builder.Expr(`id = ?`, where.Id))
+	b.Where(builder.Expr(`id = ?`, where.IdEqual))
 	b.Limit(1)
 	query, args, err := b.ToSQL()
 	row := m.db.QueryRowContext(ctx, query, args...)
@@ -350,7 +350,7 @@ func (m *UserModel) FindByNamePart(ctx context.Context, where FindByNamePartWher
 	var result = new(User)
 	b := builder.Select(`id, name, nickname`)
 	b.From("`user`")
-	b.Where(builder.Expr(`name = ?`, where.Name))
+	b.Where(builder.Expr(`name = ?`, where.NameEqual))
 	b.Limit(1)
 	query, args, err := b.ToSQL()
 	row := m.db.QueryRowContext(ctx, query, args...)
@@ -432,7 +432,7 @@ func (m *UserModel) FindOneByNameAndPassword(ctx context.Context, where FindOneB
 	var result = new(User)
 	b := builder.Select(`*`)
 	b.From("`user`")
-	b.Where(builder.Expr(`name = ? AND password = ?`, where.Name, where.Password))
+	b.Where(builder.Expr(`name = ? AND password = ?`, where.NameEqual, where.PasswordEqual))
 	b.Limit(1)
 	query, args, err := b.ToSQL()
 	row := m.db.QueryRowContext(ctx, query, args...)
@@ -450,7 +450,7 @@ func (m *UserModel) ListUserByNameAsc(ctx context.Context, where ListUserByNameA
 	var result []*User
 	b := builder.Select(`*`)
 	b.From("`user`")
-	b.Where(builder.Expr(`id > ?`, where.Id))
+	b.Where(builder.Expr(`id > ?`, where.IdGT))
 	b.GroupBy(`name`)
 	query, args, err := b.ToSQL()
 	rows, err := m.db.QueryContext(ctx, query, args...)
@@ -467,9 +467,9 @@ func (m *UserModel) ListUserByNameAscHavingCountTypeGt(ctx context.Context, wher
 	var result []*ListUserByNameAscHavingCountTypeGtResult
 	b := builder.Select(`*, count(type) AS typeCount`)
 	b.From("`user`")
-	b.Where(builder.Expr(`id > ?`, where.Id))
+	b.Where(builder.Expr(`id > ?`, where.IdGT))
 	b.GroupBy(`name`)
-	b.Having(fmt.Sprintf(`typeCount > %v`, having.TypeCount))
+	b.Having(fmt.Sprintf(`typeCount > %v`, having.TypeCountGT))
 	query, args, err := b.ToSQL()
 	rows, err := m.db.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -485,9 +485,9 @@ func (m *UserModel) ListUserByNameDescHavingCountTypeGtOrderByIdDesc(ctx context
 	var result []*ListUserByNameDescHavingCountTypeGtOrderByIdDescResult
 	b := builder.Select(`*, count(type) AS typeCount`)
 	b.From("`user`")
-	b.Where(builder.Expr(`id > ?`, where.Id))
+	b.Where(builder.Expr(`id > ?`, where.IdGT))
 	b.GroupBy(`name`)
-	b.Having(fmt.Sprintf(`typeCount > %v`, having.TypeCount))
+	b.Having(fmt.Sprintf(`typeCount > %v`, having.TypeCountGT))
 	b.OrderBy(`id desc`)
 	query, args, err := b.ToSQL()
 	rows, err := m.db.QueryContext(ctx, query, args...)
@@ -504,9 +504,9 @@ func (m *UserModel) ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10(ctx 
 	var result []*ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Result
 	b := builder.Select(`*, count(type) AS typeCount`)
 	b.From("`user`")
-	b.Where(builder.Expr(`id > ?`, where.Id))
+	b.Where(builder.Expr(`id > ?`, where.IdGT))
 	b.GroupBy(`name`)
-	b.Having(fmt.Sprintf(`typeCount > %v`, having.TypeCount))
+	b.Having(fmt.Sprintf(`typeCount > %v`, having.TypeCountGT))
 	b.OrderBy(`id desc`)
 	b.Limit(limit.Count)
 	query, args, err := b.ToSQL()
@@ -524,9 +524,9 @@ func (m *UserModel) ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offse
 	var result []*ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10Result
 	b := builder.Select(`*, count(type) AS typeCount`)
 	b.From("`user`")
-	b.Where(builder.Expr(`id > ?`, where.Id))
+	b.Where(builder.Expr(`id > ?`, where.IdGT))
 	b.GroupBy(`name`)
-	b.Having(fmt.Sprintf(`typeCount > %v`, having.TypeCount))
+	b.Having(fmt.Sprintf(`typeCount > %v`, having.TypeCountGT))
 	b.OrderBy(`id desc`)
 	b.Limit(limit.Count, limit.Offset)
 	query, args, err := b.ToSQL()
@@ -544,7 +544,7 @@ func (m *UserModel) FindOneByNameLike(ctx context.Context, where FindOneByNameLi
 	var result = new(User)
 	b := builder.Select(`*`)
 	b.From("`user`")
-	b.Where(builder.Expr(`name LIKE ?`, where.Name))
+	b.Where(builder.Expr(`name LIKE ?`, where.NameLike))
 	b.Limit(1)
 	query, args, err := b.ToSQL()
 	row := m.db.QueryRowContext(ctx, query, args...)
@@ -562,7 +562,7 @@ func (m *UserModel) FindAllByNameNotLike(ctx context.Context, where FindAllByNam
 	var result []*User
 	b := builder.Select(`*`)
 	b.From("`user`")
-	b.Where(builder.Expr(`name NOT LIKE ?`, where.Name))
+	b.Where(builder.Expr(`name NOT LIKE ?`, where.NameNotLike))
 	query, args, err := b.ToSQL()
 	rows, err := m.db.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -578,7 +578,7 @@ func (m *UserModel) FindAllByIdIn(ctx context.Context, where FindAllByIdInWhereP
 	var result []*User
 	b := builder.Select(`*`)
 	b.From("`user`")
-	b.Where(builder.Expr(`id IN (?)`, where.Id))
+	b.Where(builder.Expr(`id IN (?)`, where.IdIn))
 	query, args, err := b.ToSQL()
 	rows, err := m.db.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -594,7 +594,7 @@ func (m *UserModel) FindAllByIdNotIn(ctx context.Context, where FindAllByIdNotIn
 	var result []*User
 	b := builder.Select(`*`)
 	b.From("`user`")
-	b.Where(builder.Expr(`id NOT IN (?)`, where.Id))
+	b.Where(builder.Expr(`id NOT IN (?)`, where.IdNotIn))
 	query, args, err := b.ToSQL()
 	rows, err := m.db.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -642,7 +642,7 @@ func (m *UserModel) FindAllByIdGte(ctx context.Context, where FindAllByIdGteWher
 	var result []*User
 	b := builder.Select(`*`)
 	b.From("`user`")
-	b.Where(builder.Expr(`id >= ?`, where.Id))
+	b.Where(builder.Expr(`id >= ?`, where.IdGE))
 	query, args, err := b.ToSQL()
 	rows, err := m.db.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -658,7 +658,7 @@ func (m *UserModel) FindAllByIdLte(ctx context.Context, where FindAllByIdLteWher
 	var result []*User
 	b := builder.Select(`*`)
 	b.From("`user`")
-	b.Where(builder.Expr(`id <= ?`, where.Id))
+	b.Where(builder.Expr(`id <= ?`, where.IdLE))
 	query, args, err := b.ToSQL()
 	rows, err := m.db.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -674,7 +674,7 @@ func (m *UserModel) FindAllByIdNeq(ctx context.Context, where FindAllByIdNeqWher
 	var result []*User
 	b := builder.Select(`*`)
 	b.From("`user`")
-	b.Where(builder.Expr(`id != ?`, where.Id))
+	b.Where(builder.Expr(`id != ?`, where.IdNE))
 	query, args, err := b.ToSQL()
 	rows, err := m.db.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -690,7 +690,7 @@ func (m *UserModel) FindAllByIdInOrNotIn(ctx context.Context, where FindAllByIdI
 	var result []*User
 	b := builder.Select(`*`)
 	b.From("`user`")
-	b.Where(builder.Expr(`id IN (?) OR id NOT IN (?)`, where.Id, where.Id1))
+	b.Where(builder.Expr(`id IN (?) OR id NOT IN (?)`, where.IdIn, where.IdNotIn))
 	query, args, err := b.ToSQL()
 	rows, err := m.db.QueryContext(ctx, query, args...)
 	if err != nil {
@@ -706,7 +706,7 @@ func (m *UserModel) ComplexQuery(ctx context.Context, where ComplexQueryWherePar
 	var result []*User
 	b := builder.Select(`*`)
 	b.From("`user`")
-	b.Where(builder.Expr(`id > ? AND id < ? AND id != ? AND id IN (?) AND id NOT IN (?) AND id BETWEEN ? AND ? AND id NOT BETWEEN ? AND ? AND id >= ? AND id <= ? AND id != ? AND name LIKE ? AND name NOT LIKE ? AND name IN (?) AND name NOT IN (?) AND name BETWEEN ? AND ? AND name NOT BETWEEN ? AND ? AND name >= ? AND name <= ? AND name != ?`, where.Id, where.Id1, where.Id2, where.Id3, where.Id4, where.IdBetweenStart, where.IdBetweenEnd, where.IdNotBetweenStart, where.IdNotBetweenEnd, where.Id5, where.Id6, where.Id7, where.Name, where.Name1, where.Name2, where.Name3, where.NameBetweenStart, where.NameBetweenEnd, where.NameNotBetweenStart, where.NameNotBetweenEnd, where.Name4, where.Name5, where.Name6))
+	b.Where(builder.Expr(`id > ? AND id < ? AND id != ? AND id IN (?) AND id NOT IN (?) AND id BETWEEN ? AND ? AND id NOT BETWEEN ? AND ? AND id >= ? AND id <= ? AND id != ? AND name LIKE ? AND name NOT LIKE ? AND name IN (?) AND name NOT IN (?) AND name BETWEEN ? AND ? AND name NOT BETWEEN ? AND ? AND name >= ? AND name <= ? AND name != ?`, where.IdGT, where.IdLT, where.IdNE, where.IdIn, where.IdNotIn, where.IdBetweenStart, where.IdBetweenEnd, where.IdNotBetweenStart, where.IdNotBetweenEnd, where.IdGE, where.IdLE, where.IdNE1, where.NameLike, where.NameNotLike, where.NameIn, where.NameNotIn, where.NameBetweenStart, where.NameBetweenEnd, where.NameNotBetweenStart, where.NameNotBetweenEnd, where.NameGE, where.NameLE, where.NameNE))
 	query, args, err := b.ToSQL()
 	rows, err := m.db.QueryContext(ctx, query, args...)
 	if err != nil {

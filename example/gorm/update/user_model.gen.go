@@ -30,27 +30,27 @@ type User struct {
 
 // UpdateWhereParameter is a where parameter structure.
 type UpdateWhereParameter struct {
-	Id uint64
+	IdEqual uint64
 }
 
 // UpdateByNameWhereParameter is a where parameter structure.
 type UpdateByNameWhereParameter struct {
-	Name string
+	NameEqual string
 }
 
 // UpdatePartWhereParameter is a where parameter structure.
 type UpdatePartWhereParameter struct {
-	Id uint64
+	IdEqual uint64
 }
 
 // UpdatePartByNameWhereParameter is a where parameter structure.
 type UpdatePartByNameWhereParameter struct {
-	Name string
+	NameEqual string
 }
 
 // UpdateNameLimitWhereParameter is a where parameter structure.
 type UpdateNameLimitWhereParameter struct {
-	Id uint64
+	IdGT uint64
 }
 
 // UpdateNameLimitLimitParameter is a limit parameter structure.
@@ -60,7 +60,7 @@ type UpdateNameLimitLimitParameter struct {
 
 // UpdateNameLimitOrderWhereParameter is a where parameter structure.
 type UpdateNameLimitOrderWhereParameter struct {
-	Id uint64
+	IdGT uint64
 }
 
 // UpdateNameLimitOrderLimitParameter is a limit parameter structure.
@@ -98,7 +98,7 @@ func (m *UserModel) Create(ctx context.Context, data ...*User) error {
 func (m *UserModel) Update(ctx context.Context, data *User, where UpdateWhereParameter) error {
 	var db = m.db.WithContext(ctx)
 	db.Model(&User{})
-	db.Where(`id = ?`, where.Id)
+	db.Where(`id = ?`, where.IdEqual)
 	db.Updates(map[string]interface{}{
 		"name":        data.Name,
 		"password":    data.Password,
@@ -117,7 +117,7 @@ func (m *UserModel) Update(ctx context.Context, data *User, where UpdateWherePar
 func (m *UserModel) UpdateByName(ctx context.Context, data *User, where UpdateByNameWhereParameter) error {
 	var db = m.db.WithContext(ctx)
 	db.Model(&User{})
-	db.Where(`name = ?`, where.Name)
+	db.Where(`name = ?`, where.NameEqual)
 	db.Updates(map[string]interface{}{
 		"password":    data.Password,
 		"mobile":      data.Mobile,
@@ -135,7 +135,7 @@ func (m *UserModel) UpdateByName(ctx context.Context, data *User, where UpdateBy
 func (m *UserModel) UpdatePart(ctx context.Context, data *User, where UpdatePartWhereParameter) error {
 	var db = m.db.WithContext(ctx)
 	db.Model(&User{})
-	db.Where(`id = ?`, where.Id)
+	db.Where(`id = ?`, where.IdEqual)
 	db.Updates(map[string]interface{}{
 		"name":     data.Name,
 		"nickname": data.Nickname,
@@ -148,7 +148,7 @@ func (m *UserModel) UpdatePart(ctx context.Context, data *User, where UpdatePart
 func (m *UserModel) UpdatePartByName(ctx context.Context, data *User, where UpdatePartByNameWhereParameter) error {
 	var db = m.db.WithContext(ctx)
 	db.Model(&User{})
-	db.Where(`name = ?`, where.Name)
+	db.Where(`name = ?`, where.NameEqual)
 	db.Updates(map[string]interface{}{
 		"name":     data.Name,
 		"nickname": data.Nickname,
@@ -161,7 +161,7 @@ func (m *UserModel) UpdatePartByName(ctx context.Context, data *User, where Upda
 func (m *UserModel) UpdateNameLimit(ctx context.Context, data *User, where UpdateNameLimitWhereParameter, limit UpdateNameLimitLimitParameter) error {
 	var db = m.db.WithContext(ctx)
 	db.Model(&User{})
-	db.Where(`id > ?`, where.Id)
+	db.Where(`id > ?`, where.IdGT)
 	db.Limit(limit.Count)
 	db.Updates(map[string]interface{}{
 		"name": data.Name,
@@ -174,7 +174,7 @@ func (m *UserModel) UpdateNameLimit(ctx context.Context, data *User, where Updat
 func (m *UserModel) UpdateNameLimitOrder(ctx context.Context, data *User, where UpdateNameLimitOrderWhereParameter, limit UpdateNameLimitOrderLimitParameter) error {
 	var db = m.db.WithContext(ctx)
 	db.Model(&User{})
-	db.Where(`id > ?`, where.Id)
+	db.Where(`id > ?`, where.IdGT)
 	db.Order(`id desc`)
 	db.Limit(limit.Count)
 	db.Updates(map[string]interface{}{

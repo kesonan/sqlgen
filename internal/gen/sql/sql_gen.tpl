@@ -117,3 +117,21 @@ func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context, dat
     return err
 }
 {{end}}
+
+{{range $stmt := .DeleteStmt}}
+// {{.FuncName}} is generated from sql:
+// {{$stmt.SQL}}
+func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if $stmt.Where.IsValid}}, where {{$stmt.Where.ParameterStructureName "Where"}}{{end}}{{if $stmt.Limit.Multiple}}, limit {{$stmt.Limit.ParameterStructureName}}{{end}}) error {
+    b := builder.Delete()
+    b.From("`{{$.Table.Name}}`")
+    {{if $stmt.Where.IsValid}}b.Where(builder.Expr({{$stmt.Where.SQL}}, {{$stmt.Where.Parameters "where"}}))
+    {{end}}{{if $stmt.OrderBy.IsValid}}b.OrderBy({{$stmt.OrderBy.SQL}})
+    {{end}}{{if $stmt.Limit.IsValid}}b.Limit({{if $stmt.Limit.One}}1{{else}}{{$stmt.Limit.LimitParameter "limit"}}{{end}}{{if gt $stmt.Limit.Offset 0}}, {{$stmt.Limit.OffsetParameter "limit"}}{{end}})
+    {{end}}query, args, err := b.ToSQL()
+    if err != nil {
+        return err
+    }
+    _, err = m.db.ExecContext(ctx, query, args...)
+    return err
+}
+{{end}}

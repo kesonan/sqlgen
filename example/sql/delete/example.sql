@@ -26,3 +26,11 @@ delete from user where name = ?;
 -- example3: delete by unique keys
 -- fn: DeleteByNameAndMobile
 delete from user where name = ? and mobile = ?;
+
+-- example4: delete by id order by id
+-- fn: DeleteOrderByID
+delete from user where id = ? order by id desc;
+
+-- example5 delete by id order by id limit 10
+-- fn: DeleteOrderByIDLimit
+delete from user where id = ? order by id desc limit 10;

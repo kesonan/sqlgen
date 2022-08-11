@@ -30,18 +30,33 @@ type User struct {
 
 // DeleteWhereParameter is a where parameter structure.
 type DeleteWhereParameter struct {
-	Id uint64
+	IdEqual uint64
 }
 
 // DeleteByNameWhereParameter is a where parameter structure.
 type DeleteByNameWhereParameter struct {
-	Name string
+	NameEqual string
 }
 
 // DeleteByNameAndMobileWhereParameter is a where parameter structure.
 type DeleteByNameAndMobileWhereParameter struct {
-	Name   string
-	Mobile string
+	NameEqual   string
+	MobileEqual string
+}
+
+// DeleteOrderByIDWhereParameter is a where parameter structure.
+type DeleteOrderByIDWhereParameter struct {
+	IdEqual uint64
+}
+
+// DeleteOrderByIDLimitWhereParameter is a where parameter structure.
+type DeleteOrderByIDLimitWhereParameter struct {
+	IdEqual uint64
+}
+
+// DeleteOrderByIDLimitLimitParameter is a limit parameter structure.
+type DeleteOrderByIDLimitLimitParameter struct {
+	Count int
 }
 
 func (User) TableName() string {
@@ -73,7 +88,7 @@ func (m *UserModel) Insert(ctx context.Context, data ...*User) error {
 // delete from user where id = ?;
 func (m *UserModel) Delete(ctx context.Context, where DeleteWhereParameter) error {
 	var session = m.engine.Context(ctx)
-	session.Where(`id = ?`, where.Id)
+	session.Where(`id = ?`, where.IdEqual)
 	_, err := session.Delete(&User{})
 	return err
 }
@@ -82,7 +97,7 @@ func (m *UserModel) Delete(ctx context.Context, where DeleteWhereParameter) erro
 // delete from user where name = ?;
 func (m *UserModel) DeleteByName(ctx context.Context, where DeleteByNameWhereParameter) error {
 	var session = m.engine.Context(ctx)
-	session.Where(`name = ?`, where.Name)
+	session.Where(`name = ?`, where.NameEqual)
 	_, err := session.Delete(&User{})
 	return err
 }
@@ -91,7 +106,28 @@ func (m *UserModel) DeleteByName(ctx context.Context, where DeleteByNameWherePar
 // delete from user where name = ? and mobile = ?;
 func (m *UserModel) DeleteByNameAndMobile(ctx context.Context, where DeleteByNameAndMobileWhereParameter) error {
 	var session = m.engine.Context(ctx)
-	session.Where(`name = ? AND mobile = ?`, where.Name, where.Mobile)
+	session.Where(`name = ? AND mobile = ?`, where.NameEqual, where.MobileEqual)
+	_, err := session.Delete(&User{})
+	return err
+}
+
+// DeleteOrderByID is generated from sql:
+// delete from user where id = ? order by id desc;
+func (m *UserModel) DeleteOrderByID(ctx context.Context, where DeleteOrderByIDWhereParameter) error {
+	var session = m.engine.Context(ctx)
+	session.Where(`id = ?`, where.IdEqual)
+	session.OrderBy(`id desc`)
+	_, err := session.Delete(&User{})
+	return err
+}
+
+// DeleteOrderByIDLimit is generated from sql:
+// delete from user where id = ? order by id desc limit 10;
+func (m *UserModel) DeleteOrderByIDLimit(ctx context.Context, where DeleteOrderByIDLimitWhereParameter, limit DeleteOrderByIDLimitLimitParameter) error {
+	var session = m.engine.Context(ctx)
+	session.Where(`id = ?`, where.IdEqual)
+	session.OrderBy(`id desc`)
+	session.Limit(limit.Count)
 	_, err := session.Delete(&User{})
 	return err
 }

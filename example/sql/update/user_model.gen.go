@@ -32,27 +32,27 @@ type User struct {
 
 // UpdateWhereParameter is a where parameter structure.
 type UpdateWhereParameter struct {
-	Id uint64
+	IdEqual uint64
 }
 
 // UpdateByNameWhereParameter is a where parameter structure.
 type UpdateByNameWhereParameter struct {
-	Name string
+	NameEqual string
 }
 
 // UpdatePartWhereParameter is a where parameter structure.
 type UpdatePartWhereParameter struct {
-	Id uint64
+	IdEqual uint64
 }
 
 // UpdatePartByNameWhereParameter is a where parameter structure.
 type UpdatePartByNameWhereParameter struct {
-	Name string
+	NameEqual string
 }
 
 // UpdateNameLimitWhereParameter is a where parameter structure.
 type UpdateNameLimitWhereParameter struct {
-	Id uint64
+	IdGT uint64
 }
 
 // UpdateNameLimitLimitParameter is a limit parameter structure.
@@ -62,7 +62,7 @@ type UpdateNameLimitLimitParameter struct {
 
 // UpdateNameLimitOrderWhereParameter is a where parameter structure.
 type UpdateNameLimitOrderWhereParameter struct {
-	Id uint64
+	IdGT uint64
 }
 
 // UpdateNameLimitOrderLimitParameter is a limit parameter structure.
@@ -115,7 +115,7 @@ func (m *UserModel) Update(ctx context.Context, data *User, where UpdateWherePar
 		"update_time": data.UpdateTime,
 	})
 	b.From("`user`")
-	b.Where(builder.Expr(`id = ?`, where.Id))
+	b.Where(builder.Expr(`id = ?`, where.IdEqual))
 	query, args, err := b.ToSQL()
 	if err != nil {
 		return err
@@ -137,7 +137,7 @@ func (m *UserModel) UpdateByName(ctx context.Context, data *User, where UpdateBy
 		"update_time": data.UpdateTime,
 	})
 	b.From("`user`")
-	b.Where(builder.Expr(`name = ?`, where.Name))
+	b.Where(builder.Expr(`name = ?`, where.NameEqual))
 	query, args, err := b.ToSQL()
 	if err != nil {
 		return err
@@ -154,7 +154,7 @@ func (m *UserModel) UpdatePart(ctx context.Context, data *User, where UpdatePart
 		"nickname": data.Nickname,
 	})
 	b.From("`user`")
-	b.Where(builder.Expr(`id = ?`, where.Id))
+	b.Where(builder.Expr(`id = ?`, where.IdEqual))
 	query, args, err := b.ToSQL()
 	if err != nil {
 		return err
@@ -171,7 +171,7 @@ func (m *UserModel) UpdatePartByName(ctx context.Context, data *User, where Upda
 		"nickname": data.Nickname,
 	})
 	b.From("`user`")
-	b.Where(builder.Expr(`name = ?`, where.Name))
+	b.Where(builder.Expr(`name = ?`, where.NameEqual))
 	query, args, err := b.ToSQL()
 	if err != nil {
 		return err
@@ -187,7 +187,7 @@ func (m *UserModel) UpdateNameLimit(ctx context.Context, data *User, where Updat
 		"name": data.Name,
 	})
 	b.From("`user`")
-	b.Where(builder.Expr(`id > ?`, where.Id))
+	b.Where(builder.Expr(`id > ?`, where.IdGT))
 	b.Limit(limit.Count)
 	query, args, err := b.ToSQL()
 	if err != nil {
@@ -204,7 +204,7 @@ func (m *UserModel) UpdateNameLimitOrder(ctx context.Context, data *User, where 
 		"name": data.Name,
 	})
 	b.From("`user`")
-	b.Where(builder.Expr(`id > ?`, where.Id))
+	b.Where(builder.Expr(`id > ?`, where.IdGT))
 	b.OrderBy(`id desc`)
 	b.Limit(limit.Count)
 	query, args, err := b.ToSQL()
