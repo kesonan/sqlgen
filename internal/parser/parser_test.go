@@ -27,7 +27,7 @@ func TestParse(t *testing.T) {
 
 	ctxOne := ctx[0]
 	selectOne := ctxOne.SelectStmt[0]
-	fmt.Println(selectOne)
+	selectOne.Where.ParameterStructure("test")
 }
 
 func TestFrom(t *testing.T) {

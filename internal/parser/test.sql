@@ -15,27 +15,6 @@ CREATE TABLE `user`
     UNIQUE KEY `mobile_index` (`mobile`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '用户表' COLLATE=utf8mb4_general_ci;
 
--- example1: update by primary key
--- fn: Update
-update user set name = ?, password = ?, mobile = ?, gender = ?, nickname = ?, type = ?, create_time = ?, update_time = ? where id = ?;
-
--- example2: update by unique key
--- fn: UpdateByName
-update user set password = ?, mobile = ?, gender = ?, nickname = ?, type = ?, create_time = ?, update_time = ? where name = ?;
-
--- example3: update part columns by primary key
--- fn: UpdatePart
-update user set name = ?, nickname = ? where id = ?;
-
--- example4: update part columns by unique key
--- fn: UpdatePartByName
-update user set name = ?, nickname = ? where name = ?;
-
--- example5: update name limit ?
--- fn: UpdateNameLimit
-update user set name = ? where id > ? limit ?;
-
--- example6: update name limit ? order by id desc
--- fn: UpdateNameLimitOrder
-update user set name = ? where id > ? order by id desc limit ?;
+-- fn: test
+select * from user where id = ? and name in (?) limit 1;
 

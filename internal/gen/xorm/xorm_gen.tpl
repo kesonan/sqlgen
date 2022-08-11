@@ -14,7 +14,7 @@ import (
 
 // {{UpperCamel $.Table.Name}}Model represents a {{$.Table.Name}} model.
 type {{UpperCamel $.Table.Name}}Model struct {
-    engine *xorm.Engine
+    engine xorm.EngineInterface
 }
 
 // {{UpperCamel $.Table.Name}} represents a {{$.Table.Name}} struct data.
@@ -42,6 +42,11 @@ func ({{UpperCamel $.Table.Name}}) TableName() string{
     return "{{$.Table.Name}}"
 }
 
+// New{{UpperCamel $.Table.Name}}Model returns a new {{$.Table.Name}} model.
+func New{{UpperCamel $.Table.Name}}Model (engine xorm.EngineInterface) *{{UpperCamel $.Table.Name}}Model {
+    return &{{UpperCamel $.Table.Name}}Model{engine: engine}
+}
+
 // Insert creates  {{$.Table.Name}} data.
 func (m *{{UpperCamel $.Table.Name}}Model) Insert(ctx context.Context, data ...*{{UpperCamel $.Table.Name}}) error {
     if len(data)==0{
@@ -63,7 +68,7 @@ func (m *{{UpperCamel $.Table.Name}}Model) Insert(ctx context.Context, data ...*
 func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if $stmt.Where.IsValid}}, where {{$stmt.Where.ParameterStructureName "Where"}}{{end}}{{if $stmt.Having.IsValid}}, having {{$stmt.Having.ParameterStructureName "Having"}}{{end}}{{if $stmt.Limit.Multiple}}, limit {{$stmt.Limit.ParameterStructureName}}{{end}})({{if $stmt.Limit.One}}*{{$stmt.ReceiverName}}, {{else}}[]*{{$stmt.ReceiverName}}, {{end}} error){
     var result {{if $stmt.Limit.One}} = new({{$stmt.ReceiverName}}){{else}}[]*{{$stmt.ReceiverName}}{{end}}
     var session = m.engine.Context(ctx)
-    session.Select({{$stmt.SelectSQL}})
+    session.Select(`{{$stmt.SelectSQL}}`)
     {{if $stmt.Where.IsValid}}session.Where({{$stmt.Where.SQL}}, {{$stmt.Where.Parameters "where"}})
     {{end }}{{if $stmt.GroupBy.IsValid}}session.GroupBy({{$stmt.GroupBy.SQL}})
     {{end}}{{if $stmt.Having.IsValid}}session.Having(fmt.Sprintf({{HavingSprintf $stmt.Having.SQL}}, {{$stmt.Having.Parameters "having"}}))
@@ -79,7 +84,6 @@ func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if 
 // {{$stmt.SQL}}
 func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context, data *{{UpperCamel $.Table.Name}}{{if $stmt.Where.IsValid}}, where {{$stmt.Where.ParameterStructureName "Where"}}{{end}}{{if $stmt.Limit.Multiple}}, limit {{$stmt.Limit.ParameterStructureName}}{{end}}) error {
     var session = m.engine.Context(ctx)
-    session.Table(&{{UpperCamel $.Table.Name}}{})
     {{if $stmt.Where.IsValid}}session.Where({{$stmt.Where.SQL}}, {{$stmt.Where.Parameters "where"}})
     {{end}}{{if $stmt.OrderBy.IsValid}}session.OrderBy({{$stmt.OrderBy.SQL}})
     {{end}}{{if $stmt.Limit.IsValid}}session.Limit({{if $stmt.Limit.One}}1{{else}}{{$stmt.Limit.LimitParameter "limit"}}{{end}}{{if gt $stmt.Limit.Offset 0}}, {{$stmt.Limit.OffsetParameter "limit"}}{{end}})
@@ -97,7 +101,7 @@ func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context, dat
 func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if $stmt.Where.IsValid}}, where {{$stmt.Where.ParameterStructureName "Where"}}{{end}}{{if $stmt.Limit.Multiple}}, limit {{$stmt.Limit.ParameterStructureName}}{{end}}) error {
     var session = m.engine.Context(ctx)
     {{if $stmt.Where.IsValid}}session.Where({{$stmt.Where.SQL}}, {{$stmt.Where.Parameters "where"}})
-    {{end}}{{if $stmt.OrderBy.IsValid}}session.Order({{$stmt.OrderBy.SQL}})
+    {{end}}{{if $stmt.OrderBy.IsValid}}session.OrderBy({{$stmt.OrderBy.SQL}})
     {{end}}{{if $stmt.Limit.IsValid}}session.Limit({{if $stmt.Limit.One}}1{{else}}{{$stmt.Limit.LimitParameter "limit"}}{{end}}{{if gt $stmt.Limit.Offset 0}}, {{$stmt.Limit.OffsetParameter "limit"}}{{end}})
     {{end}}_, err := session.Delete(&{{UpperCamel $.Table.Name}}{})
     return err

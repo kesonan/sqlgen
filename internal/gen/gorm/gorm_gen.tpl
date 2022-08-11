@@ -42,6 +42,11 @@ func ({{UpperCamel $.Table.Name}}) TableName() string {
     return "{{$.Table.Name}}"
 }
 
+// New{{UpperCamel $.Table.Name}}Model returns a new {{$.Table.Name}} model.
+func New{{UpperCamel $.Table.Name}}Model (db gorm.DB) *{{UpperCamel $.Table.Name}}Model {
+    return &{{UpperCamel $.Table.Name}}Model{db: db}
+}
+
 // Create creates  {{$.Table.Name}} data.
 func (m *{{UpperCamel $.Table.Name}}Model) Create(ctx context.Context, data ...*{{UpperCamel $.Table.Name}}) error {
     if len(data)==0{
@@ -62,7 +67,7 @@ func (m *{{UpperCamel $.Table.Name}}Model) Create(ctx context.Context, data ...*
 func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if $stmt.Where.IsValid}}, where {{$stmt.Where.ParameterStructureName "Where"}}{{end}}{{if $stmt.Having.IsValid}}, having {{$stmt.Having.ParameterStructureName "Having"}}{{end}}{{if $stmt.Limit.Multiple}}, limit {{$stmt.Limit.ParameterStructureName}}{{end}})({{if $stmt.Limit.One}}*{{$stmt.ReceiverName}}, {{else}}[]*{{$stmt.ReceiverName}}, {{end}} error){
     var result {{if $stmt.Limit.One}} = new({{$stmt.ReceiverName}}){{else}}[]*{{$stmt.ReceiverName}}{{end}}
     var db = m.db.WithContext(ctx)
-    db.Select({{$stmt.SelectSQL}})
+    db.Select(`{{$stmt.SelectSQL}}`)
     {{if $stmt.Where.IsValid}}db.Where({{$stmt.Where.SQL}}, {{$stmt.Where.Parameters "where"}})
     {{end }}{{if $stmt.GroupBy.IsValid}}db.Group({{$stmt.GroupBy.SQL}})
     {{end}}{{if $stmt.Having.IsValid}}db.Having({{$stmt.Having.SQL}}, {{$stmt.Having.Parameters "having"}})

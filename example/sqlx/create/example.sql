@@ -14,23 +14,3 @@ CREATE TABLE `user`
     UNIQUE KEY `type_index` (`type`),
     UNIQUE KEY `mobile_index` (`mobile`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '用户表' COLLATE=utf8mb4_general_ci;
-
--- example1: delete by primary key
--- fn: Delete
-delete from user where id = ?;
-
--- example2: delete by unique key
--- fn: DeleteByName
-delete from user where name = ?;
-
--- example3: delete by unique keys
--- fn: DeleteByNameAndMobile
-delete from user where name = ? and mobile = ?;
-
--- example4: delete by id order by id
--- fn: DeleteOrderByID
-delete from user where id = ? order by id desc;
-
--- example5 delete by id order by id limit 10
--- fn: DeleteOrderByIDLimit
-delete from user where id = ? order by id desc limit 10;

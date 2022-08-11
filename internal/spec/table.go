@@ -115,6 +115,9 @@ func (t *Table) PrimaryColumnList() Columns {
 // PrimaryColumn returns the primary column.
 func (t *Table) PrimaryColumn() Column {
 	list := t.PrimaryColumnList()
+	if len(list) == 0 {
+		return Column{}
+	}
 	return list[0]
 }
 

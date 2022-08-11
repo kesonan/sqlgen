@@ -33,6 +33,11 @@ func (User) TableName() string {
 	return "user"
 }
 
+// NewUserModel returns a new user model.
+func NewUserModel(db gorm.DB) *UserModel {
+	return &UserModel{db: db}
+}
+
 // Create creates  user data.
 func (m *UserModel) Create(ctx context.Context, data ...*User) error {
 	if len(data) == 0 {

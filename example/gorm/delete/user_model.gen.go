@@ -30,23 +30,43 @@ type User struct {
 
 // DeleteWhereParameter is a where parameter structure.
 type DeleteWhereParameter struct {
-	Id uint64
+	IdEqual uint64
 }
 
 // DeleteByNameWhereParameter is a where parameter structure.
 type DeleteByNameWhereParameter struct {
-	Name string
+	NameEqual string
 }
 
 // DeleteByNameAndMobileWhereParameter is a where parameter structure.
 type DeleteByNameAndMobileWhereParameter struct {
-	Name   string
-	Mobile string
+	NameEqual   string
+	MobileEqual string
+}
+
+// DeleteOrderByIDWhereParameter is a where parameter structure.
+type DeleteOrderByIDWhereParameter struct {
+	IdEqual uint64
+}
+
+// DeleteOrderByIDLimitWhereParameter is a where parameter structure.
+type DeleteOrderByIDLimitWhereParameter struct {
+	IdEqual uint64
+}
+
+// DeleteOrderByIDLimitLimitParameter is a limit parameter structure.
+type DeleteOrderByIDLimitLimitParameter struct {
+	Count int
 }
 
 // TableName returns the table name. it implemented by gorm.Tabler.
 func (User) TableName() string {
 	return "user"
+}
+
+// NewUserModel returns a new user model.
+func NewUserModel(db gorm.DB) *UserModel {
+	return &UserModel{db: db}
 }
 
 // Create creates  user data.
@@ -68,7 +88,7 @@ func (m *UserModel) Create(ctx context.Context, data ...*User) error {
 // delete from user where id = ?;
 func (m *UserModel) Delete(ctx context.Context, where DeleteWhereParameter) error {
 	var db = m.db.WithContext(ctx)
-	db.Where(`id = ?`, where.Id)
+	db.Where(`id = ?`, where.IdEqual)
 	db.Delete(&User{})
 	return db.Error
 }
@@ -77,7 +97,7 @@ func (m *UserModel) Delete(ctx context.Context, where DeleteWhereParameter) erro
 // delete from user where name = ?;
 func (m *UserModel) DeleteByName(ctx context.Context, where DeleteByNameWhereParameter) error {
 	var db = m.db.WithContext(ctx)
-	db.Where(`name = ?`, where.Name)
+	db.Where(`name = ?`, where.NameEqual)
 	db.Delete(&User{})
 	return db.Error
 }
@@ -86,7 +106,28 @@ func (m *UserModel) DeleteByName(ctx context.Context, where DeleteByNameWherePar
 // delete from user where name = ? and mobile = ?;
 func (m *UserModel) DeleteByNameAndMobile(ctx context.Context, where DeleteByNameAndMobileWhereParameter) error {
 	var db = m.db.WithContext(ctx)
-	db.Where(`name = ? AND mobile = ?`, where.Name, where.Mobile)
+	db.Where(`name = ? AND mobile = ?`, where.NameEqual, where.MobileEqual)
+	db.Delete(&User{})
+	return db.Error
+}
+
+// DeleteOrderByID is generated from sql:
+// delete from user where id = ? order by id desc;
+func (m *UserModel) DeleteOrderByID(ctx context.Context, where DeleteOrderByIDWhereParameter) error {
+	var db = m.db.WithContext(ctx)
+	db.Where(`id = ?`, where.IdEqual)
+	db.Order(`id desc`)
+	db.Delete(&User{})
+	return db.Error
+}
+
+// DeleteOrderByIDLimit is generated from sql:
+// delete from user where id = ? order by id desc limit 10;
+func (m *UserModel) DeleteOrderByIDLimit(ctx context.Context, where DeleteOrderByIDLimitWhereParameter, limit DeleteOrderByIDLimitLimitParameter) error {
+	var db = m.db.WithContext(ctx)
+	db.Where(`id = ?`, where.IdEqual)
+	db.Order(`id desc`)
+	db.Limit(limit.Count)
 	db.Delete(&User{})
 	return db.Error
 }

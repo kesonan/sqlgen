@@ -12,7 +12,7 @@ import (
 
 // UserModel represents a user model.
 type UserModel struct {
-	engine *xorm.Engine
+	engine xorm.EngineInterface
 }
 
 // User represents a user struct data.
@@ -30,6 +30,11 @@ type User struct {
 
 func (User) TableName() string {
 	return "user"
+}
+
+// NewUserModel returns a new user model.
+func NewUserModel(engine xorm.EngineInterface) *UserModel {
+	return &UserModel{engine: engine}
 }
 
 // Insert creates  user data.

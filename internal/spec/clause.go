@@ -72,12 +72,7 @@ func (c *Clause) ParameterStructure(identifier string) (string, error) {
 	writer.Write(`// %s is a %s parameter structure.`, c.ParameterStructureName(identifier), strcase.ToDelimited(identifier, ' '))
 	writer.Write(`type %s struct {`, c.ParameterStructureName(identifier))
 	for _, v := range parameters {
-		if c.OP == In || c.OP == NotIn {
-			writer.Write("%s []%s", v.Column, v.Type)
-		} else {
-			writer.Write("%s %s", v.Column, v.Type)
-		}
-
+		writer.Write("%s %s", v.Column, v.Type)
 	}
 
 	writer.Write(`}`)
@@ -162,14 +157,31 @@ func (c *Clause) marshal() (sql string, parameters parameter.Parameters, err err
 		}
 
 		sql = strings.Join(sqlList, " "+Operator[c.OP]+" ")
-	case EQ, GE, GT, In, LE, LT, Like, NE, Not, NotIn, NotLike:
+	case EQ, GE, GT, LE, LT, Like, NE, Not, NotLike:
 		sql = fmt.Sprintf("%s %s ?", c.Column, Operator[c.OP])
 		p, err := c.ColumnInfo.DataType()
 		if err != nil {
 			return "", nil, err
 		}
 
-		ps.Add(p)
+		ps.Add(parameter.Parameter{
+			Column:   p.Column + OpName[c.OP],
+			Type:     p.Type,
+			ThirdPkg: p.ThirdPkg,
+		})
+	case In, NotIn:
+		sql = fmt.Sprintf("%s %s (?)", c.Column, Operator[c.OP])
+		p, err := c.ColumnInfo.DataType()
+		if err != nil {
+			return "", nil, err
+		}
+
+		p.Type = fmt.Sprintf("[]%s", p.Type)
+		ps.Add(parameter.Parameter{
+			Column:   p.Column + OpName[c.OP],
+			Type:     p.Type,
+			ThirdPkg: p.ThirdPkg,
+		})
 	case Between, NotBetween:
 		sql = fmt.Sprintf("%s %s ? AND ?", c.Column, Operator[c.OP])
 		p, err := c.ColumnInfo.DataType()

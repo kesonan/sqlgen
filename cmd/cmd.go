@@ -14,9 +14,10 @@ var rootCmd = &cobra.Command{
 	Use:   "sqlgen",
 	Short: "A cli for mysql generator",
 }
+
 var sqlCmd = &cobra.Command{
 	Use:   "sql",
-	Short: "Generate SQL model",
+	Short: "Generate sql model",
 	Run: func(cmd *cobra.Command, args []string) {
 		arg.Mode = flags.SQL
 		flags.Run(arg)
@@ -68,10 +69,11 @@ func init() {
 	persistentFlags.StringVarP(&arg.Output, "output", "o", ".", "The output directory")
 
 	// sub commands init
-	rootCmd.AddCommand(sqlCmd)
+	rootCmd.AddCommand(bunCmd)
 	rootCmd.AddCommand(gormCmd)
-	rootCmd.AddCommand(xormCmd)
+	rootCmd.AddCommand(sqlCmd)
 	rootCmd.AddCommand(sqlxCmd)
+	rootCmd.AddCommand(xormCmd)
 }
 
 func Execute() {

@@ -20,7 +20,7 @@ CREATE TABLE `user`
 -- fn: FindOne
 select *
 from user
-where id = ? limit 1;
+where id = ? and name in (?,?,?) limit 1;
 
 -- example2: find one by unique key
 -- fn: FindByName

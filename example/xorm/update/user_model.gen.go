@@ -12,7 +12,7 @@ import (
 
 // UserModel represents a user model.
 type UserModel struct {
-	engine *xorm.Engine
+	engine xorm.EngineInterface
 }
 
 // User represents a user struct data.
@@ -30,27 +30,27 @@ type User struct {
 
 // UpdateWhereParameter is a where parameter structure.
 type UpdateWhereParameter struct {
-	Id uint64
+	IdEqual uint64
 }
 
 // UpdateByNameWhereParameter is a where parameter structure.
 type UpdateByNameWhereParameter struct {
-	Name string
+	NameEqual string
 }
 
 // UpdatePartWhereParameter is a where parameter structure.
 type UpdatePartWhereParameter struct {
-	Id uint64
+	IdEqual uint64
 }
 
 // UpdatePartByNameWhereParameter is a where parameter structure.
 type UpdatePartByNameWhereParameter struct {
-	Name string
+	NameEqual string
 }
 
 // UpdateNameLimitWhereParameter is a where parameter structure.
 type UpdateNameLimitWhereParameter struct {
-	Id uint64
+	IdGT uint64
 }
 
 // UpdateNameLimitLimitParameter is a limit parameter structure.
@@ -60,7 +60,7 @@ type UpdateNameLimitLimitParameter struct {
 
 // UpdateNameLimitOrderWhereParameter is a where parameter structure.
 type UpdateNameLimitOrderWhereParameter struct {
-	Id uint64
+	IdGT uint64
 }
 
 // UpdateNameLimitOrderLimitParameter is a limit parameter structure.
@@ -70,6 +70,11 @@ type UpdateNameLimitOrderLimitParameter struct {
 
 func (User) TableName() string {
 	return "user"
+}
+
+// NewUserModel returns a new user model.
+func NewUserModel(engine xorm.EngineInterface) *UserModel {
+	return &UserModel{engine: engine}
 }
 
 // Insert creates  user data.
@@ -92,8 +97,7 @@ func (m *UserModel) Insert(ctx context.Context, data ...*User) error {
 // update user set name = ?, password = ?, mobile = ?, gender = ?, nickname = ?, type = ?, create_time = ?, update_time = ? where id = ?;
 func (m *UserModel) Update(ctx context.Context, data *User, where UpdateWhereParameter) error {
 	var session = m.engine.Context(ctx)
-	session.Table(&User{})
-	session.Where(`id = ?`, where.Id)
+	session.Where(`id = ?`, where.IdEqual)
 	_, err := session.Update(map[string]interface{}{
 		"name":        data.Name,
 		"password":    data.Password,
@@ -111,8 +115,7 @@ func (m *UserModel) Update(ctx context.Context, data *User, where UpdateWherePar
 // update user set password = ?, mobile = ?, gender = ?, nickname = ?, type = ?, create_time = ?, update_time = ? where name = ?;
 func (m *UserModel) UpdateByName(ctx context.Context, data *User, where UpdateByNameWhereParameter) error {
 	var session = m.engine.Context(ctx)
-	session.Table(&User{})
-	session.Where(`name = ?`, where.Name)
+	session.Where(`name = ?`, where.NameEqual)
 	_, err := session.Update(map[string]interface{}{
 		"password":    data.Password,
 		"mobile":      data.Mobile,
@@ -129,8 +132,7 @@ func (m *UserModel) UpdateByName(ctx context.Context, data *User, where UpdateBy
 // update user set name = ?, nickname = ? where id = ?;
 func (m *UserModel) UpdatePart(ctx context.Context, data *User, where UpdatePartWhereParameter) error {
 	var session = m.engine.Context(ctx)
-	session.Table(&User{})
-	session.Where(`id = ?`, where.Id)
+	session.Where(`id = ?`, where.IdEqual)
 	_, err := session.Update(map[string]interface{}{
 		"name":     data.Name,
 		"nickname": data.Nickname,
@@ -142,8 +144,7 @@ func (m *UserModel) UpdatePart(ctx context.Context, data *User, where UpdatePart
 // update user set name = ?, nickname = ? where name = ?;
 func (m *UserModel) UpdatePartByName(ctx context.Context, data *User, where UpdatePartByNameWhereParameter) error {
 	var session = m.engine.Context(ctx)
-	session.Table(&User{})
-	session.Where(`name = ?`, where.Name)
+	session.Where(`name = ?`, where.NameEqual)
 	_, err := session.Update(map[string]interface{}{
 		"name":     data.Name,
 		"nickname": data.Nickname,
@@ -155,8 +156,7 @@ func (m *UserModel) UpdatePartByName(ctx context.Context, data *User, where Upda
 // update user set name = ? where id > ? limit ?;
 func (m *UserModel) UpdateNameLimit(ctx context.Context, data *User, where UpdateNameLimitWhereParameter, limit UpdateNameLimitLimitParameter) error {
 	var session = m.engine.Context(ctx)
-	session.Table(&User{})
-	session.Where(`id > ?`, where.Id)
+	session.Where(`id > ?`, where.IdGT)
 	session.Limit(limit.Count)
 	_, err := session.Update(map[string]interface{}{
 		"name": data.Name,
@@ -168,8 +168,7 @@ func (m *UserModel) UpdateNameLimit(ctx context.Context, data *User, where Updat
 // update user set name = ? where id > ? order by id desc limit ?;
 func (m *UserModel) UpdateNameLimitOrder(ctx context.Context, data *User, where UpdateNameLimitOrderWhereParameter, limit UpdateNameLimitOrderLimitParameter) error {
 	var session = m.engine.Context(ctx)
-	session.Table(&User{})
-	session.Where(`id > ?`, where.Id)
+	session.Where(`id > ?`, where.IdGT)
 	session.OrderBy(`id desc`)
 	session.Limit(limit.Count)
 	_, err := session.Update(map[string]interface{}{

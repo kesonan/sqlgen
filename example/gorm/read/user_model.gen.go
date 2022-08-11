@@ -30,22 +30,22 @@ type User struct {
 
 // FindOneWhereParameter is a where parameter structure.
 type FindOneWhereParameter struct {
-	Id uint64
+	IdEqual uint64
 }
 
 // FindByNameWhereParameter is a where parameter structure.
 type FindByNameWhereParameter struct {
-	Name string
+	NameEqual string
 }
 
 // FindOnePartWhereParameter is a where parameter structure.
 type FindOnePartWhereParameter struct {
-	Id uint64
+	IdEqual uint64
 }
 
 // FindByNamePartWhereParameter is a where parameter structure.
 type FindByNamePartWhereParameter struct {
-	Name string
+	NameEqual string
 }
 
 // FindAllCountResult is a find all count result.
@@ -60,23 +60,23 @@ type FindAllPartCountResult struct {
 
 // FindOneByNameAndPasswordWhereParameter is a where parameter structure.
 type FindOneByNameAndPasswordWhereParameter struct {
-	Name     string
-	Password string
+	NameEqual     string
+	PasswordEqual string
 }
 
 // ListUserByNameAscWhereParameter is a where parameter structure.
 type ListUserByNameAscWhereParameter struct {
-	Id uint64
+	IdGT uint64
 }
 
 // ListUserByNameAscHavingCountTypeGtWhereParameter is a where parameter structure.
 type ListUserByNameAscHavingCountTypeGtWhereParameter struct {
-	Id uint64
+	IdGT uint64
 }
 
 // ListUserByNameAscHavingCountTypeGtHavingParameter is a having parameter structure.
 type ListUserByNameAscHavingCountTypeGtHavingParameter struct {
-	TypeCount int8
+	TypeCountGT int8
 }
 
 // ListUserByNameAscHavingCountTypeGtResult is a list user by name asc having count type gt result.
@@ -95,12 +95,12 @@ type ListUserByNameAscHavingCountTypeGtResult struct {
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescWhereParameter is a where parameter structure.
 type ListUserByNameDescHavingCountTypeGtOrderByIdDescWhereParameter struct {
-	Id uint64
+	IdGT uint64
 }
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescHavingParameter is a having parameter structure.
 type ListUserByNameDescHavingCountTypeGtOrderByIdDescHavingParameter struct {
-	TypeCount int8
+	TypeCountGT int8
 }
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescResult is a list user by name desc having count type gt order by id desc result.
@@ -119,12 +119,12 @@ type ListUserByNameDescHavingCountTypeGtOrderByIdDescResult struct {
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10WhereParameter is a where parameter structure.
 type ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10WhereParameter struct {
-	Id uint64
+	IdGT uint64
 }
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10HavingParameter is a having parameter structure.
 type ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10HavingParameter struct {
-	TypeCount int8
+	TypeCountGT int8
 }
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10LimitParameter is a limit parameter structure.
@@ -148,12 +148,12 @@ type ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Result struct {
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10WhereParameter is a where parameter structure.
 type ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10WhereParameter struct {
-	Id uint64
+	IdGT uint64
 }
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10HavingParameter is a having parameter structure.
 type ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10HavingParameter struct {
-	TypeCount int8
+	TypeCountGT int8
 }
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10LimitParameter is a limit parameter structure.
@@ -178,22 +178,22 @@ type ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10Result struc
 
 // FindOneByNameLikeWhereParameter is a where parameter structure.
 type FindOneByNameLikeWhereParameter struct {
-	Name string
+	NameLike string
 }
 
 // FindAllByNameNotLikeWhereParameter is a where parameter structure.
 type FindAllByNameNotLikeWhereParameter struct {
-	Name string
+	NameNotLike string
 }
 
 // FindAllByIdInWhereParameter is a where parameter structure.
 type FindAllByIdInWhereParameter struct {
-	Id []uint64
+	IdIn []uint64
 }
 
 // FindAllByIdNotInWhereParameter is a where parameter structure.
 type FindAllByIdNotInWhereParameter struct {
-	Id []uint64
+	IdNotIn []uint64
 }
 
 // FindAllByIdBetweenWhereParameter is a where parameter structure.
@@ -210,55 +210,60 @@ type FindAllByIdNotBetweenWhereParameter struct {
 
 // FindAllByIdGteWhereParameter is a where parameter structure.
 type FindAllByIdGteWhereParameter struct {
-	Id uint64
+	IdGE uint64
 }
 
 // FindAllByIdLteWhereParameter is a where parameter structure.
 type FindAllByIdLteWhereParameter struct {
-	Id uint64
+	IdLE uint64
 }
 
 // FindAllByIdNeqWhereParameter is a where parameter structure.
 type FindAllByIdNeqWhereParameter struct {
-	Id uint64
+	IdNE uint64
 }
 
 // FindAllByIdInOrNotInWhereParameter is a where parameter structure.
 type FindAllByIdInOrNotInWhereParameter struct {
-	Id  uint64
-	Id1 uint64
+	IdIn    []uint64
+	IdNotIn []uint64
 }
 
 // ComplexQueryWhereParameter is a where parameter structure.
 type ComplexQueryWhereParameter struct {
-	Id                  uint64
-	Id1                 uint64
-	Id2                 uint64
-	Id3                 uint64
-	Id4                 uint64
+	IdGT                uint64
+	IdLT                uint64
+	IdNE                uint64
+	IdIn                []uint64
+	IdNotIn             []uint64
 	IdBetweenStart      uint64
 	IdBetweenEnd        uint64
 	IdNotBetweenStart   uint64
 	IdNotBetweenEnd     uint64
-	Id5                 uint64
-	Id6                 uint64
-	Id7                 uint64
-	Name                string
-	Name1               string
-	Name2               string
-	Name3               string
+	IdGE                uint64
+	IdLE                uint64
+	IdNE1               uint64
+	NameLike            string
+	NameNotLike         string
+	NameIn              []string
+	NameNotIn           []string
 	NameBetweenStart    string
 	NameBetweenEnd      string
 	NameNotBetweenStart string
 	NameNotBetweenEnd   string
-	Name4               string
-	Name5               string
-	Name6               string
+	NameGE              string
+	NameLE              string
+	NameNE              string
 }
 
 // TableName returns the table name. it implemented by gorm.Tabler.
 func (User) TableName() string {
 	return "user"
+}
+
+// NewUserModel returns a new user model.
+func NewUserModel(db gorm.DB) *UserModel {
+	return &UserModel{db: db}
 }
 
 // Create creates  user data.
@@ -282,7 +287,7 @@ func (m *UserModel) FindOne(ctx context.Context, where FindOneWhereParameter) (*
 	var result = new(User)
 	var db = m.db.WithContext(ctx)
 	db.Select(`*`)
-	db.Where(`id = ?`, where.Id)
+	db.Where(`id = ?`, where.IdEqual)
 	db.Limit(1)
 	db.Find(result)
 	return result, db.Error
@@ -294,7 +299,7 @@ func (m *UserModel) FindByName(ctx context.Context, where FindByNameWhereParamet
 	var result = new(User)
 	var db = m.db.WithContext(ctx)
 	db.Select(`*`)
-	db.Where(`name = ?`, where.Name)
+	db.Where(`name = ?`, where.NameEqual)
 	db.Limit(1)
 	db.Find(result)
 	return result, db.Error
@@ -306,7 +311,7 @@ func (m *UserModel) FindOnePart(ctx context.Context, where FindOnePartWhereParam
 	var result = new(User)
 	var db = m.db.WithContext(ctx)
 	db.Select(`id, name, nickname`)
-	db.Where(`id = ?`, where.Id)
+	db.Where(`id = ?`, where.IdEqual)
 	db.Limit(1)
 	db.Find(result)
 	return result, db.Error
@@ -318,7 +323,7 @@ func (m *UserModel) FindByNamePart(ctx context.Context, where FindByNamePartWher
 	var result = new(User)
 	var db = m.db.WithContext(ctx)
 	db.Select(`id, name, nickname`)
-	db.Where(`name = ?`, where.Name)
+	db.Where(`name = ?`, where.NameEqual)
 	db.Limit(1)
 	db.Find(result)
 	return result, db.Error
@@ -372,7 +377,7 @@ func (m *UserModel) FindOneByNameAndPassword(ctx context.Context, where FindOneB
 	var result = new(User)
 	var db = m.db.WithContext(ctx)
 	db.Select(`*`)
-	db.Where(`name = ? AND password = ?`, where.Name, where.Password)
+	db.Where(`name = ? AND password = ?`, where.NameEqual, where.PasswordEqual)
 	db.Limit(1)
 	db.Find(result)
 	return result, db.Error
@@ -384,7 +389,7 @@ func (m *UserModel) ListUserByNameAsc(ctx context.Context, where ListUserByNameA
 	var result []*User
 	var db = m.db.WithContext(ctx)
 	db.Select(`*`)
-	db.Where(`id > ?`, where.Id)
+	db.Where(`id > ?`, where.IdGT)
 	db.Group(`name`)
 	db.Find(&result)
 	return result, db.Error
@@ -396,9 +401,9 @@ func (m *UserModel) ListUserByNameAscHavingCountTypeGt(ctx context.Context, wher
 	var result []*ListUserByNameAscHavingCountTypeGtResult
 	var db = m.db.WithContext(ctx)
 	db.Select(`*, count(type) AS typeCount`)
-	db.Where(`id > ?`, where.Id)
+	db.Where(`id > ?`, where.IdGT)
 	db.Group(`name`)
-	db.Having(`typeCount > ?`, having.TypeCount)
+	db.Having(`typeCount > ?`, having.TypeCountGT)
 	db.Find(&result)
 	return result, db.Error
 }
@@ -409,9 +414,9 @@ func (m *UserModel) ListUserByNameDescHavingCountTypeGtOrderByIdDesc(ctx context
 	var result []*ListUserByNameDescHavingCountTypeGtOrderByIdDescResult
 	var db = m.db.WithContext(ctx)
 	db.Select(`*, count(type) AS typeCount`)
-	db.Where(`id > ?`, where.Id)
+	db.Where(`id > ?`, where.IdGT)
 	db.Group(`name`)
-	db.Having(`typeCount > ?`, having.TypeCount)
+	db.Having(`typeCount > ?`, having.TypeCountGT)
 	db.Order(`id desc`)
 	db.Find(&result)
 	return result, db.Error
@@ -423,9 +428,9 @@ func (m *UserModel) ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10(ctx 
 	var result []*ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Result
 	var db = m.db.WithContext(ctx)
 	db.Select(`*, count(type) AS typeCount`)
-	db.Where(`id > ?`, where.Id)
+	db.Where(`id > ?`, where.IdGT)
 	db.Group(`name`)
-	db.Having(`typeCount > ?`, having.TypeCount)
+	db.Having(`typeCount > ?`, having.TypeCountGT)
 	db.Order(`id desc`)
 	db.Limit(limit.Count)
 	db.Find(&result)
@@ -433,14 +438,14 @@ func (m *UserModel) ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10(ctx 
 }
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10 is generated from sql:
-// select *, count(type) AS typeCount from user where id > ? group by name having typeCount > ? order by id desc limit 10 offset 10;
+// select *, count(type) AS typeCount from user where id > ? group by name having typeCount > ? order by id desc limit 10, 10;
 func (m *UserModel) ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10(ctx context.Context, where ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10WhereParameter, having ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10HavingParameter, limit ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10LimitParameter) ([]*ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10Result, error) {
 	var result []*ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10Result
 	var db = m.db.WithContext(ctx)
 	db.Select(`*, count(type) AS typeCount`)
-	db.Where(`id > ?`, where.Id)
+	db.Where(`id > ?`, where.IdGT)
 	db.Group(`name`)
-	db.Having(`typeCount > ?`, having.TypeCount)
+	db.Having(`typeCount > ?`, having.TypeCountGT)
 	db.Order(`id desc`)
 	db.Offset(limit.Offset).Limit(limit.Count)
 	db.Find(&result)
@@ -453,7 +458,7 @@ func (m *UserModel) FindOneByNameLike(ctx context.Context, where FindOneByNameLi
 	var result = new(User)
 	var db = m.db.WithContext(ctx)
 	db.Select(`*`)
-	db.Where(`name LIKE ?`, where.Name)
+	db.Where(`name LIKE ?`, where.NameLike)
 	db.Limit(1)
 	db.Find(result)
 	return result, db.Error
@@ -465,7 +470,7 @@ func (m *UserModel) FindAllByNameNotLike(ctx context.Context, where FindAllByNam
 	var result []*User
 	var db = m.db.WithContext(ctx)
 	db.Select(`*`)
-	db.Where(`name NOT LIKE ?`, where.Name)
+	db.Where(`name NOT LIKE ?`, where.NameNotLike)
 	db.Find(&result)
 	return result, db.Error
 }
@@ -476,7 +481,7 @@ func (m *UserModel) FindAllByIdIn(ctx context.Context, where FindAllByIdInWhereP
 	var result []*User
 	var db = m.db.WithContext(ctx)
 	db.Select(`*`)
-	db.Where(`id IN ?`, where.Id)
+	db.Where(`id IN (?)`, where.IdIn)
 	db.Find(&result)
 	return result, db.Error
 }
@@ -487,7 +492,7 @@ func (m *UserModel) FindAllByIdNotIn(ctx context.Context, where FindAllByIdNotIn
 	var result []*User
 	var db = m.db.WithContext(ctx)
 	db.Select(`*`)
-	db.Where(`id NOT IN ?`, where.Id)
+	db.Where(`id NOT IN (?)`, where.IdNotIn)
 	db.Find(&result)
 	return result, db.Error
 }
@@ -520,7 +525,7 @@ func (m *UserModel) FindAllByIdGte(ctx context.Context, where FindAllByIdGteWher
 	var result []*User
 	var db = m.db.WithContext(ctx)
 	db.Select(`*`)
-	db.Where(`id >= ?`, where.Id)
+	db.Where(`id >= ?`, where.IdGE)
 	db.Find(&result)
 	return result, db.Error
 }
@@ -531,7 +536,7 @@ func (m *UserModel) FindAllByIdLte(ctx context.Context, where FindAllByIdLteWher
 	var result []*User
 	var db = m.db.WithContext(ctx)
 	db.Select(`*`)
-	db.Where(`id <= ?`, where.Id)
+	db.Where(`id <= ?`, where.IdLE)
 	db.Find(&result)
 	return result, db.Error
 }
@@ -542,7 +547,7 @@ func (m *UserModel) FindAllByIdNeq(ctx context.Context, where FindAllByIdNeqWher
 	var result []*User
 	var db = m.db.WithContext(ctx)
 	db.Select(`*`)
-	db.Where(`id != ?`, where.Id)
+	db.Where(`id != ?`, where.IdNE)
 	db.Find(&result)
 	return result, db.Error
 }
@@ -553,7 +558,7 @@ func (m *UserModel) FindAllByIdInOrNotIn(ctx context.Context, where FindAllByIdI
 	var result []*User
 	var db = m.db.WithContext(ctx)
 	db.Select(`*`)
-	db.Where(`id IN ? OR id NOT IN ?`, where.Id, where.Id1)
+	db.Where(`id IN (?) OR id NOT IN (?)`, where.IdIn, where.IdNotIn)
 	db.Find(&result)
 	return result, db.Error
 }
@@ -564,7 +569,7 @@ func (m *UserModel) ComplexQuery(ctx context.Context, where ComplexQueryWherePar
 	var result []*User
 	var db = m.db.WithContext(ctx)
 	db.Select(`*`)
-	db.Where(`id > ? AND id < ? AND id != ? AND id IN ? AND id NOT IN ? AND id BETWEEN ? AND ? AND id NOT BETWEEN ? AND ? AND id >= ? AND id <= ? AND id != ? AND name LIKE ? AND name NOT LIKE ? AND name IN ? AND name NOT IN ? AND name BETWEEN ? AND ? AND name NOT BETWEEN ? AND ? AND name >= ? AND name <= ? AND name != ?`, where.Id, where.Id1, where.Id2, where.Id3, where.Id4, where.IdBetweenStart, where.IdBetweenEnd, where.IdNotBetweenStart, where.IdNotBetweenEnd, where.Id5, where.Id6, where.Id7, where.Name, where.Name1, where.Name2, where.Name3, where.NameBetweenStart, where.NameBetweenEnd, where.NameNotBetweenStart, where.NameNotBetweenEnd, where.Name4, where.Name5, where.Name6)
+	db.Where(`id > ? AND id < ? AND id != ? AND id IN (?) AND id NOT IN (?) AND id BETWEEN ? AND ? AND id NOT BETWEEN ? AND ? AND id >= ? AND id <= ? AND id != ? AND name LIKE ? AND name NOT LIKE ? AND name IN (?) AND name NOT IN (?) AND name BETWEEN ? AND ? AND name NOT BETWEEN ? AND ? AND name >= ? AND name <= ? AND name != ?`, where.IdGT, where.IdLT, where.IdNE, where.IdIn, where.IdNotIn, where.IdBetweenStart, where.IdBetweenEnd, where.IdNotBetweenStart, where.IdNotBetweenEnd, where.IdGE, where.IdLE, where.IdNE1, where.NameLike, where.NameNotLike, where.NameIn, where.NameNotIn, where.NameBetweenStart, where.NameBetweenEnd, where.NameNotBetweenStart, where.NameNotBetweenEnd, where.NameGE, where.NameLE, where.NameNE)
 	db.Find(&result)
 	return result, db.Error
 }
