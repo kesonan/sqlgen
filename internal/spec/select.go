@@ -5,6 +5,7 @@ import (
 	_ "embed"
 	"fmt"
 	"strings"
+	"text/template"
 
 	"github.com/iancoleman/strcase"
 
@@ -64,7 +65,7 @@ func (s *SelectStmt) ReceiverName() string {
 //go:embed column.tpl
 var fieldTpl string
 
-func (s *SelectStmt) ReceiverStructure() string {
+func (s *SelectStmt) ReceiverStructure(orm string) string {
 	receiverName := s.ReceiverName()
 	if strings.EqualFold(receiverName, s.TableName()) {
 		// Use table struct
@@ -76,6 +77,18 @@ func (s *SelectStmt) ReceiverStructure() string {
 	buf.Write(`type %s struct {`, receiverName)
 	for _, v := range s.ColumnInfo {
 		t := templatex.New()
+		t.AppendFuncMap(template.FuncMap{
+			"ColumnTag": func() string {
+				switch orm {
+				case "gorm":
+					return fmt.Sprintf(`gorm:"column:%s" `, v.Name)
+				case "xorm":
+					return fmt.Sprintf(`xorm:"'%s'" `, v.Name)
+				default:
+					return ""
+				}
+			},
+		})
 		t.MustParse(fieldTpl)
 		t.MustExecute(v)
 		var columnBuf bytes.Buffer

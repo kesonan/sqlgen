@@ -50,12 +50,12 @@ type FindByNamePartWhereParameter struct {
 
 // FindAllCountResult is a find all count result.
 type FindAllCountResult struct {
-	Count int64 `gorm:"column:count" json:"count"`
+	Count int64 `xorm:"'count'" json:"count"`
 }
 
 // FindAllPartCountResult is a find all part count result.
 type FindAllPartCountResult struct {
-	Count uint64 `gorm:"column:count" json:"count"`
+	Count uint64 `xorm:"'count'" json:"count"`
 }
 
 // FindOneByNameAndPasswordWhereParameter is a where parameter structure.
@@ -81,16 +81,16 @@ type ListUserByNameAscHavingCountTypeGtHavingParameter struct {
 
 // ListUserByNameAscHavingCountTypeGtResult is a list user by name asc having count type gt result.
 type ListUserByNameAscHavingCountTypeGtResult struct {
-	Id         uint64    `gorm:"column:id" json:"id"`
-	Name       string    `gorm:"column:name" json:"name"`
-	Password   string    `gorm:"column:password" json:"password"`
-	Mobile     string    `gorm:"column:mobile" json:"mobile"`
-	Gender     string    `gorm:"column:gender" json:"gender"`
-	Nickname   string    `gorm:"column:nickname" json:"nickname"`
-	Type       int8      `gorm:"column:type" json:"type"`
-	CreateTime time.Time `gorm:"column:create_time" json:"createTime"`
-	UpdateTime time.Time `gorm:"column:update_time" json:"updateTime"`
-	TypeCount  int8      `gorm:"column:typeCount" json:"typeCount"`
+	Id         uint64    `xorm:"'id'" json:"id"`
+	Name       string    `xorm:"'name'" json:"name"`
+	Password   string    `xorm:"'password'" json:"password"`
+	Mobile     string    `xorm:"'mobile'" json:"mobile"`
+	Gender     string    `xorm:"'gender'" json:"gender"`
+	Nickname   string    `xorm:"'nickname'" json:"nickname"`
+	Type       int8      `xorm:"'type'" json:"type"`
+	CreateTime time.Time `xorm:"'create_time'" json:"createTime"`
+	UpdateTime time.Time `xorm:"'update_time'" json:"updateTime"`
+	TypeCount  int8      `xorm:"'typeCount'" json:"typeCount"`
 }
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescWhereParameter is a where parameter structure.
@@ -105,16 +105,16 @@ type ListUserByNameDescHavingCountTypeGtOrderByIdDescHavingParameter struct {
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescResult is a list user by name desc having count type gt order by id desc result.
 type ListUserByNameDescHavingCountTypeGtOrderByIdDescResult struct {
-	Id         uint64    `gorm:"column:id" json:"id"`
-	Name       string    `gorm:"column:name" json:"name"`
-	Password   string    `gorm:"column:password" json:"password"`
-	Mobile     string    `gorm:"column:mobile" json:"mobile"`
-	Gender     string    `gorm:"column:gender" json:"gender"`
-	Nickname   string    `gorm:"column:nickname" json:"nickname"`
-	Type       int8      `gorm:"column:type" json:"type"`
-	CreateTime time.Time `gorm:"column:create_time" json:"createTime"`
-	UpdateTime time.Time `gorm:"column:update_time" json:"updateTime"`
-	TypeCount  int8      `gorm:"column:typeCount" json:"typeCount"`
+	Id         uint64    `xorm:"'id'" json:"id"`
+	Name       string    `xorm:"'name'" json:"name"`
+	Password   string    `xorm:"'password'" json:"password"`
+	Mobile     string    `xorm:"'mobile'" json:"mobile"`
+	Gender     string    `xorm:"'gender'" json:"gender"`
+	Nickname   string    `xorm:"'nickname'" json:"nickname"`
+	Type       int8      `xorm:"'type'" json:"type"`
+	CreateTime time.Time `xorm:"'create_time'" json:"createTime"`
+	UpdateTime time.Time `xorm:"'update_time'" json:"updateTime"`
+	TypeCount  int8      `xorm:"'typeCount'" json:"typeCount"`
 }
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10WhereParameter is a where parameter structure.
@@ -134,16 +134,16 @@ type ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10LimitParameter struc
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Result is a list user by name desc having count type gt order by id desc limit 10 result.
 type ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Result struct {
-	Id         uint64    `gorm:"column:id" json:"id"`
-	Name       string    `gorm:"column:name" json:"name"`
-	Password   string    `gorm:"column:password" json:"password"`
-	Mobile     string    `gorm:"column:mobile" json:"mobile"`
-	Gender     string    `gorm:"column:gender" json:"gender"`
-	Nickname   string    `gorm:"column:nickname" json:"nickname"`
-	Type       int8      `gorm:"column:type" json:"type"`
-	CreateTime time.Time `gorm:"column:create_time" json:"createTime"`
-	UpdateTime time.Time `gorm:"column:update_time" json:"updateTime"`
-	TypeCount  int8      `gorm:"column:typeCount" json:"typeCount"`
+	Id         uint64    `xorm:"'id'" json:"id"`
+	Name       string    `xorm:"'name'" json:"name"`
+	Password   string    `xorm:"'password'" json:"password"`
+	Mobile     string    `xorm:"'mobile'" json:"mobile"`
+	Gender     string    `xorm:"'gender'" json:"gender"`
+	Nickname   string    `xorm:"'nickname'" json:"nickname"`
+	Type       int8      `xorm:"'type'" json:"type"`
+	CreateTime time.Time `xorm:"'create_time'" json:"createTime"`
+	UpdateTime time.Time `xorm:"'update_time'" json:"updateTime"`
+	TypeCount  int8      `xorm:"'typeCount'" json:"typeCount"`
 }
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10WhereParameter is a where parameter structure.
@@ -164,16 +164,16 @@ type ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10LimitParamet
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10Result is a list user by name desc having count type gt order by id desc limit 10 offset 10 result.
 type ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10Result struct {
-	Id         uint64    `gorm:"column:id" json:"id"`
-	Name       string    `gorm:"column:name" json:"name"`
-	Password   string    `gorm:"column:password" json:"password"`
-	Mobile     string    `gorm:"column:mobile" json:"mobile"`
-	Gender     string    `gorm:"column:gender" json:"gender"`
-	Nickname   string    `gorm:"column:nickname" json:"nickname"`
-	Type       int8      `gorm:"column:type" json:"type"`
-	CreateTime time.Time `gorm:"column:create_time" json:"createTime"`
-	UpdateTime time.Time `gorm:"column:update_time" json:"updateTime"`
-	TypeCount  int8      `gorm:"column:typeCount" json:"typeCount"`
+	Id         uint64    `xorm:"'id'" json:"id"`
+	Name       string    `xorm:"'name'" json:"name"`
+	Password   string    `xorm:"'password'" json:"password"`
+	Mobile     string    `xorm:"'mobile'" json:"mobile"`
+	Gender     string    `xorm:"'gender'" json:"gender"`
+	Nickname   string    `xorm:"'nickname'" json:"nickname"`
+	Type       int8      `xorm:"'type'" json:"type"`
+	CreateTime time.Time `xorm:"'create_time'" json:"createTime"`
+	UpdateTime time.Time `xorm:"'update_time'" json:"updateTime"`
+	TypeCount  int8      `xorm:"'typeCount'" json:"typeCount"`
 }
 
 // FindOneByNameLikeWhereParameter is a where parameter structure.

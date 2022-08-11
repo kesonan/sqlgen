@@ -24,7 +24,7 @@ type {{UpperCamel $.Table.Name}} struct { {{range $.Table.Columns}}
 {{range $stmt := .SelectStmt}}{{if $stmt.Where.IsValid}}{{$stmt.Where.ParameterStructure "Where"}}
 {{end}}{{if $stmt.Having.IsValid}}{{$stmt.Having.ParameterStructure "Having"}}
 {{end}}{{if $stmt.Limit.Multiple}}{{$stmt.Limit.ParameterStructure}}
-{{end}}{{$stmt.ReceiverStructure}}
+{{end}}{{$stmt.ReceiverStructure "gorm"}}
 {{end}}
 
 {{range $stmt := .UpdateStmt}}{{if $stmt.Where.IsValid}}{{$stmt.Where.ParameterStructure "Where"}}
