@@ -14,7 +14,7 @@ func (p Pattern) Match(list ...string) []string {
 	var matchTableSet = set.From()
 	for _, s := range list {
 		for _, v := range p {
-			match, _ := filepath.Match(v, s)
+			match, _ := filepath.Match(v, filepath.Base(s))
 			if match {
 				matchTableSet.Add(s)
 			}

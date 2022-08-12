@@ -13,6 +13,14 @@ import (
 	"github.com/anqiansong/sqlgen/internal/templatex"
 )
 
+const (
+	ormBun  = "bun"
+	ormGorm = "gorm"
+	ormSQL  = "sql"
+	ormSQLX = "sqlx"
+	ormXorm = "xorm"
+)
+
 // SelectStmt represents a select statement.
 type SelectStmt struct {
 	// Action represents the db action.
@@ -75,14 +83,23 @@ func (s *SelectStmt) ReceiverStructure(orm string) string {
 	buf.Write("\n")
 	buf.Write("// %s is a %s.", receiverName, strcase.ToDelimited(receiverName, ' '))
 	buf.Write(`type %s struct {`, receiverName)
+	if orm == ormBun {
+		buf.Write("bun.BaseModel `bun:\"table:%s\"`", s.FromInfo.Name)
+	}
 	for _, v := range s.ColumnInfo {
 		t := templatex.New()
 		t.AppendFuncMap(template.FuncMap{
 			"ColumnTag": func() string {
 				switch orm {
-				case "gorm":
+				case ormBun:
+					return fmt.Sprintf(`bun:"%s" `, v.Name)
+				case ormGorm:
 					return fmt.Sprintf(`gorm:"column:%s" `, v.Name)
-				case "xorm":
+				case ormSQL:
+					return "" // placeholder
+				case ormSQLX:
+					return fmt.Sprintf(`db:"%s" `, v.Name)
+				case ormXorm:
 					return fmt.Sprintf(`xorm:"'%s'" `, v.Name)
 				default:
 					return ""

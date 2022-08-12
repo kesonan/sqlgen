@@ -13,21 +13,8 @@ function generate() {
     rm -rf "$output"
     mkdir -p "$output"
 
-    # generate create code
-    cd "$output/create"
-    sqlgen $name -f "example.sql" -o .
-
-    # generate delete code
-    cd "$output/delete"
-    sqlgen $name -f "example.sql" -o .
-
-    # generate read code
-    cd "$output/read"
-    sqlgen $name -f "example.sql" -o .
-
-    # generate update code
-    cd "$output/update"
-    sqlgen $name -f "example.sql" -o .
+    cd "$output"
+    sqlgen $name -f "$dir/example.sql" -o .
 }
 
 

@@ -1,243 +1,160 @@
---  用户表 --
 CREATE TABLE `user`
 (
     `id`          bigint(10) unsigned NOT NULL AUTO_INCREMENT primary key,
-    `name`        varchar(255) COLLATE utf8mb4_general_ci NULL COMMENT '用户\t名称',
-    `password`    varchar(255) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '用户\n密码',
-    `mobile`      varchar(255) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '手机号',
-    `gender`      char(5) COLLATE utf8mb4_general_ci      NOT NULL COMMENT '男｜女｜未公\r开',
-    `nickname`    varchar(255) COLLATE utf8mb4_general_ci          DEFAULT '' COMMENT '用户昵称',
-    `type`        tinyint(1) COLLATE utf8mb4_general_ci DEFAULT 0 COMMENT '用户类型',
-    `create_time` timestamp NULL,
-    `update_time` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    `name`        varchar(255) COLLATE utf8mb4_general_ci NULL COMMENT 'The username',
+    `password`    varchar(255) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT 'The \n user password',
+    `mobile`      varchar(255) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT 'The mobile phone number',
+    `gender`      char(10) COLLATE utf8mb4_general_ci      NOT NULL COMMENT 'gender,male|female|unknown',
+    `nickname`    varchar(255) COLLATE utf8mb4_general_ci          DEFAULT '' COMMENT 'The nickname',
+    `type`        tinyint(1) COLLATE utf8mb4_general_ci DEFAULT 0 COMMENT 'The user type, 0:normal,1:vip, for test golang keyword',
+    `create_at` timestamp NULL,
+    `update_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY `name_index` (`name`),
     UNIQUE KEY `type_index` (`type`),
     UNIQUE KEY `mobile_index` (`mobile`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '用户表' COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT 'user table' COLLATE=utf8mb4_general_ci;
 
--- example1: find one by primary key
--- if you want to find one result, you have to explicitly declare limit 1 statement.
--- fn: FindOne
-select *
-from user
-where id = ? and name in (?,?,?) limit 1;
 
--- example2: find one by unique key
--- fn: FindByName
-select *
-from user
-where name = ? limit 1;
+-- operation: create
+-- note: sqlgen will generate only one create function named Create, so the next insert sql statements will be ignored.
 
--- example3: find part of fields by primary key
--- fn: FindOnePart
-select id, name, nickname
-from user
-where id = ? limit 1;
+-- test case: insert one.
+-- fn: CreateOne
+insert into `user` (`name`, `password`, `mobile`, `gender`, `nickname`, `type`, `create_at`, `update_at`) values (?, ?, ?, ?, ?, ?, ?, ?);
 
--- example4: find part of fields by unique key
--- fn: FindByNamePart
-select id, name, nickname
-from user
-where name = ? limit 1;
+-- test case: insert partial columns.
+-- fn: CreatePart
+insert into `user` (`name`, `password`, `mobile`) values (?, ?, ?);
 
--- example5: find all
--- fn: FindAll
-select *
-from user;
 
--- example6: find all count, if call function, you must use AS keyword to alias result.
--- fn: FindAllCount
-select count(*) AS count
-from user;
 
--- example7: find all part of fields
--- fn: FindAllPart
-select id, name, nickname
-from user;
 
--- example8: find all part of fields count, if call function, you must use AS keyword to alias result.
--- fn: FindAllPartCount
-select count(id) AS count
-from user;
+-- operation: update
+-- note:  sqlgen will generate update function whose name via the value of `fn:` in the comment.
+-- update statement please see https://dev.mysql.com/doc/refman/8.0/en/update.html.
 
--- example9: find one by name and password
--- fn: FindOneByNameAndPassword
-select *
-from user
-where name = ?
-  and password = ? limit 1;
-
--- example10: list user by primary key, group by name
--- fn: ListUserByNameAsc
-select *
-from user
-where id > ?
-group by name;
-
--- example11: list user by primary key, group by name asc, having count(type) > ?
--- having clause must be a alias, do not use function expression, for example:
--- select * from user where id > ? group by name asc having count(type) > ?; in this
--- statement, count(type) is a function expression, it will not work, you can use
--- select *,count(type) AS typeCount from user where id > ? group by name asc having typeCount > ?; instead.
--- fn: ListUserByNameAscHavingCountTypeGt
-select *, count(type) AS typeCount
-from user
-where id > ?
-group by name
-having typeCount > ?;
-
--- example13: list user by primary key, group by name desc, having count(type) > ?, order by id desc
--- fn: ListUserByNameDescHavingCountTypeGtOrderByIdDesc
-select *, count(type) AS typeCount
-from user
-where id > ?
-group by name
-having typeCount > ?
-order by id desc;
-
--- example14: list user by primary key, group by name desc, having count(type) > ?, order by id desc, limit 10
--- fn: ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10
-select *, count(type) AS typeCount
-from user
-where id > ?
-group by name
-having typeCount > ?
-order by id desc limit 10;
-
--- example15: list user by primary key, group by name desc, having count(type) > ?, order by id desc, limit 10, 10
--- fn: ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10
-select *, count(type) AS typeCount
-from user
-where id > ?
-group by name
-having typeCount > ?
-order by id desc limit 10, 10;
-
--- example16: find one by name like
--- fn: FindOneByNameLike
-select *
-from user
-where name like ? limit 1;
-
--- example17: find all by name not like
--- fn: FindAllByNameNotLike
-select *
-from user
-where name not like ?;
-
--- example18: find all by id in
--- fn: FindAllByIdIn
-select *
-from user
-where id in (?);
-
--- example19: find all by id not in
--- fn: FindAllByIdNotIn
-select *
-from user
-where id not in (?);
-
--- example20: find all by id between
--- fn: FindAllByIdBetween
-select *
-from user
-where id between ? and ?;
-
--- example21: find all by id not between
--- fn: FindAllByIdNotBetween
-select *
-from user
-where id not between ? and ?;
-
--- example22: find all by id greater than or equal to
--- fn: FindAllByIdGte
-select *
-from user
-where id >= ?;
-
--- example23: find all by id less than or equal to
--- fn: FindAllByIdLte
-select *
-from user
-where id <= ?;
-
--- example24: find all by id not equal to
--- fn: FindAllByIdNeq
-select *
-from user
-where id != ?;
-
--- example25: find all by id in, or, not in
--- fn: FindAllByIdInOrNotIn
-select *
-from user
-where id in (?)
-   or id not in (?);
-
--- example26: complex query
--- fn: ComplexQuery
-select *
-from user
-where id > ?
-  and id < ?
-  and id != ?
-  and id in (?)
-  and id not in (?)
-  and id between ? and ?
-  and id not between ? and ?
-  and id >= ?
-  and id <= ?
-  and id != ?
-  and name like ?
-  and name not like ?
-  and name in (?)
-  and name not in (?)
-  and name between ?
-  and ? and name not between ? and ?
-  and name >= ?
-  and name <= ?
-  and name != ?;
-
--- example27: update by primary key
+-- test case: update one.
 -- fn: Update
-update user set name = ?, password = ?, mobile = ?, gender = ?, nickname = ?, type = ?, create_time = ?, update_time = ? where id = ?;
+update `user` set `name` = ?, `password` = ?, `mobile` = ?, `gender` = ?, `nickname` = ?, `type` = ?, `create_at` = ?, `update_at` = ? where `id` = ?;
 
--- example28: update by unique key
--- fn: UpdateByName
-update user set password = ?, mobile = ?, gender = ?, nickname = ?, type = ?, create_time = ?, update_time = ? where name = ?;
+-- case: update one with order by desc clause.
+-- fn: UpdateOrderByIdDesc
+update `user` set `name` = ?, `password` = ?, `mobile` = ?, `gender` = ?, `nickname` = ?, `type` = ?, `create_at` = ?, `update_at` = ? where `id` = ? order by id desc;
 
--- example29: update part columns by primary key
--- fn: UpdatePart
-update user set name = ?, nickname = ? where id = ?;
+-- test case: update one with order by desc, limit count clause.
+-- fn: UpdateOrderByIdDescLimitCount
+update `user` set `name` = ?, `password` = ?, `mobile` = ?, `gender` = ?, `nickname` = ?, `type` = ?, `create_at` = ?, `update_at` = ? where `id` = ? order by id desc;
 
--- example30: update part columns by unique key
--- fn: UpdatePartByName
-update user set name = ?, nickname = ? where name = ?;
 
--- example31: update name limit ?
--- fn: UpdateNameLimit
-update user set name = ? where id > ? limit ?;
+-- operation: read
+-- note:  sqlgen will generate update function whose name via the value of `fn:` in the comment.
+-- select statement please see https://dev.mysql.com/doc/refman/8.0/en/select.html.
 
--- example32: update name limit ? order by id desc
--- fn: UpdateNameLimitOrder
-update user set name = ? where id > ? order by id desc limit ?;
+-- test case: find one by primary key.
+-- note: the expression `limit 1` is necessary in order to get the first record, otherwise it will return multiple records.
+-- fn: FindOne
+select * from `user` where `id` = ? limit 1;
 
--- example33: delete by primary key
--- fn: Delete
-delete from user where id = ?;
+-- test case: find one by unique key.
+-- note: the expression `limit 1` is necessary in order to get the first record, otherwise it will return multiple records.
+-- fn: FindOneByName
+select * from `user` where `name` = ? limit 1;
 
--- example34: delete by unique key
--- fn: DeleteByName
-delete from user where name = ?;
 
--- example35 delete by unique keys
--- fn: DeleteByNameAndMobile
-delete from user where name = ? and mobile = ?;
+-- test case: find one with group by clause.
+-- note: the expression `limit 1` is necessary in order to get the first record, otherwise it will return multiple records.
+-- fn: FindOneGroupByName
+select * from `user` where `name` = ? group by name limit 1;
 
--- example36: delete by id order by id
--- fn: DeleteOrderByID
-delete from user where id = ? order by id desc;
+-- test case: find one with group by desc, having clause.
+-- note: the expression `limit 1` is necessary in order to get the first record, otherwise it will return multiple records.
+-- fn: FindOneGroupByNameHavingName
+select * from `user` where `name` = ? group by name having name = ? limit 1;
 
--- example37 delete by id order by id limit 10
--- fn: DeleteOrderByIDLimit
-delete from user where id = ? order by id desc limit 10;
+-- test case: find all
+-- fn: FindAll
+select * from `user`;
+
+-- test case: find limit count, offset 0.
+-- note: the expression both `limit ?`(unsupported marker likes `$1`) and `limit 10`(count must be gather than 1) can return multiple records. do not use `limit 1` if you want to read multiple records.
+-- fn: FindLimit
+select * from `user` where id > ? limit ?;
+
+-- test case: find records, with limit count, offset clause.
+-- note: the expression both `limit ?, ?`(unsupported marker likes `$1`) and `limit 10, 10`(count must gather than 1, offset must gather than 0) can return multiple records. do not use `limit ?,1` or `limit 10,1` if you want to read multiple records.
+-- fn: FindLimitOffset
+select * from `user` limit ?, ?;
+
+-- test case: find records, with group by, limit, offset clause.
+-- note: the expression both `limit ?, ?`(unsupported marker likes `$1`) and `limit 10, 10`(count must gather than 1, offset must gather than 0) can return multiple records. do not use `limit ?,1` or `limit 10,1` if you want to read multiple records.
+-- fn: FindGroupLimitOffset
+select * from `user` where id > ? group by name limit ?, ?;
+
+-- test case: find records, with group by, having, limit, offset clause.
+-- note: the expression both `limit ?, ?`(unsupported marker likes `$1`) and `limit 10, 10`(count must gather than 1, offset must gather than 0) can return multiple records. do not use `limit ?,1` or `limit 10,1` if you want to read multiple records.
+-- fn: FindGroupHavingLimitOffset
+select * from `user` where id > ? group by name having id > ? limit ?, ?;
+
+-- test case: find records, with group by, having, order by asc, limit, offset clause.
+-- note: the expression both `limit ?, ?`(unsupported marker likes `$1`) and `limit 10, 10`(count must gather than 1, offset must gather than 0) can return multiple records. do not use `limit ?,1` or `limit 10,1` if you want to read multiple records.
+-- fn: FindGroupHavingOrderAscLimitOffset
+select * from `user` where id > ? group by name having id > ? order by id limit ?, ?;
+
+-- test case: find records, with group by, having, order by desc, limit, offset clause.
+-- note: the expression both `limit ?, ?`(unsupported marker likes `$1`) and `limit 10, 10`(count must gather than 1, offset must gather than 0) can return multiple records. do not use `limit ?,1` or `limit 10,1` if you want to read multiple records.
+-- fn: FindGroupHavingOrderDescLimitOffset
+select * from `user` where id > ? group by name having id > ? order by id desc limit ?, ?;
+
+-- test case: find partial columns.
+-- fn: FindOnePart
+select `name`, `password`, `mobile` from `user` where id > ? limit 1;
+
+-- test case: built-in function: count.
+-- note: AS expression is necessary if you are using built-in function.
+-- fn: FindAllCount
+select count(id) AS countID from `user`;
+
+-- test case: built-in function: count.
+-- note: AS expression is necessary if you are using built-in function.
+-- fn: FindAllCountWhere
+select count(id) AS countID from `user` where id > ?;
+
+-- test case: built-in function: max
+-- note: AS expression is necessary if you are using built-in function.
+-- fn: FindMaxID
+select max(id) AS maxID from `user`;
+
+-- test case: built-in function: min
+-- note: AS expression is necessary if you are using built-in function.
+-- fn: FindMinID
+select min(id) AS minID from `user`;
+
+-- test case: built-in function: avg
+-- note: AS expression is necessary if you are using built-in function.
+-- fn: FindAvgID
+select avg(id) AS avgID from `user`;
+
+
+-- operation: delete
+-- note:  sqlgen will generate update function whose name via the value of `fn:` in the comment.
+-- select statement please see https://dev.mysql.com/doc/refman/8.0/en/delete.html.
+
+-- test case: delete one by primary key.
+-- fn: DeleteOne
+delete from `user` where `id` = ?;
+
+-- test case: delete one by unique key.
+-- fn: DeleteOneByName
+delete from `user` where `name` = ?;
+
+-- test case: delete one with order by asc clause.
+-- fn: DeleteOneOrderByIDAsc
+delete from `user` where `name` = ? order by id;
+
+-- test case: delete one with order by desc clause.
+-- fn: DeleteOneOrderByIDDesc
+delete from `user` where `name` = ? order by id desc;
+
+-- test case: delete one with order by desc clause, limit clause.
+-- fn: DeleteOneOrderByIDDescLimitCount
+delete from `user` where `name` = ? order by id desc limit ?;

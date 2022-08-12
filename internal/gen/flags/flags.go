@@ -49,7 +49,12 @@ func Run(arg RunArg) {
 
 func runFromSQL(arg RunArg) error {
 	var list []string
-	for _, filename := range arg.Filename {
+	for _, item := range arg.Filename {
+		filename, err := filepath.Abs(item)
+		if err != nil {
+			return err
+		}
+
 		var dir = filepath.Dir(filename)
 		var base = filepath.Base(filename)
 		fileInfo, err := ioutil.ReadDir(dir)
@@ -61,6 +66,7 @@ func runFromSQL(arg RunArg) error {
 			if item.IsDir() {
 				continue
 			}
+
 			ext := filepath.Ext(item.Name())
 			if ext != sqlExt {
 				continue
