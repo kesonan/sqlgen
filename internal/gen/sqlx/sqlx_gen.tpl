@@ -9,18 +9,18 @@ import (
     "time"
 
     "xorm.io/builder"
+    "github.com/jmoiron/sqlx"
     "github.com/shopspring/decimal"
 )
 
 // {{UpperCamel $.Table.Name}}Model represents a {{$.Table.Name}} model.
 type {{UpperCamel $.Table.Name}}Model struct {
-    db      *sql.Conn
-    scanner Scanner
+    db      *sqlx.DB
 }
 
 // {{UpperCamel $.Table.Name}} represents a {{$.Table.Name}} struct data.
 type {{UpperCamel $.Table.Name}} struct { {{range $.Table.Columns}}
-{{UpperCamel .Name}} {{.GoType}} `json:"{{LowerCamel .Name}}"`{{end}}
+{{UpperCamel .Name}} {{.GoType}} `db:"{{.Name}}" json:"{{LowerCamel .Name}}"`{{end}}
 }
 {{range $stmt := .SelectStmt}}{{if $stmt.Where.IsValid}}{{$stmt.Where.ParameterStructure "Where"}}
 {{end}}{{if $stmt.Having.IsValid}}{{$stmt.Having.ParameterStructure "Having"}}
@@ -40,10 +40,9 @@ type {{UpperCamel $.Table.Name}} struct { {{range $.Table.Columns}}
 
 
 // New{{UpperCamel $.Table.Name}}Model creates a new {{$.Table.Name}} model.
-func New{{UpperCamel $.Table.Name}}Model(db *sql.Conn, scanner Scanner) *{{UpperCamel $.Table.Name}}Model {
+func New{{UpperCamel $.Table.Name}}Model(db *sqlx.DB) *{{UpperCamel $.Table.Name}}Model {
     return &{{UpperCamel $.Table.Name}}Model{
         db: db,
-        scanner: scanner,
     }
 }
 
@@ -72,7 +71,7 @@ func (m *{{UpperCamel $.Table.Name}}Model) Create(ctx context.Context, data ...*
             return err
         }
 
-        {{range $.Table.Columns}}{{if IsPrimary .Name}}{{if .AutoIncrement}}v.{{UpperCamel .Name}} = {{.GoType}}(id){{end}}{{end}}{{end}}
+        {{range $.Table.Columns}}{{if IsPrimary .Name}}{{if .AutoIncrement}}v.{{UpperCamel .Name}} =  {{.GoType}}(id){{end}}{{end}}{{end}}
     }
     return
 }
@@ -89,14 +88,8 @@ func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if 
     {{end}}{{if $stmt.OrderBy.IsValid}}b.OrderBy({{$stmt.OrderBy.SQL}})
     {{end}}{{if $stmt.Limit.IsValid}}b.Limit({{if $stmt.Limit.One}}1{{else}}{{$stmt.Limit.LimitParameter "limit"}}{{end}}{{if gt $stmt.Limit.Offset 0}}, {{$stmt.Limit.OffsetParameter "limit"}}{{end}})
     {{end}}query, args, err := b.ToSQL()
-    {{if $stmt.Limit.One}}row := m.db.QueryRowContext(ctx, query, args...)
-    if err = row.Err(); err != nil {
-        return nil, err
-    }
-    err = m.scanner.ScanRow(row, result)
-    return
-    {{else}}var rows *sql.Rows
-    rows, err = m.db.QueryContext(ctx, query, args...)
+    var rows *sqlx.Rows
+    rows, err = m.db.QueryxContext(ctx, query, args...)
     if err != nil {
         return nil, err
     }
@@ -106,10 +99,18 @@ func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if 
             result = nil
         }
     }()
-    if err = m.scanner.ScanRows(rows, result); err != nil{
-        return nil, err
+
+    for rows.Next() {
+        var v {{$stmt.ReceiverName}}
+        err = rows.StructScan(&v)
+        if err != nil {
+            return nil, err
+        }
+        {{if $stmt.Limit.One}}result=&v
+        break{{else}} result = append(result, &v){{end}}
     }
-    return result, nil{{end}}
+
+    return result, nil
 }
 {{end}}
 

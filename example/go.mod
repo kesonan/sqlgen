@@ -3,6 +3,7 @@ module github.com/anqiansong/sqlgen/example
 go 1.18
 
 require (
+	github.com/jmoiron/sqlx v1.3.5
 	gorm.io/gorm v1.23.8
 	xorm.io/builder v0.3.11-0.20220531020008-1bd24a7dc978
 	xorm.io/xorm v1.3.1

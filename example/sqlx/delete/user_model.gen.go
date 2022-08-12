@@ -8,26 +8,26 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/jmoiron/sqlx"
 	"xorm.io/builder"
 )
 
 // UserModel represents a user model.
 type UserModel struct {
-	db      *sql.Conn
-	scanner Scanner
+	db *sqlx.DB
 }
 
 // User represents a user struct data.
 type User struct {
-	Id         uint64    `json:"id"`
-	Name       string    `json:"name"`
-	Password   string    `json:"password"`
-	Mobile     string    `json:"mobile"`
-	Gender     string    `json:"gender"`
-	Nickname   string    `json:"nickname"`
-	Type       int8      `json:"type"`
-	CreateTime time.Time `json:"createTime"`
-	UpdateTime time.Time `json:"updateTime"`
+	Id         uint64    `db:"id" json:"id"`
+	Name       string    `db:"name" json:"name"`
+	Password   string    `db:"password" json:"password"`
+	Mobile     string    `db:"mobile" json:"mobile"`
+	Gender     string    `db:"gender" json:"gender"`
+	Nickname   string    `db:"nickname" json:"nickname"`
+	Type       int8      `db:"type" json:"type"`
+	CreateTime time.Time `db:"create_time" json:"createTime"`
+	UpdateTime time.Time `db:"update_time" json:"updateTime"`
 }
 
 // DeleteWhereParameter is a where parameter structure.
@@ -62,10 +62,9 @@ type DeleteOrderByIDLimitLimitParameter struct {
 }
 
 // NewUserModel creates a new user model.
-func NewUserModel(db *sql.Conn, scanner Scanner) *UserModel {
+func NewUserModel(db *sqlx.DB) *UserModel {
 	return &UserModel{
-		db:      db,
-		scanner: scanner,
+		db: db,
 	}
 }
 
