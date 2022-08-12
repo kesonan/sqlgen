@@ -8,32 +8,31 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/jmoiron/sqlx"
 	"xorm.io/builder"
 )
 
 // UserModel represents a user model.
 type UserModel struct {
-	db      *sql.Conn
-	scanner Scanner
+	db *sqlx.DB
 }
 
 // User represents a user struct data.
 type User struct {
-	Id         uint64    `json:"id"`
-	Name       string    `json:"name"`
-	Password   string    `json:"password"`
-	Mobile     string    `json:"mobile"`
-	Gender     string    `json:"gender"`
-	Nickname   string    `json:"nickname"`
-	Type       int8      `json:"type"`
-	CreateTime time.Time `json:"createTime"`
-	UpdateTime time.Time `json:"updateTime"`
+	Id         uint64    `db:"id" json:"id"`
+	Name       string    `db:"name" json:"name"`
+	Password   string    `db:"password" json:"password"`
+	Mobile     string    `db:"mobile" json:"mobile"`
+	Gender     string    `db:"gender" json:"gender"`
+	Nickname   string    `db:"nickname" json:"nickname"`
+	Type       int8      `db:"type" json:"type"`
+	CreateTime time.Time `db:"create_time" json:"createTime"`
+	UpdateTime time.Time `db:"update_time" json:"updateTime"`
 }
 
 // FindOneWhereParameter is a where parameter structure.
 type FindOneWhereParameter struct {
 	IdEqual uint64
-	NameIn  []string
 }
 
 // FindByNameWhereParameter is a where parameter structure.
@@ -260,10 +259,9 @@ type ComplexQueryWhereParameter struct {
 }
 
 // NewUserModel creates a new user model.
-func NewUserModel(db *sql.Conn, scanner Scanner) *UserModel {
+func NewUserModel(db *sqlx.DB) *UserModel {
 	return &UserModel{
-		db:      db,
-		scanner: scanner,
+		db: db,
 	}
 }
 
@@ -298,21 +296,37 @@ func (m *UserModel) Create(ctx context.Context, data ...*User) (err error) {
 }
 
 // FindOne is generated from sql:
-// select * from user where id = ? and name in (?,?,?) limit 1;
+// select * from user where id = ? limit 1;
 func (m *UserModel) FindOne(ctx context.Context, where FindOneWhereParameter) (result *User, err error) {
 	result = new(User)
 	b := builder.Select(`*`)
 	b.From("`user`")
-	b.Where(builder.Expr(`id = ? AND name IN (?)`, where.IdEqual, where.NameIn))
+	b.Where(builder.Expr(`id = ?`, where.IdEqual))
 	b.Limit(1)
 	query, args, err := b.ToSQL()
-	row := m.db.QueryRowContext(ctx, query, args...)
-	if err = row.Err(); err != nil {
+	var rows *sqlx.Rows
+	rows, err = m.db.QueryxContext(ctx, query, args...)
+	if err != nil {
 		return nil, err
 	}
-	err = m.scanner.ScanRow(row, result)
-	return
+	defer func() {
+		err = rows.Close()
+		if err != nil {
+			result = nil
+		}
+	}()
 
+	for rows.Next() {
+		var v User
+		err = rows.StructScan(&v)
+		if err != nil {
+			return nil, err
+		}
+		result = &v
+		break
+	}
+
+	return result, nil
 }
 
 // FindByName is generated from sql:
@@ -324,13 +338,29 @@ func (m *UserModel) FindByName(ctx context.Context, where FindByNameWhereParamet
 	b.Where(builder.Expr(`name = ?`, where.NameEqual))
 	b.Limit(1)
 	query, args, err := b.ToSQL()
-	row := m.db.QueryRowContext(ctx, query, args...)
-	if err = row.Err(); err != nil {
+	var rows *sqlx.Rows
+	rows, err = m.db.QueryxContext(ctx, query, args...)
+	if err != nil {
 		return nil, err
 	}
-	err = m.scanner.ScanRow(row, result)
-	return
+	defer func() {
+		err = rows.Close()
+		if err != nil {
+			result = nil
+		}
+	}()
 
+	for rows.Next() {
+		var v User
+		err = rows.StructScan(&v)
+		if err != nil {
+			return nil, err
+		}
+		result = &v
+		break
+	}
+
+	return result, nil
 }
 
 // FindOnePart is generated from sql:
@@ -342,13 +372,29 @@ func (m *UserModel) FindOnePart(ctx context.Context, where FindOnePartWhereParam
 	b.Where(builder.Expr(`id = ?`, where.IdEqual))
 	b.Limit(1)
 	query, args, err := b.ToSQL()
-	row := m.db.QueryRowContext(ctx, query, args...)
-	if err = row.Err(); err != nil {
+	var rows *sqlx.Rows
+	rows, err = m.db.QueryxContext(ctx, query, args...)
+	if err != nil {
 		return nil, err
 	}
-	err = m.scanner.ScanRow(row, result)
-	return
+	defer func() {
+		err = rows.Close()
+		if err != nil {
+			result = nil
+		}
+	}()
 
+	for rows.Next() {
+		var v User
+		err = rows.StructScan(&v)
+		if err != nil {
+			return nil, err
+		}
+		result = &v
+		break
+	}
+
+	return result, nil
 }
 
 // FindByNamePart is generated from sql:
@@ -360,23 +406,8 @@ func (m *UserModel) FindByNamePart(ctx context.Context, where FindByNamePartWher
 	b.Where(builder.Expr(`name = ?`, where.NameEqual))
 	b.Limit(1)
 	query, args, err := b.ToSQL()
-	row := m.db.QueryRowContext(ctx, query, args...)
-	if err = row.Err(); err != nil {
-		return nil, err
-	}
-	err = m.scanner.ScanRow(row, result)
-	return
-
-}
-
-// FindAll is generated from sql:
-// select * from user;
-func (m *UserModel) FindAll(ctx context.Context) (result []*User, err error) {
-	b := builder.Select(`*`)
-	b.From("`user`")
-	query, args, err := b.ToSQL()
-	var rows *sql.Rows
-	rows, err = m.db.QueryContext(ctx, query, args...)
+	var rows *sqlx.Rows
+	rows, err = m.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -386,9 +417,47 @@ func (m *UserModel) FindAll(ctx context.Context) (result []*User, err error) {
 			result = nil
 		}
 	}()
-	if err = m.scanner.ScanRows(rows, result); err != nil {
+
+	for rows.Next() {
+		var v User
+		err = rows.StructScan(&v)
+		if err != nil {
+			return nil, err
+		}
+		result = &v
+		break
+	}
+
+	return result, nil
+}
+
+// FindAll is generated from sql:
+// select * from user;
+func (m *UserModel) FindAll(ctx context.Context) (result []*User, err error) {
+	b := builder.Select(`*`)
+	b.From("`user`")
+	query, args, err := b.ToSQL()
+	var rows *sqlx.Rows
+	rows, err = m.db.QueryxContext(ctx, query, args...)
+	if err != nil {
 		return nil, err
 	}
+	defer func() {
+		err = rows.Close()
+		if err != nil {
+			result = nil
+		}
+	}()
+
+	for rows.Next() {
+		var v User
+		err = rows.StructScan(&v)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, &v)
+	}
+
 	return result, nil
 }
 
@@ -400,23 +469,8 @@ func (m *UserModel) FindAllCount(ctx context.Context) (result *FindAllCountResul
 	b.From("`user`")
 	b.Limit(1)
 	query, args, err := b.ToSQL()
-	row := m.db.QueryRowContext(ctx, query, args...)
-	if err = row.Err(); err != nil {
-		return nil, err
-	}
-	err = m.scanner.ScanRow(row, result)
-	return
-
-}
-
-// FindAllPart is generated from sql:
-// select id, name, nickname from user;
-func (m *UserModel) FindAllPart(ctx context.Context) (result []*User, err error) {
-	b := builder.Select(`id, name, nickname`)
-	b.From("`user`")
-	query, args, err := b.ToSQL()
-	var rows *sql.Rows
-	rows, err = m.db.QueryContext(ctx, query, args...)
+	var rows *sqlx.Rows
+	rows, err = m.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -426,9 +480,47 @@ func (m *UserModel) FindAllPart(ctx context.Context) (result []*User, err error)
 			result = nil
 		}
 	}()
-	if err = m.scanner.ScanRows(rows, result); err != nil {
+
+	for rows.Next() {
+		var v FindAllCountResult
+		err = rows.StructScan(&v)
+		if err != nil {
+			return nil, err
+		}
+		result = &v
+		break
+	}
+
+	return result, nil
+}
+
+// FindAllPart is generated from sql:
+// select id, name, nickname from user;
+func (m *UserModel) FindAllPart(ctx context.Context) (result []*User, err error) {
+	b := builder.Select(`id, name, nickname`)
+	b.From("`user`")
+	query, args, err := b.ToSQL()
+	var rows *sqlx.Rows
+	rows, err = m.db.QueryxContext(ctx, query, args...)
+	if err != nil {
 		return nil, err
 	}
+	defer func() {
+		err = rows.Close()
+		if err != nil {
+			result = nil
+		}
+	}()
+
+	for rows.Next() {
+		var v User
+		err = rows.StructScan(&v)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, &v)
+	}
+
 	return result, nil
 }
 
@@ -440,13 +532,29 @@ func (m *UserModel) FindAllPartCount(ctx context.Context) (result *FindAllPartCo
 	b.From("`user`")
 	b.Limit(1)
 	query, args, err := b.ToSQL()
-	row := m.db.QueryRowContext(ctx, query, args...)
-	if err = row.Err(); err != nil {
+	var rows *sqlx.Rows
+	rows, err = m.db.QueryxContext(ctx, query, args...)
+	if err != nil {
 		return nil, err
 	}
-	err = m.scanner.ScanRow(row, result)
-	return
+	defer func() {
+		err = rows.Close()
+		if err != nil {
+			result = nil
+		}
+	}()
 
+	for rows.Next() {
+		var v FindAllPartCountResult
+		err = rows.StructScan(&v)
+		if err != nil {
+			return nil, err
+		}
+		result = &v
+		break
+	}
+
+	return result, nil
 }
 
 // FindOneByNameAndPassword is generated from sql:
@@ -458,13 +566,29 @@ func (m *UserModel) FindOneByNameAndPassword(ctx context.Context, where FindOneB
 	b.Where(builder.Expr(`name = ? AND password = ?`, where.NameEqual, where.PasswordEqual))
 	b.Limit(1)
 	query, args, err := b.ToSQL()
-	row := m.db.QueryRowContext(ctx, query, args...)
-	if err = row.Err(); err != nil {
+	var rows *sqlx.Rows
+	rows, err = m.db.QueryxContext(ctx, query, args...)
+	if err != nil {
 		return nil, err
 	}
-	err = m.scanner.ScanRow(row, result)
-	return
+	defer func() {
+		err = rows.Close()
+		if err != nil {
+			result = nil
+		}
+	}()
 
+	for rows.Next() {
+		var v User
+		err = rows.StructScan(&v)
+		if err != nil {
+			return nil, err
+		}
+		result = &v
+		break
+	}
+
+	return result, nil
 }
 
 // ListUserByNameAsc is generated from sql:
@@ -475,8 +599,8 @@ func (m *UserModel) ListUserByNameAsc(ctx context.Context, where ListUserByNameA
 	b.Where(builder.Expr(`id > ?`, where.IdGT))
 	b.GroupBy(`name`)
 	query, args, err := b.ToSQL()
-	var rows *sql.Rows
-	rows, err = m.db.QueryContext(ctx, query, args...)
+	var rows *sqlx.Rows
+	rows, err = m.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -486,9 +610,16 @@ func (m *UserModel) ListUserByNameAsc(ctx context.Context, where ListUserByNameA
 			result = nil
 		}
 	}()
-	if err = m.scanner.ScanRows(rows, result); err != nil {
-		return nil, err
+
+	for rows.Next() {
+		var v User
+		err = rows.StructScan(&v)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, &v)
 	}
+
 	return result, nil
 }
 
@@ -501,8 +632,8 @@ func (m *UserModel) ListUserByNameAscHavingCountTypeGt(ctx context.Context, wher
 	b.GroupBy(`name`)
 	b.Having(fmt.Sprintf(`typeCount > %v`, having.TypeCountGT))
 	query, args, err := b.ToSQL()
-	var rows *sql.Rows
-	rows, err = m.db.QueryContext(ctx, query, args...)
+	var rows *sqlx.Rows
+	rows, err = m.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -512,9 +643,16 @@ func (m *UserModel) ListUserByNameAscHavingCountTypeGt(ctx context.Context, wher
 			result = nil
 		}
 	}()
-	if err = m.scanner.ScanRows(rows, result); err != nil {
-		return nil, err
+
+	for rows.Next() {
+		var v ListUserByNameAscHavingCountTypeGtResult
+		err = rows.StructScan(&v)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, &v)
 	}
+
 	return result, nil
 }
 
@@ -528,8 +666,8 @@ func (m *UserModel) ListUserByNameDescHavingCountTypeGtOrderByIdDesc(ctx context
 	b.Having(fmt.Sprintf(`typeCount > %v`, having.TypeCountGT))
 	b.OrderBy(`id desc`)
 	query, args, err := b.ToSQL()
-	var rows *sql.Rows
-	rows, err = m.db.QueryContext(ctx, query, args...)
+	var rows *sqlx.Rows
+	rows, err = m.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -539,9 +677,16 @@ func (m *UserModel) ListUserByNameDescHavingCountTypeGtOrderByIdDesc(ctx context
 			result = nil
 		}
 	}()
-	if err = m.scanner.ScanRows(rows, result); err != nil {
-		return nil, err
+
+	for rows.Next() {
+		var v ListUserByNameDescHavingCountTypeGtOrderByIdDescResult
+		err = rows.StructScan(&v)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, &v)
 	}
+
 	return result, nil
 }
 
@@ -556,8 +701,8 @@ func (m *UserModel) ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10(ctx 
 	b.OrderBy(`id desc`)
 	b.Limit(limit.Count)
 	query, args, err := b.ToSQL()
-	var rows *sql.Rows
-	rows, err = m.db.QueryContext(ctx, query, args...)
+	var rows *sqlx.Rows
+	rows, err = m.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -567,9 +712,16 @@ func (m *UserModel) ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10(ctx 
 			result = nil
 		}
 	}()
-	if err = m.scanner.ScanRows(rows, result); err != nil {
-		return nil, err
+
+	for rows.Next() {
+		var v ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Result
+		err = rows.StructScan(&v)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, &v)
 	}
+
 	return result, nil
 }
 
@@ -584,8 +736,8 @@ func (m *UserModel) ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offse
 	b.OrderBy(`id desc`)
 	b.Limit(limit.Count, limit.Offset)
 	query, args, err := b.ToSQL()
-	var rows *sql.Rows
-	rows, err = m.db.QueryContext(ctx, query, args...)
+	var rows *sqlx.Rows
+	rows, err = m.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -595,9 +747,16 @@ func (m *UserModel) ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offse
 			result = nil
 		}
 	}()
-	if err = m.scanner.ScanRows(rows, result); err != nil {
-		return nil, err
+
+	for rows.Next() {
+		var v ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10Result
+		err = rows.StructScan(&v)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, &v)
 	}
+
 	return result, nil
 }
 
@@ -610,24 +769,8 @@ func (m *UserModel) FindOneByNameLike(ctx context.Context, where FindOneByNameLi
 	b.Where(builder.Expr(`name LIKE ?`, where.NameLike))
 	b.Limit(1)
 	query, args, err := b.ToSQL()
-	row := m.db.QueryRowContext(ctx, query, args...)
-	if err = row.Err(); err != nil {
-		return nil, err
-	}
-	err = m.scanner.ScanRow(row, result)
-	return
-
-}
-
-// FindAllByNameNotLike is generated from sql:
-// select * from user where name not like ?;
-func (m *UserModel) FindAllByNameNotLike(ctx context.Context, where FindAllByNameNotLikeWhereParameter) (result []*User, err error) {
-	b := builder.Select(`*`)
-	b.From("`user`")
-	b.Where(builder.Expr(`name NOT LIKE ?`, where.NameNotLike))
-	query, args, err := b.ToSQL()
-	var rows *sql.Rows
-	rows, err = m.db.QueryContext(ctx, query, args...)
+	var rows *sqlx.Rows
+	rows, err = m.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -637,9 +780,48 @@ func (m *UserModel) FindAllByNameNotLike(ctx context.Context, where FindAllByNam
 			result = nil
 		}
 	}()
-	if err = m.scanner.ScanRows(rows, result); err != nil {
+
+	for rows.Next() {
+		var v User
+		err = rows.StructScan(&v)
+		if err != nil {
+			return nil, err
+		}
+		result = &v
+		break
+	}
+
+	return result, nil
+}
+
+// FindAllByNameNotLike is generated from sql:
+// select * from user where name not like ?;
+func (m *UserModel) FindAllByNameNotLike(ctx context.Context, where FindAllByNameNotLikeWhereParameter) (result []*User, err error) {
+	b := builder.Select(`*`)
+	b.From("`user`")
+	b.Where(builder.Expr(`name NOT LIKE ?`, where.NameNotLike))
+	query, args, err := b.ToSQL()
+	var rows *sqlx.Rows
+	rows, err = m.db.QueryxContext(ctx, query, args...)
+	if err != nil {
 		return nil, err
 	}
+	defer func() {
+		err = rows.Close()
+		if err != nil {
+			result = nil
+		}
+	}()
+
+	for rows.Next() {
+		var v User
+		err = rows.StructScan(&v)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, &v)
+	}
+
 	return result, nil
 }
 
@@ -650,8 +832,8 @@ func (m *UserModel) FindAllByIdIn(ctx context.Context, where FindAllByIdInWhereP
 	b.From("`user`")
 	b.Where(builder.Expr(`id IN (?)`, where.IdIn))
 	query, args, err := b.ToSQL()
-	var rows *sql.Rows
-	rows, err = m.db.QueryContext(ctx, query, args...)
+	var rows *sqlx.Rows
+	rows, err = m.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -661,9 +843,16 @@ func (m *UserModel) FindAllByIdIn(ctx context.Context, where FindAllByIdInWhereP
 			result = nil
 		}
 	}()
-	if err = m.scanner.ScanRows(rows, result); err != nil {
-		return nil, err
+
+	for rows.Next() {
+		var v User
+		err = rows.StructScan(&v)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, &v)
 	}
+
 	return result, nil
 }
 
@@ -674,8 +863,8 @@ func (m *UserModel) FindAllByIdNotIn(ctx context.Context, where FindAllByIdNotIn
 	b.From("`user`")
 	b.Where(builder.Expr(`id NOT IN (?)`, where.IdNotIn))
 	query, args, err := b.ToSQL()
-	var rows *sql.Rows
-	rows, err = m.db.QueryContext(ctx, query, args...)
+	var rows *sqlx.Rows
+	rows, err = m.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -685,9 +874,16 @@ func (m *UserModel) FindAllByIdNotIn(ctx context.Context, where FindAllByIdNotIn
 			result = nil
 		}
 	}()
-	if err = m.scanner.ScanRows(rows, result); err != nil {
-		return nil, err
+
+	for rows.Next() {
+		var v User
+		err = rows.StructScan(&v)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, &v)
 	}
+
 	return result, nil
 }
 
@@ -698,8 +894,8 @@ func (m *UserModel) FindAllByIdBetween(ctx context.Context, where FindAllByIdBet
 	b.From("`user`")
 	b.Where(builder.Expr(`id BETWEEN ? AND ?`, where.IdBetweenStart, where.IdBetweenEnd))
 	query, args, err := b.ToSQL()
-	var rows *sql.Rows
-	rows, err = m.db.QueryContext(ctx, query, args...)
+	var rows *sqlx.Rows
+	rows, err = m.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -709,9 +905,16 @@ func (m *UserModel) FindAllByIdBetween(ctx context.Context, where FindAllByIdBet
 			result = nil
 		}
 	}()
-	if err = m.scanner.ScanRows(rows, result); err != nil {
-		return nil, err
+
+	for rows.Next() {
+		var v User
+		err = rows.StructScan(&v)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, &v)
 	}
+
 	return result, nil
 }
 
@@ -722,8 +925,8 @@ func (m *UserModel) FindAllByIdNotBetween(ctx context.Context, where FindAllById
 	b.From("`user`")
 	b.Where(builder.Expr(`id NOT BETWEEN ? AND ?`, where.IdNotBetweenStart, where.IdNotBetweenEnd))
 	query, args, err := b.ToSQL()
-	var rows *sql.Rows
-	rows, err = m.db.QueryContext(ctx, query, args...)
+	var rows *sqlx.Rows
+	rows, err = m.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -733,9 +936,16 @@ func (m *UserModel) FindAllByIdNotBetween(ctx context.Context, where FindAllById
 			result = nil
 		}
 	}()
-	if err = m.scanner.ScanRows(rows, result); err != nil {
-		return nil, err
+
+	for rows.Next() {
+		var v User
+		err = rows.StructScan(&v)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, &v)
 	}
+
 	return result, nil
 }
 
@@ -746,8 +956,8 @@ func (m *UserModel) FindAllByIdGte(ctx context.Context, where FindAllByIdGteWher
 	b.From("`user`")
 	b.Where(builder.Expr(`id >= ?`, where.IdGE))
 	query, args, err := b.ToSQL()
-	var rows *sql.Rows
-	rows, err = m.db.QueryContext(ctx, query, args...)
+	var rows *sqlx.Rows
+	rows, err = m.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -757,9 +967,16 @@ func (m *UserModel) FindAllByIdGte(ctx context.Context, where FindAllByIdGteWher
 			result = nil
 		}
 	}()
-	if err = m.scanner.ScanRows(rows, result); err != nil {
-		return nil, err
+
+	for rows.Next() {
+		var v User
+		err = rows.StructScan(&v)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, &v)
 	}
+
 	return result, nil
 }
 
@@ -770,8 +987,8 @@ func (m *UserModel) FindAllByIdLte(ctx context.Context, where FindAllByIdLteWher
 	b.From("`user`")
 	b.Where(builder.Expr(`id <= ?`, where.IdLE))
 	query, args, err := b.ToSQL()
-	var rows *sql.Rows
-	rows, err = m.db.QueryContext(ctx, query, args...)
+	var rows *sqlx.Rows
+	rows, err = m.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -781,9 +998,16 @@ func (m *UserModel) FindAllByIdLte(ctx context.Context, where FindAllByIdLteWher
 			result = nil
 		}
 	}()
-	if err = m.scanner.ScanRows(rows, result); err != nil {
-		return nil, err
+
+	for rows.Next() {
+		var v User
+		err = rows.StructScan(&v)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, &v)
 	}
+
 	return result, nil
 }
 
@@ -794,8 +1018,8 @@ func (m *UserModel) FindAllByIdNeq(ctx context.Context, where FindAllByIdNeqWher
 	b.From("`user`")
 	b.Where(builder.Expr(`id != ?`, where.IdNE))
 	query, args, err := b.ToSQL()
-	var rows *sql.Rows
-	rows, err = m.db.QueryContext(ctx, query, args...)
+	var rows *sqlx.Rows
+	rows, err = m.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -805,9 +1029,16 @@ func (m *UserModel) FindAllByIdNeq(ctx context.Context, where FindAllByIdNeqWher
 			result = nil
 		}
 	}()
-	if err = m.scanner.ScanRows(rows, result); err != nil {
-		return nil, err
+
+	for rows.Next() {
+		var v User
+		err = rows.StructScan(&v)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, &v)
 	}
+
 	return result, nil
 }
 
@@ -818,8 +1049,8 @@ func (m *UserModel) FindAllByIdInOrNotIn(ctx context.Context, where FindAllByIdI
 	b.From("`user`")
 	b.Where(builder.Expr(`id IN (?) OR id NOT IN (?)`, where.IdIn, where.IdNotIn))
 	query, args, err := b.ToSQL()
-	var rows *sql.Rows
-	rows, err = m.db.QueryContext(ctx, query, args...)
+	var rows *sqlx.Rows
+	rows, err = m.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -829,9 +1060,16 @@ func (m *UserModel) FindAllByIdInOrNotIn(ctx context.Context, where FindAllByIdI
 			result = nil
 		}
 	}()
-	if err = m.scanner.ScanRows(rows, result); err != nil {
-		return nil, err
+
+	for rows.Next() {
+		var v User
+		err = rows.StructScan(&v)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, &v)
 	}
+
 	return result, nil
 }
 
@@ -842,8 +1080,8 @@ func (m *UserModel) ComplexQuery(ctx context.Context, where ComplexQueryWherePar
 	b.From("`user`")
 	b.Where(builder.Expr(`id > ? AND id < ? AND id != ? AND id IN (?) AND id NOT IN (?) AND id BETWEEN ? AND ? AND id NOT BETWEEN ? AND ? AND id >= ? AND id <= ? AND id != ? AND name LIKE ? AND name NOT LIKE ? AND name IN (?) AND name NOT IN (?) AND name BETWEEN ? AND ? AND name NOT BETWEEN ? AND ? AND name >= ? AND name <= ? AND name != ?`, where.IdGT, where.IdLT, where.IdNE, where.IdIn, where.IdNotIn, where.IdBetweenStart, where.IdBetweenEnd, where.IdNotBetweenStart, where.IdNotBetweenEnd, where.IdGE, where.IdLE, where.IdNE1, where.NameLike, where.NameNotLike, where.NameIn, where.NameNotIn, where.NameBetweenStart, where.NameBetweenEnd, where.NameNotBetweenStart, where.NameNotBetweenEnd, where.NameGE, where.NameLE, where.NameNE))
 	query, args, err := b.ToSQL()
-	var rows *sql.Rows
-	rows, err = m.db.QueryContext(ctx, query, args...)
+	var rows *sqlx.Rows
+	rows, err = m.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -853,8 +1091,15 @@ func (m *UserModel) ComplexQuery(ctx context.Context, where ComplexQueryWherePar
 			result = nil
 		}
 	}()
-	if err = m.scanner.ScanRows(rows, result); err != nil {
-		return nil, err
+
+	for rows.Next() {
+		var v User
+		err = rows.StructScan(&v)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, &v)
 	}
+
 	return result, nil
 }
