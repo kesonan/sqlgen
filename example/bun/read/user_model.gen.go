@@ -7,25 +7,26 @@ import (
 	"fmt"
 	"time"
 
-	"gorm.io/gorm"
+	"github.com/uptrace/bun"
 )
 
 // UserModel represents a user model.
 type UserModel struct {
-	db gorm.DB
+	db bun.IDB
 }
 
 // User represents a user struct data.
 type User struct {
-	Id         uint64    `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
-	Name       string    `gorm:"column:name" json:"name"`
-	Password   string    `gorm:"column:password" json:"password"`
-	Mobile     string    `gorm:"column:mobile" json:"mobile"`
-	Gender     string    `gorm:"column:gender" json:"gender"`
-	Nickname   string    `gorm:"column:nickname" json:"nickname"`
-	Type       int8      `gorm:"column:type" json:"type"`
-	CreateTime time.Time `gorm:"column:create_time" json:"createTime"`
-	UpdateTime time.Time `gorm:"column:update_time" json:"updateTime"`
+	bun.BaseModel `bun:"table:user"`
+	Id            uint64    `bun:"id,pk,autoincrement;" json:"id"`
+	Name          string    `bun:"name" json:"name"`
+	Password      string    `bun:"password" json:"password"`
+	Mobile        string    `bun:"mobile" json:"mobile"`
+	Gender        string    `bun:"gender" json:"gender"`
+	Nickname      string    `bun:"nickname" json:"nickname"`
+	Type          int8      `bun:"type" json:"type"`
+	CreateTime    time.Time `bun:"create_time" json:"createTime"`
+	UpdateTime    time.Time `bun:"update_time" json:"updateTime"`
 }
 
 // FindOneWhereParameter is a where parameter structure.
@@ -50,12 +51,12 @@ type FindByNamePartWhereParameter struct {
 
 // FindAllCountResult is a find all count result.
 type FindAllCountResult struct {
-	Count int64 `gorm:"column:count" json:"count"`
+	Count int64 `json:"count"`
 }
 
 // FindAllPartCountResult is a find all part count result.
 type FindAllPartCountResult struct {
-	Count uint64 `gorm:"column:count" json:"count"`
+	Count uint64 `json:"count"`
 }
 
 // FindOneByNameAndPasswordWhereParameter is a where parameter structure.
@@ -81,16 +82,16 @@ type ListUserByNameAscHavingCountTypeGtHavingParameter struct {
 
 // ListUserByNameAscHavingCountTypeGtResult is a list user by name asc having count type gt result.
 type ListUserByNameAscHavingCountTypeGtResult struct {
-	Id         uint64    `gorm:"column:id" json:"id"`
-	Name       string    `gorm:"column:name" json:"name"`
-	Password   string    `gorm:"column:password" json:"password"`
-	Mobile     string    `gorm:"column:mobile" json:"mobile"`
-	Gender     string    `gorm:"column:gender" json:"gender"`
-	Nickname   string    `gorm:"column:nickname" json:"nickname"`
-	Type       int8      `gorm:"column:type" json:"type"`
-	CreateTime time.Time `gorm:"column:create_time" json:"createTime"`
-	UpdateTime time.Time `gorm:"column:update_time" json:"updateTime"`
-	TypeCount  int8      `gorm:"column:typeCount" json:"typeCount"`
+	Id         uint64    `json:"id"`
+	Name       string    `json:"name"`
+	Password   string    `json:"password"`
+	Mobile     string    `json:"mobile"`
+	Gender     string    `json:"gender"`
+	Nickname   string    `json:"nickname"`
+	Type       int8      `json:"type"`
+	CreateTime time.Time `json:"createTime"`
+	UpdateTime time.Time `json:"updateTime"`
+	TypeCount  int8      `json:"typeCount"`
 }
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescWhereParameter is a where parameter structure.
@@ -105,16 +106,16 @@ type ListUserByNameDescHavingCountTypeGtOrderByIdDescHavingParameter struct {
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescResult is a list user by name desc having count type gt order by id desc result.
 type ListUserByNameDescHavingCountTypeGtOrderByIdDescResult struct {
-	Id         uint64    `gorm:"column:id" json:"id"`
-	Name       string    `gorm:"column:name" json:"name"`
-	Password   string    `gorm:"column:password" json:"password"`
-	Mobile     string    `gorm:"column:mobile" json:"mobile"`
-	Gender     string    `gorm:"column:gender" json:"gender"`
-	Nickname   string    `gorm:"column:nickname" json:"nickname"`
-	Type       int8      `gorm:"column:type" json:"type"`
-	CreateTime time.Time `gorm:"column:create_time" json:"createTime"`
-	UpdateTime time.Time `gorm:"column:update_time" json:"updateTime"`
-	TypeCount  int8      `gorm:"column:typeCount" json:"typeCount"`
+	Id         uint64    `json:"id"`
+	Name       string    `json:"name"`
+	Password   string    `json:"password"`
+	Mobile     string    `json:"mobile"`
+	Gender     string    `json:"gender"`
+	Nickname   string    `json:"nickname"`
+	Type       int8      `json:"type"`
+	CreateTime time.Time `json:"createTime"`
+	UpdateTime time.Time `json:"updateTime"`
+	TypeCount  int8      `json:"typeCount"`
 }
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10WhereParameter is a where parameter structure.
@@ -134,16 +135,16 @@ type ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10LimitParameter struc
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Result is a list user by name desc having count type gt order by id desc limit 10 result.
 type ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Result struct {
-	Id         uint64    `gorm:"column:id" json:"id"`
-	Name       string    `gorm:"column:name" json:"name"`
-	Password   string    `gorm:"column:password" json:"password"`
-	Mobile     string    `gorm:"column:mobile" json:"mobile"`
-	Gender     string    `gorm:"column:gender" json:"gender"`
-	Nickname   string    `gorm:"column:nickname" json:"nickname"`
-	Type       int8      `gorm:"column:type" json:"type"`
-	CreateTime time.Time `gorm:"column:create_time" json:"createTime"`
-	UpdateTime time.Time `gorm:"column:update_time" json:"updateTime"`
-	TypeCount  int8      `gorm:"column:typeCount" json:"typeCount"`
+	Id         uint64    `json:"id"`
+	Name       string    `json:"name"`
+	Password   string    `json:"password"`
+	Mobile     string    `json:"mobile"`
+	Gender     string    `json:"gender"`
+	Nickname   string    `json:"nickname"`
+	Type       int8      `json:"type"`
+	CreateTime time.Time `json:"createTime"`
+	UpdateTime time.Time `json:"updateTime"`
+	TypeCount  int8      `json:"typeCount"`
 }
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10WhereParameter is a where parameter structure.
@@ -164,16 +165,16 @@ type ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10LimitParamet
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10Result is a list user by name desc having count type gt order by id desc limit 10 offset 10 result.
 type ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10Result struct {
-	Id         uint64    `gorm:"column:id" json:"id"`
-	Name       string    `gorm:"column:name" json:"name"`
-	Password   string    `gorm:"column:password" json:"password"`
-	Mobile     string    `gorm:"column:mobile" json:"mobile"`
-	Gender     string    `gorm:"column:gender" json:"gender"`
-	Nickname   string    `gorm:"column:nickname" json:"nickname"`
-	Type       int8      `gorm:"column:type" json:"type"`
-	CreateTime time.Time `gorm:"column:create_time" json:"createTime"`
-	UpdateTime time.Time `gorm:"column:update_time" json:"updateTime"`
-	TypeCount  int8      `gorm:"column:typeCount" json:"typeCount"`
+	Id         uint64    `json:"id"`
+	Name       string    `json:"name"`
+	Password   string    `json:"password"`
+	Mobile     string    `json:"mobile"`
+	Gender     string    `json:"gender"`
+	Nickname   string    `json:"nickname"`
+	Type       int8      `json:"type"`
+	CreateTime time.Time `json:"createTime"`
+	UpdateTime time.Time `json:"updateTime"`
+	TypeCount  int8      `json:"typeCount"`
 }
 
 // FindOneByNameLikeWhereParameter is a where parameter structure.
@@ -256,14 +257,11 @@ type ComplexQueryWhereParameter struct {
 	NameNE              string
 }
 
-// TableName returns the table name. it implemented by gorm.Tabler.
-func (User) TableName() string {
-	return "user"
-}
-
-// NewUserModel returns a new user model.
-func NewUserModel(db gorm.DB) *UserModel {
-	return &UserModel{db: db}
+// NewUserModel creates a new user model.
+func NewUserModel(db bun.IDB) *UserModel {
+	return &UserModel{
+		db: db,
+	}
 }
 
 // Create creates  user data.
@@ -272,304 +270,329 @@ func (m *UserModel) Create(ctx context.Context, data ...*User) error {
 		return fmt.Errorf("data is empty")
 	}
 
-	db := m.db.WithContext(ctx)
 	var list []User
 	for _, v := range data {
 		list = append(list, *v)
 	}
 
-	return db.Create(&list).Error
+	_, err := m.db.NewInsert().Model(&list).Exec(ctx)
+	return err
 }
 
 // FindOne is generated from sql:
 // select * from user where id = ? limit 1;
 func (m *UserModel) FindOne(ctx context.Context, where FindOneWhereParameter) (*User, error) {
 	var result = new(User)
-	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
+	var db = m.db.NewSelect()
+	db.Model(result)
+	db.ColumnExpr(`*`)
 	db.Where(`id = ?`, where.IdEqual)
 	db.Limit(1)
-	db.Find(result)
-	return result, db.Error
+	err := db.Scan(ctx)
+	return result, err
 }
 
 // FindByName is generated from sql:
 // select * from user where name = ? limit 1;
 func (m *UserModel) FindByName(ctx context.Context, where FindByNameWhereParameter) (*User, error) {
 	var result = new(User)
-	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
+	var db = m.db.NewSelect()
+	db.Model(result)
+	db.ColumnExpr(`*`)
 	db.Where(`name = ?`, where.NameEqual)
 	db.Limit(1)
-	db.Find(result)
-	return result, db.Error
+	err := db.Scan(ctx)
+	return result, err
 }
 
 // FindOnePart is generated from sql:
 // select id, name, nickname from user where id = ? limit 1;
 func (m *UserModel) FindOnePart(ctx context.Context, where FindOnePartWhereParameter) (*User, error) {
 	var result = new(User)
-	var db = m.db.WithContext(ctx)
-	db.Select(`id, name, nickname`)
+	var db = m.db.NewSelect()
+	db.Model(result)
+	db.ColumnExpr(`id, name, nickname`)
 	db.Where(`id = ?`, where.IdEqual)
 	db.Limit(1)
-	db.Find(result)
-	return result, db.Error
+	err := db.Scan(ctx)
+	return result, err
 }
 
 // FindByNamePart is generated from sql:
 // select id, name, nickname from user where name = ? limit 1;
 func (m *UserModel) FindByNamePart(ctx context.Context, where FindByNamePartWhereParameter) (*User, error) {
 	var result = new(User)
-	var db = m.db.WithContext(ctx)
-	db.Select(`id, name, nickname`)
+	var db = m.db.NewSelect()
+	db.Model(result)
+	db.ColumnExpr(`id, name, nickname`)
 	db.Where(`name = ?`, where.NameEqual)
 	db.Limit(1)
-	db.Find(result)
-	return result, db.Error
+	err := db.Scan(ctx)
+	return result, err
 }
 
 // FindAll is generated from sql:
 // select * from user;
 func (m *UserModel) FindAll(ctx context.Context) ([]*User, error) {
 	var result []*User
-	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
-	db.Find(&result)
-	return result, db.Error
+	var db = m.db.NewSelect()
+	db.Model(&result)
+	db.ColumnExpr(`*`)
+	err := db.Scan(ctx)
+	return result, err
 }
 
 // FindAllCount is generated from sql:
 // select count(*) AS count from user;
 func (m *UserModel) FindAllCount(ctx context.Context) (*FindAllCountResult, error) {
 	var result = new(FindAllCountResult)
-	var db = m.db.WithContext(ctx)
-	db.Select(`count(1) AS count`)
+	var db = m.db.NewSelect()
+	db.Model(result)
+	db.ColumnExpr(`count(1) AS count`)
 	db.Limit(1)
-	db.Find(result)
-	return result, db.Error
+	err := db.Scan(ctx)
+	return result, err
 }
 
 // FindAllPart is generated from sql:
 // select id, name, nickname from user;
 func (m *UserModel) FindAllPart(ctx context.Context) ([]*User, error) {
 	var result []*User
-	var db = m.db.WithContext(ctx)
-	db.Select(`id, name, nickname`)
-	db.Find(&result)
-	return result, db.Error
+	var db = m.db.NewSelect()
+	db.Model(&result)
+	db.ColumnExpr(`id, name, nickname`)
+	err := db.Scan(ctx)
+	return result, err
 }
 
 // FindAllPartCount is generated from sql:
 // select count(id) AS count from user;
 func (m *UserModel) FindAllPartCount(ctx context.Context) (*FindAllPartCountResult, error) {
 	var result = new(FindAllPartCountResult)
-	var db = m.db.WithContext(ctx)
-	db.Select(`count(id) AS count`)
+	var db = m.db.NewSelect()
+	db.Model(result)
+	db.ColumnExpr(`count(id) AS count`)
 	db.Limit(1)
-	db.Find(result)
-	return result, db.Error
+	err := db.Scan(ctx)
+	return result, err
 }
 
 // FindOneByNameAndPassword is generated from sql:
 // select * from user where name = ? and password = ? limit 1;
 func (m *UserModel) FindOneByNameAndPassword(ctx context.Context, where FindOneByNameAndPasswordWhereParameter) (*User, error) {
 	var result = new(User)
-	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
+	var db = m.db.NewSelect()
+	db.Model(result)
+	db.ColumnExpr(`*`)
 	db.Where(`name = ? AND password = ?`, where.NameEqual, where.PasswordEqual)
 	db.Limit(1)
-	db.Find(result)
-	return result, db.Error
+	err := db.Scan(ctx)
+	return result, err
 }
 
 // ListUserByNameAsc is generated from sql:
 // select * from user where id > ? group by name;
 func (m *UserModel) ListUserByNameAsc(ctx context.Context, where ListUserByNameAscWhereParameter) ([]*User, error) {
 	var result []*User
-	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
+	var db = m.db.NewSelect()
+	db.Model(&result)
+	db.ColumnExpr(`*`)
 	db.Where(`id > ?`, where.IdGT)
-	db.Group(`name`)
-	db.Find(&result)
-	return result, db.Error
+	db.GroupExpr(`name`)
+	err := db.Scan(ctx)
+	return result, err
 }
 
 // ListUserByNameAscHavingCountTypeGt is generated from sql:
 // select *, count(type) AS typeCount from user where id > ? group by name having typeCount > ?;
 func (m *UserModel) ListUserByNameAscHavingCountTypeGt(ctx context.Context, where ListUserByNameAscHavingCountTypeGtWhereParameter, having ListUserByNameAscHavingCountTypeGtHavingParameter) ([]*ListUserByNameAscHavingCountTypeGtResult, error) {
 	var result []*ListUserByNameAscHavingCountTypeGtResult
-	var db = m.db.WithContext(ctx)
-	db.Select(`*, count(type) AS typeCount`)
+	var db = m.db.NewSelect()
+	db.Model(&result)
+	db.ColumnExpr(`*, count(type) AS typeCount`)
 	db.Where(`id > ?`, where.IdGT)
-	db.Group(`name`)
+	db.GroupExpr(`name`)
 	db.Having(`typeCount > ?`, having.TypeCountGT)
-	db.Find(&result)
-	return result, db.Error
+	err := db.Scan(ctx)
+	return result, err
 }
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDesc is generated from sql:
 // select *, count(type) AS typeCount from user where id > ? group by name having typeCount > ? order by id desc;
 func (m *UserModel) ListUserByNameDescHavingCountTypeGtOrderByIdDesc(ctx context.Context, where ListUserByNameDescHavingCountTypeGtOrderByIdDescWhereParameter, having ListUserByNameDescHavingCountTypeGtOrderByIdDescHavingParameter) ([]*ListUserByNameDescHavingCountTypeGtOrderByIdDescResult, error) {
 	var result []*ListUserByNameDescHavingCountTypeGtOrderByIdDescResult
-	var db = m.db.WithContext(ctx)
-	db.Select(`*, count(type) AS typeCount`)
+	var db = m.db.NewSelect()
+	db.Model(&result)
+	db.ColumnExpr(`*, count(type) AS typeCount`)
 	db.Where(`id > ?`, where.IdGT)
-	db.Group(`name`)
+	db.GroupExpr(`name`)
 	db.Having(`typeCount > ?`, having.TypeCountGT)
-	db.Order(`id desc`)
-	db.Find(&result)
-	return result, db.Error
+	db.OrderExpr(`id desc`)
+	err := db.Scan(ctx)
+	return result, err
 }
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10 is generated from sql:
 // select *, count(type) AS typeCount from user where id > ? group by name having typeCount > ? order by id desc limit 10;
 func (m *UserModel) ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10(ctx context.Context, where ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10WhereParameter, having ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10HavingParameter, limit ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10LimitParameter) ([]*ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Result, error) {
 	var result []*ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Result
-	var db = m.db.WithContext(ctx)
-	db.Select(`*, count(type) AS typeCount`)
+	var db = m.db.NewSelect()
+	db.Model(&result)
+	db.ColumnExpr(`*, count(type) AS typeCount`)
 	db.Where(`id > ?`, where.IdGT)
-	db.Group(`name`)
+	db.GroupExpr(`name`)
 	db.Having(`typeCount > ?`, having.TypeCountGT)
-	db.Order(`id desc`)
+	db.OrderExpr(`id desc`)
 	db.Limit(limit.Count)
-	db.Find(&result)
-	return result, db.Error
+	err := db.Scan(ctx)
+	return result, err
 }
 
 // ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10 is generated from sql:
 // select *, count(type) AS typeCount from user where id > ? group by name having typeCount > ? order by id desc limit 10, 10;
 func (m *UserModel) ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10(ctx context.Context, where ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10WhereParameter, having ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10HavingParameter, limit ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10LimitParameter) ([]*ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10Result, error) {
 	var result []*ListUserByNameDescHavingCountTypeGtOrderByIdDescLimit10Offset10Result
-	var db = m.db.WithContext(ctx)
-	db.Select(`*, count(type) AS typeCount`)
+	var db = m.db.NewSelect()
+	db.Model(&result)
+	db.ColumnExpr(`*, count(type) AS typeCount`)
 	db.Where(`id > ?`, where.IdGT)
-	db.Group(`name`)
+	db.GroupExpr(`name`)
 	db.Having(`typeCount > ?`, having.TypeCountGT)
-	db.Order(`id desc`)
+	db.OrderExpr(`id desc`)
 	db.Offset(limit.Offset).Limit(limit.Count)
-	db.Find(&result)
-	return result, db.Error
+	err := db.Scan(ctx)
+	return result, err
 }
 
 // FindOneByNameLike is generated from sql:
 // select * from user where name like ? limit 1;
 func (m *UserModel) FindOneByNameLike(ctx context.Context, where FindOneByNameLikeWhereParameter) (*User, error) {
 	var result = new(User)
-	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
+	var db = m.db.NewSelect()
+	db.Model(result)
+	db.ColumnExpr(`*`)
 	db.Where(`name LIKE ?`, where.NameLike)
 	db.Limit(1)
-	db.Find(result)
-	return result, db.Error
+	err := db.Scan(ctx)
+	return result, err
 }
 
 // FindAllByNameNotLike is generated from sql:
 // select * from user where name not like ?;
 func (m *UserModel) FindAllByNameNotLike(ctx context.Context, where FindAllByNameNotLikeWhereParameter) ([]*User, error) {
 	var result []*User
-	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
+	var db = m.db.NewSelect()
+	db.Model(&result)
+	db.ColumnExpr(`*`)
 	db.Where(`name NOT LIKE ?`, where.NameNotLike)
-	db.Find(&result)
-	return result, db.Error
+	err := db.Scan(ctx)
+	return result, err
 }
 
 // FindAllByIdIn is generated from sql:
 // select * from user where id in (?);
 func (m *UserModel) FindAllByIdIn(ctx context.Context, where FindAllByIdInWhereParameter) ([]*User, error) {
 	var result []*User
-	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
+	var db = m.db.NewSelect()
+	db.Model(&result)
+	db.ColumnExpr(`*`)
 	db.Where(`id IN (?)`, where.IdIn)
-	db.Find(&result)
-	return result, db.Error
+	err := db.Scan(ctx)
+	return result, err
 }
 
 // FindAllByIdNotIn is generated from sql:
 // select * from user where id not in (?);
 func (m *UserModel) FindAllByIdNotIn(ctx context.Context, where FindAllByIdNotInWhereParameter) ([]*User, error) {
 	var result []*User
-	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
+	var db = m.db.NewSelect()
+	db.Model(&result)
+	db.ColumnExpr(`*`)
 	db.Where(`id NOT IN (?)`, where.IdNotIn)
-	db.Find(&result)
-	return result, db.Error
+	err := db.Scan(ctx)
+	return result, err
 }
 
 // FindAllByIdBetween is generated from sql:
 // select * from user where id between ? and ?;
 func (m *UserModel) FindAllByIdBetween(ctx context.Context, where FindAllByIdBetweenWhereParameter) ([]*User, error) {
 	var result []*User
-	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
+	var db = m.db.NewSelect()
+	db.Model(&result)
+	db.ColumnExpr(`*`)
 	db.Where(`id BETWEEN ? AND ?`, where.IdBetweenStart, where.IdBetweenEnd)
-	db.Find(&result)
-	return result, db.Error
+	err := db.Scan(ctx)
+	return result, err
 }
 
 // FindAllByIdNotBetween is generated from sql:
 // select * from user where id not between ? and ?;
 func (m *UserModel) FindAllByIdNotBetween(ctx context.Context, where FindAllByIdNotBetweenWhereParameter) ([]*User, error) {
 	var result []*User
-	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
+	var db = m.db.NewSelect()
+	db.Model(&result)
+	db.ColumnExpr(`*`)
 	db.Where(`id NOT BETWEEN ? AND ?`, where.IdNotBetweenStart, where.IdNotBetweenEnd)
-	db.Find(&result)
-	return result, db.Error
+	err := db.Scan(ctx)
+	return result, err
 }
 
 // FindAllByIdGte is generated from sql:
 // select * from user where id >= ?;
 func (m *UserModel) FindAllByIdGte(ctx context.Context, where FindAllByIdGteWhereParameter) ([]*User, error) {
 	var result []*User
-	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
+	var db = m.db.NewSelect()
+	db.Model(&result)
+	db.ColumnExpr(`*`)
 	db.Where(`id >= ?`, where.IdGE)
-	db.Find(&result)
-	return result, db.Error
+	err := db.Scan(ctx)
+	return result, err
 }
 
 // FindAllByIdLte is generated from sql:
 // select * from user where id <= ?;
 func (m *UserModel) FindAllByIdLte(ctx context.Context, where FindAllByIdLteWhereParameter) ([]*User, error) {
 	var result []*User
-	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
+	var db = m.db.NewSelect()
+	db.Model(&result)
+	db.ColumnExpr(`*`)
 	db.Where(`id <= ?`, where.IdLE)
-	db.Find(&result)
-	return result, db.Error
+	err := db.Scan(ctx)
+	return result, err
 }
 
 // FindAllByIdNeq is generated from sql:
 // select * from user where id != ?;
 func (m *UserModel) FindAllByIdNeq(ctx context.Context, where FindAllByIdNeqWhereParameter) ([]*User, error) {
 	var result []*User
-	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
+	var db = m.db.NewSelect()
+	db.Model(&result)
+	db.ColumnExpr(`*`)
 	db.Where(`id != ?`, where.IdNE)
-	db.Find(&result)
-	return result, db.Error
+	err := db.Scan(ctx)
+	return result, err
 }
 
 // FindAllByIdInOrNotIn is generated from sql:
 // select * from user where id in (?) or id not in (?);
 func (m *UserModel) FindAllByIdInOrNotIn(ctx context.Context, where FindAllByIdInOrNotInWhereParameter) ([]*User, error) {
 	var result []*User
-	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
+	var db = m.db.NewSelect()
+	db.Model(&result)
+	db.ColumnExpr(`*`)
 	db.Where(`id IN (?) OR id NOT IN (?)`, where.IdIn, where.IdNotIn)
-	db.Find(&result)
-	return result, db.Error
+	err := db.Scan(ctx)
+	return result, err
 }
 
 // ComplexQuery is generated from sql:
 // select * from user where id > ? and id < ? and id != ? and id in (?) and id not in (?) and id between ? and ? and id not between ? and ? and id >= ? and id <= ? and id != ? and name like ? and name not like ? and name in (?) and name not in (?) and name between ? and ? and name not between ? and ? and name >= ? and name <= ? and name != ?;
 func (m *UserModel) ComplexQuery(ctx context.Context, where ComplexQueryWhereParameter) ([]*User, error) {
 	var result []*User
-	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
+	var db = m.db.NewSelect()
+	db.Model(&result)
+	db.ColumnExpr(`*`)
 	db.Where(`id > ? AND id < ? AND id != ? AND id IN (?) AND id NOT IN (?) AND id BETWEEN ? AND ? AND id NOT BETWEEN ? AND ? AND id >= ? AND id <= ? AND id != ? AND name LIKE ? AND name NOT LIKE ? AND name IN (?) AND name NOT IN (?) AND name BETWEEN ? AND ? AND name NOT BETWEEN ? AND ? AND name >= ? AND name <= ? AND name != ?`, where.IdGT, where.IdLT, where.IdNE, where.IdIn, where.IdNotIn, where.IdBetweenStart, where.IdBetweenEnd, where.IdNotBetweenStart, where.IdNotBetweenEnd, where.IdGE, where.IdLE, where.IdNE1, where.NameLike, where.NameNotLike, where.NameIn, where.NameNotIn, where.NameBetweenStart, where.NameBetweenEnd, where.NameNotBetweenStart, where.NameNotBetweenEnd, where.NameGE, where.NameLE, where.NameNE)
-	db.Find(&result)
-	return result, db.Error
+	err := db.Scan(ctx)
+	return result, err
 }
