@@ -13,10 +13,10 @@ import (
 )
 
 //go:embed sqlx_gen.tpl
-var sqlGenTpl string
+var sqlxGenTpl string
 
 //go:embed sqlx_custom.tpl
-var sqlCustomTpl string
+var sqlxCustomTpl string
 
 func Run(list []spec.Context, output string) error {
 	for _, ctx := range list {
@@ -56,12 +56,12 @@ func Run(list []spec.Context, output string) error {
 				return format
 			},
 		})
-		gen.MustParse(sqlGenTpl)
+		gen.MustParse(sqlxGenTpl)
 		gen.MustExecute(ctx)
 		gen.MustSaveAs(genFilename, true)
 
 		custom := templatex.New()
-		custom.MustParse(sqlCustomTpl)
+		custom.MustParse(sqlxCustomTpl)
 		custom.MustExecute(ctx)
 		custom.MustSave(customFilename, true)
 	}

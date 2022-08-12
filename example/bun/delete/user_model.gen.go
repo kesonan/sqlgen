@@ -7,25 +7,26 @@ import (
 	"fmt"
 	"time"
 
-	"gorm.io/gorm"
+	"github.com/uptrace/bun"
 )
 
 // UserModel represents a user model.
 type UserModel struct {
-	db gorm.DB
+	db bun.IDB
 }
 
 // User represents a user struct data.
 type User struct {
-	Id         uint64    `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
-	Name       string    `gorm:"column:name" json:"name"`
-	Password   string    `gorm:"column:password" json:"password"`
-	Mobile     string    `gorm:"column:mobile" json:"mobile"`
-	Gender     string    `gorm:"column:gender" json:"gender"`
-	Nickname   string    `gorm:"column:nickname" json:"nickname"`
-	Type       int8      `gorm:"column:type" json:"type"`
-	CreateTime time.Time `gorm:"column:create_time" json:"createTime"`
-	UpdateTime time.Time `gorm:"column:update_time" json:"updateTime"`
+	bun.BaseModel `bun:"table:user"`
+	Id            uint64    `bun:"id,pk,autoincrement;" json:"id"`
+	Name          string    `bun:"name" json:"name"`
+	Password      string    `bun:"password" json:"password"`
+	Mobile        string    `bun:"mobile" json:"mobile"`
+	Gender        string    `bun:"gender" json:"gender"`
+	Nickname      string    `bun:"nickname" json:"nickname"`
+	Type          int8      `bun:"type" json:"type"`
+	CreateTime    time.Time `bun:"create_time" json:"createTime"`
+	UpdateTime    time.Time `bun:"update_time" json:"updateTime"`
 }
 
 // DeleteWhereParameter is a where parameter structure.
@@ -54,19 +55,11 @@ type DeleteOrderByIDLimitWhereParameter struct {
 	IdEqual uint64
 }
 
-// DeleteOrderByIDLimitLimitParameter is a limit parameter structure.
-type DeleteOrderByIDLimitLimitParameter struct {
-	Count int
-}
-
-// TableName returns the table name. it implemented by gorm.Tabler.
-func (User) TableName() string {
-	return "user"
-}
-
-// NewUserModel returns a new user model.
-func NewUserModel(db gorm.DB) *UserModel {
-	return &UserModel{db: db}
+// NewUserModel creates a new user model.
+func NewUserModel(db bun.IDB) *UserModel {
+	return &UserModel{
+		db: db,
+	}
 }
 
 // Create creates  user data.
@@ -75,59 +68,61 @@ func (m *UserModel) Create(ctx context.Context, data ...*User) error {
 		return fmt.Errorf("data is empty")
 	}
 
-	db := m.db.WithContext(ctx)
 	var list []User
 	for _, v := range data {
 		list = append(list, *v)
 	}
 
-	return db.Create(&list).Error
+	_, err := m.db.NewInsert().Model(&list).Exec(ctx)
+	return err
 }
 
 // Delete is generated from sql:
 // delete from user where id = ?;
 func (m *UserModel) Delete(ctx context.Context, where DeleteWhereParameter) error {
-	var db = m.db.WithContext(ctx)
+	var db = m.db.NewDelete()
+	db.Model(&User{})
 	db.Where(`id = ?`, where.IdEqual)
-	db.Delete(&User{})
-	return db.Error
+	_, err := db.Exec(ctx)
+	return err
 }
 
 // DeleteByName is generated from sql:
 // delete from user where name = ?;
 func (m *UserModel) DeleteByName(ctx context.Context, where DeleteByNameWhereParameter) error {
-	var db = m.db.WithContext(ctx)
+	var db = m.db.NewDelete()
+	db.Model(&User{})
 	db.Where(`name = ?`, where.NameEqual)
-	db.Delete(&User{})
-	return db.Error
+	_, err := db.Exec(ctx)
+	return err
 }
 
 // DeleteByNameAndMobile is generated from sql:
 // delete from user where name = ? and mobile = ?;
 func (m *UserModel) DeleteByNameAndMobile(ctx context.Context, where DeleteByNameAndMobileWhereParameter) error {
-	var db = m.db.WithContext(ctx)
+	var db = m.db.NewDelete()
+	db.Model(&User{})
 	db.Where(`name = ? AND mobile = ?`, where.NameEqual, where.MobileEqual)
-	db.Delete(&User{})
-	return db.Error
+	_, err := db.Exec(ctx)
+	return err
 }
 
 // DeleteOrderByID is generated from sql:
 // delete from user where id = ? order by id desc;
 func (m *UserModel) DeleteOrderByID(ctx context.Context, where DeleteOrderByIDWhereParameter) error {
-	var db = m.db.WithContext(ctx)
+	var db = m.db.NewDelete()
+	db.Model(&User{})
 	db.Where(`id = ?`, where.IdEqual)
-	db.Order(`id desc`)
-	db.Delete(&User{})
-	return db.Error
+	_, err := db.Exec(ctx)
+	return err
 }
 
 // DeleteOrderByIDLimit is generated from sql:
 // delete from user where id = ? order by id desc limit 10;
-func (m *UserModel) DeleteOrderByIDLimit(ctx context.Context, where DeleteOrderByIDLimitWhereParameter, limit DeleteOrderByIDLimitLimitParameter) error {
-	var db = m.db.WithContext(ctx)
+func (m *UserModel) DeleteOrderByIDLimit(ctx context.Context, where DeleteOrderByIDLimitWhereParameter) error {
+	var db = m.db.NewDelete()
+	db.Model(&User{})
 	db.Where(`id = ?`, where.IdEqual)
-	db.Order(`id desc`)
-	db.Limit(limit.Count)
-	db.Delete(&User{})
-	return db.Error
+	_, err := db.Exec(ctx)
+	return err
 }

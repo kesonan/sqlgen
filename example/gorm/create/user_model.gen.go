@@ -17,7 +17,7 @@ type UserModel struct {
 
 // User represents a user struct data.
 type User struct {
-	Id         uint64    `gorm:"primaryKey;autoIncrement;column:id" json:"id"`
+	Id         uint64    `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
 	Name       string    `gorm:"column:name" json:"name"`
 	Password   string    `gorm:"column:password" json:"password"`
 	Mobile     string    `gorm:"column:mobile" json:"mobile"`

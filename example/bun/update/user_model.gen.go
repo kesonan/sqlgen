@@ -7,25 +7,26 @@ import (
 	"fmt"
 	"time"
 
-	"gorm.io/gorm"
+	"github.com/uptrace/bun"
 )
 
 // UserModel represents a user model.
 type UserModel struct {
-	db gorm.DB
+	db bun.IDB
 }
 
 // User represents a user struct data.
 type User struct {
-	Id         uint64    `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
-	Name       string    `gorm:"column:name" json:"name"`
-	Password   string    `gorm:"column:password" json:"password"`
-	Mobile     string    `gorm:"column:mobile" json:"mobile"`
-	Gender     string    `gorm:"column:gender" json:"gender"`
-	Nickname   string    `gorm:"column:nickname" json:"nickname"`
-	Type       int8      `gorm:"column:type" json:"type"`
-	CreateTime time.Time `gorm:"column:create_time" json:"createTime"`
-	UpdateTime time.Time `gorm:"column:update_time" json:"updateTime"`
+	bun.BaseModel `bun:"table:user"`
+	Id            uint64    `bun:"id,pk,autoincrement;" json:"id"`
+	Name          string    `bun:"name" json:"name"`
+	Password      string    `bun:"password" json:"password"`
+	Mobile        string    `bun:"mobile" json:"mobile"`
+	Gender        string    `bun:"gender" json:"gender"`
+	Nickname      string    `bun:"nickname" json:"nickname"`
+	Type          int8      `bun:"type" json:"type"`
+	CreateTime    time.Time `bun:"create_time" json:"createTime"`
+	UpdateTime    time.Time `bun:"update_time" json:"updateTime"`
 }
 
 // UpdateWhereParameter is a where parameter structure.
@@ -53,29 +54,16 @@ type UpdateNameLimitWhereParameter struct {
 	IdGT uint64
 }
 
-// UpdateNameLimitLimitParameter is a limit parameter structure.
-type UpdateNameLimitLimitParameter struct {
-	Count int
-}
-
 // UpdateNameLimitOrderWhereParameter is a where parameter structure.
 type UpdateNameLimitOrderWhereParameter struct {
 	IdGT uint64
 }
 
-// UpdateNameLimitOrderLimitParameter is a limit parameter structure.
-type UpdateNameLimitOrderLimitParameter struct {
-	Count int
-}
-
-// TableName returns the table name. it implemented by gorm.Tabler.
-func (User) TableName() string {
-	return "user"
-}
-
-// NewUserModel returns a new user model.
-func NewUserModel(db gorm.DB) *UserModel {
-	return &UserModel{db: db}
+// NewUserModel creates a new user model.
+func NewUserModel(db bun.IDB) *UserModel {
+	return &UserModel{
+		db: db,
+	}
 }
 
 // Create creates  user data.
@@ -84,22 +72,20 @@ func (m *UserModel) Create(ctx context.Context, data ...*User) error {
 		return fmt.Errorf("data is empty")
 	}
 
-	db := m.db.WithContext(ctx)
 	var list []User
 	for _, v := range data {
 		list = append(list, *v)
 	}
 
-	return db.Create(&list).Error
+	_, err := m.db.NewInsert().Model(&list).Exec(ctx)
+	return err
 }
 
 // Update is generated from sql:
 // update user set name = ?, password = ?, mobile = ?, gender = ?, nickname = ?, type = ?, create_time = ?, update_time = ? where id = ?;
 func (m *UserModel) Update(ctx context.Context, data *User, where UpdateWhereParameter) error {
-	var db = m.db.WithContext(ctx)
-	db.Model(&User{})
-	db.Where(`id = ?`, where.IdEqual)
-	db.Updates(map[string]interface{}{
+	var db = m.db.NewUpdate()
+	db.Model(map[string]interface{}{
 		"name":        data.Name,
 		"password":    data.Password,
 		"mobile":      data.Mobile,
@@ -109,16 +95,16 @@ func (m *UserModel) Update(ctx context.Context, data *User, where UpdateWherePar
 		"create_time": data.CreateTime,
 		"update_time": data.UpdateTime,
 	})
-	return db.Error
+	db.Where(`id = ?`, where.IdEqual)
+	_, err := db.Exec(ctx)
+	return err
 }
 
 // UpdateByName is generated from sql:
 // update user set password = ?, mobile = ?, gender = ?, nickname = ?, type = ?, create_time = ?, update_time = ? where name = ?;
 func (m *UserModel) UpdateByName(ctx context.Context, data *User, where UpdateByNameWhereParameter) error {
-	var db = m.db.WithContext(ctx)
-	db.Model(&User{})
-	db.Where(`name = ?`, where.NameEqual)
-	db.Updates(map[string]interface{}{
+	var db = m.db.NewUpdate()
+	db.Model(map[string]interface{}{
 		"password":    data.Password,
 		"mobile":      data.Mobile,
 		"gender":      data.Gender,
@@ -127,58 +113,57 @@ func (m *UserModel) UpdateByName(ctx context.Context, data *User, where UpdateBy
 		"create_time": data.CreateTime,
 		"update_time": data.UpdateTime,
 	})
-	return db.Error
+	db.Where(`name = ?`, where.NameEqual)
+	_, err := db.Exec(ctx)
+	return err
 }
 
 // UpdatePart is generated from sql:
 // update user set name = ?, nickname = ? where id = ?;
 func (m *UserModel) UpdatePart(ctx context.Context, data *User, where UpdatePartWhereParameter) error {
-	var db = m.db.WithContext(ctx)
-	db.Model(&User{})
-	db.Where(`id = ?`, where.IdEqual)
-	db.Updates(map[string]interface{}{
+	var db = m.db.NewUpdate()
+	db.Model(map[string]interface{}{
 		"name":     data.Name,
 		"nickname": data.Nickname,
 	})
-	return db.Error
+	db.Where(`id = ?`, where.IdEqual)
+	_, err := db.Exec(ctx)
+	return err
 }
 
 // UpdatePartByName is generated from sql:
 // update user set name = ?, nickname = ? where name = ?;
 func (m *UserModel) UpdatePartByName(ctx context.Context, data *User, where UpdatePartByNameWhereParameter) error {
-	var db = m.db.WithContext(ctx)
-	db.Model(&User{})
-	db.Where(`name = ?`, where.NameEqual)
-	db.Updates(map[string]interface{}{
+	var db = m.db.NewUpdate()
+	db.Model(map[string]interface{}{
 		"name":     data.Name,
 		"nickname": data.Nickname,
 	})
-	return db.Error
+	db.Where(`name = ?`, where.NameEqual)
+	_, err := db.Exec(ctx)
+	return err
 }
 
 // UpdateNameLimit is generated from sql:
 // update user set name = ? where id > ? limit ?;
-func (m *UserModel) UpdateNameLimit(ctx context.Context, data *User, where UpdateNameLimitWhereParameter, limit UpdateNameLimitLimitParameter) error {
-	var db = m.db.WithContext(ctx)
-	db.Model(&User{})
-	db.Where(`id > ?`, where.IdGT)
-	db.Limit(limit.Count)
-	db.Updates(map[string]interface{}{
+func (m *UserModel) UpdateNameLimit(ctx context.Context, data *User, where UpdateNameLimitWhereParameter) error {
+	var db = m.db.NewUpdate()
+	db.Model(map[string]interface{}{
 		"name": data.Name,
 	})
-	return db.Error
+	db.Where(`id > ?`, where.IdGT)
+	_, err := db.Exec(ctx)
+	return err
 }
 
 // UpdateNameLimitOrder is generated from sql:
 // update user set name = ? where id > ? order by id desc limit ?;
-func (m *UserModel) UpdateNameLimitOrder(ctx context.Context, data *User, where UpdateNameLimitOrderWhereParameter, limit UpdateNameLimitOrderLimitParameter) error {
-	var db = m.db.WithContext(ctx)
-	db.Model(&User{})
-	db.Where(`id > ?`, where.IdGT)
-	db.Order(`id desc`)
-	db.Limit(limit.Count)
-	db.Updates(map[string]interface{}{
+func (m *UserModel) UpdateNameLimitOrder(ctx context.Context, data *User, where UpdateNameLimitOrderWhereParameter) error {
+	var db = m.db.NewUpdate()
+	db.Model(map[string]interface{}{
 		"name": data.Name,
 	})
-	return db.Error
+	db.Where(`id > ?`, where.IdGT)
+	_, err := db.Exec(ctx)
+	return err
 }
