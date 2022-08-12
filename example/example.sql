@@ -197,3 +197,47 @@ where id > ?
   and name >= ?
   and name <= ?
   and name != ?;
+
+-- example27: update by primary key
+-- fn: Update
+update user set name = ?, password = ?, mobile = ?, gender = ?, nickname = ?, type = ?, create_time = ?, update_time = ? where id = ?;
+
+-- example28: update by unique key
+-- fn: UpdateByName
+update user set password = ?, mobile = ?, gender = ?, nickname = ?, type = ?, create_time = ?, update_time = ? where name = ?;
+
+-- example29: update part columns by primary key
+-- fn: UpdatePart
+update user set name = ?, nickname = ? where id = ?;
+
+-- example30: update part columns by unique key
+-- fn: UpdatePartByName
+update user set name = ?, nickname = ? where name = ?;
+
+-- example31: update name limit ?
+-- fn: UpdateNameLimit
+update user set name = ? where id > ? limit ?;
+
+-- example32: update name limit ? order by id desc
+-- fn: UpdateNameLimitOrder
+update user set name = ? where id > ? order by id desc limit ?;
+
+-- example33: delete by primary key
+-- fn: Delete
+delete from user where id = ?;
+
+-- example34: delete by unique key
+-- fn: DeleteByName
+delete from user where name = ?;
+
+-- example35 delete by unique keys
+-- fn: DeleteByNameAndMobile
+delete from user where name = ? and mobile = ?;
+
+-- example36: delete by id order by id
+-- fn: DeleteOrderByID
+delete from user where id = ? order by id desc;
+
+-- example37 delete by id order by id limit 10
+-- fn: DeleteOrderByIDLimit
+delete from user where id = ? order by id desc limit 10;
