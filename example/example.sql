@@ -10,7 +10,6 @@ CREATE TABLE `user`
     `create_at` timestamp NULL,
     `update_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY `name_index` (`name`),
-    UNIQUE KEY `type_index` (`type`),
     UNIQUE KEY `mobile_index` (`mobile`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT 'user table' COLLATE=utf8mb4_general_ci;
 

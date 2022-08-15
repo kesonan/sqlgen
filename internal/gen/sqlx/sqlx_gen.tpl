@@ -47,19 +47,17 @@ func New{{UpperCamel $.Table.Name}}Model(db *sqlx.DB) *{{UpperCamel $.Table.Name
 }
 
 // Create creates  {{$.Table.Name}} data.
-func (m *{{UpperCamel $.Table.Name}}Model) Create(ctx context.Context, data ...*{{UpperCamel $.Table.Name}}) (err error) {
+func (m *{{UpperCamel $.Table.Name}}Model) Create(ctx context.Context, data ...*{{UpperCamel $.Table.Name}}) error {
     if len(data) == 0 {
         return fmt.Errorf("data is empty")
     }
 
     var stmt *sql.Stmt
-    stmt, err = m.db.PrepareContext(ctx, "INSERT INTO {{$.Table.Name}} ({{InsertSQL}}) VALUES ({{InsertQuotes}})")
+    stmt, err := m.db.PrepareContext(ctx, "INSERT INTO {{$.Table.Name}} ({{InsertSQL}}) VALUES ({{InsertQuotes}})")
     if err != nil {
-        return
+        return err
     }
-    defer func() {
-        err = stmt.Close()
-    }()
+    defer stmt.Close()
     for _, v := range data {
         result, err := stmt.ExecContext(ctx, {{InsertValues "v"}})
         if err != nil {
@@ -73,14 +71,15 @@ func (m *{{UpperCamel $.Table.Name}}Model) Create(ctx context.Context, data ...*
 
         {{range $.Table.Columns}}{{if IsPrimary .Name}}{{if .AutoIncrement}}v.{{UpperCamel .Name}} =  {{.GoType}}(id){{end}}{{end}}{{end}}
     }
-    return
+    return nil
 }
 {{range $stmt := .SelectStmt}}
 // {{.FuncName}} is generated from sql:
 // {{$stmt.SQL}}
 func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if $stmt.Where.IsValid}}, where {{$stmt.Where.ParameterStructureName "Where"}}{{end}}{{if $stmt.Having.IsValid}}, having {{$stmt.Having.ParameterStructureName "Having"}}{{end}}{{if $stmt.Limit.Multiple}}, limit {{$stmt.Limit.ParameterStructureName}}{{end}})(result {{if $stmt.Limit.One}}*{{$stmt.ReceiverName}}, {{else}}[]*{{$stmt.ReceiverName}}, {{end}} err error){ {{if $stmt.Limit.One}}
     result = new({{$stmt.ReceiverName}}){{end}}
-    b := builder.Select(`{{$stmt.SelectSQL}}`)
+    b := builder.MySQL()
+    b.Select(`{{$stmt.SelectSQL}}`)
     b.From("`{{$.Table.Name}}`")
     {{if $stmt.Where.IsValid}}b.Where(builder.Expr({{$stmt.Where.SQL}}, {{$stmt.Where.Parameters "where"}}))
     {{end }}{{if $stmt.GroupBy.IsValid}}b.GroupBy({{$stmt.GroupBy.SQL}})
@@ -88,6 +87,10 @@ func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if 
     {{end}}{{if $stmt.OrderBy.IsValid}}b.OrderBy({{$stmt.OrderBy.SQL}})
     {{end}}{{if $stmt.Limit.IsValid}}b.Limit({{if $stmt.Limit.One}}1{{else}}{{$stmt.Limit.LimitParameter "limit"}}{{end}}{{if gt $stmt.Limit.Offset 0}}, {{$stmt.Limit.OffsetParameter "limit"}}{{end}})
     {{end}}query, args, err := b.ToSQL()
+    if err != nil {
+        return nil, err
+    }
+
     var rows *sqlx.Rows
     rows, err = m.db.QueryxContext(ctx, query, args...)
     if err != nil {
@@ -118,7 +121,8 @@ func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if 
 // {{.FuncName}} is generated from sql:
 // {{$stmt.SQL}}
 func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context, data *{{UpperCamel $.Table.Name}}{{if $stmt.Where.IsValid}}, where {{$stmt.Where.ParameterStructureName "Where"}}{{end}}{{if $stmt.Limit.Multiple}}, limit {{$stmt.Limit.ParameterStructureName}}{{end}}) error {
-    b := builder.Update(builder.Eq{
+    b := builder.MySQL()
+    b.Update(builder.Eq{
         {{range $name := $stmt.Columns}}"{{$name}}": data.{{UpperCamel $name}},
         {{end}}
     })
@@ -139,7 +143,8 @@ func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context, dat
 // {{.FuncName}} is generated from sql:
 // {{$stmt.SQL}}
 func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if $stmt.Where.IsValid}}, where {{$stmt.Where.ParameterStructureName "Where"}}{{end}}{{if $stmt.Limit.Multiple}}, limit {{$stmt.Limit.ParameterStructureName}}{{end}}) error {
-    b := builder.Delete()
+    b := builder.MySQL()
+    b.Delete()
     b.From("`{{$.Table.Name}}`")
     {{if $stmt.Where.IsValid}}b.Where(builder.Expr({{$stmt.Where.SQL}}, {{$stmt.Where.Parameters "where"}}))
     {{end}}{{if $stmt.OrderBy.IsValid}}b.OrderBy({{$stmt.OrderBy.SQL}})
