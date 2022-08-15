@@ -18,7 +18,7 @@ type UserModel struct {
 // User represents a user struct data.
 type User struct {
 	bun.BaseModel `bun:"table:user"`
-	Id            uint64    `bun:"id,pk,autoincrement;" json:"id"`
+	Id            uint64    `bun:"id,pk,autoincrement" json:"id"`
 	Name          string    `bun:"name" json:"name"`
 	Password      string    `bun:"password" json:"password"`
 	Mobile        string    `bun:"mobile" json:"mobile"`
