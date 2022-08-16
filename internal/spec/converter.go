@@ -128,6 +128,9 @@ func convertField(table *Table, fields []Field) (Columns, error) {
 			if ok {
 				column.Name = name
 				column.AggregateCall = f.AggregateCall
+				if f.TP != mysql.TypeUnspecified {
+					column.TP = f.TP
+				}
 				list = append(list, column)
 			} else {
 				return nil, fmt.Errorf("column %q no found in table %q", f.ColumnName, table.Name)

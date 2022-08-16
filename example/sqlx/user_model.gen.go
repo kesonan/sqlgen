@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/shopspring/decimal"
 	"xorm.io/builder"
 )
 
@@ -162,7 +163,7 @@ type FindMinIDResult struct {
 
 // FindAvgIDResult is a find avg id result.
 type FindAvgIDResult struct {
-	AvgID sql.NullInt64 `db:"avgID" json:"avgID"`
+	AvgID decimal.NullDecimal `db:"avgID" json:"avgID"`
 }
 
 // UpdateWhereParameter is a where parameter structure.

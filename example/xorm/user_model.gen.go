@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"xorm.io/xorm"
+
+	"github.com/shopspring/decimal"
 )
 
 // UserModel represents a user model.
@@ -161,7 +163,7 @@ type FindMinIDResult struct {
 
 // FindAvgIDResult is a find avg id result.
 type FindAvgIDResult struct {
-	AvgID sql.NullInt64 `xorm:"'avgID'" json:"avgID"`
+	AvgID decimal.NullDecimal `xorm:"'avgID'" json:"avgID"`
 }
 
 // UpdateWhereParameter is a where parameter structure.

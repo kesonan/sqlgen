@@ -33,8 +33,6 @@ var typeMapper = map[typeKey]string{
 	typeKey{tp: mysql.TypeShort}:                  "int16",
 	typeKey{tp: mysql.TypeShort, signed: true}:    "uint16",
 	typeKey{tp: mysql.TypeLong}:                   "int32",
-	typeKey{tp: TypeNullLongLong}:                 "sql.NullInt64",
-	typeKey{tp: TypeNullLongLong, signed: true}:   "sql.NullInt64",
 	typeKey{tp: mysql.TypeLong, signed: true}:     "uint32",
 	typeKey{tp: mysql.TypeFloat}:                  "float64",
 	typeKey{tp: mysql.TypeDouble}:                 "float64",
@@ -69,22 +67,17 @@ var typeMapper = map[typeKey]string{
 	typeKey{tp: TypeNullString}:       "sql.NullString",
 
 	// aggregate functions
-	typeKey{tp: mysql.TypeTiny, aggregateCall: true}:                   "sql.NullInt16",
-	typeKey{tp: mysql.TypeTiny, signed: true, aggregateCall: true}:     "sql.NullInt16",
-	typeKey{tp: mysql.TypeShort, aggregateCall: true}:                  "sql.NullInt16",
-	typeKey{tp: mysql.TypeShort, signed: true, aggregateCall: true}:    "sql.NullInt16",
-	typeKey{tp: mysql.TypeLong, aggregateCall: true}:                   "sql.NullInt32",
-	typeKey{tp: mysql.TypeLong, signed: true, aggregateCall: true}:     "sql.NullInt32",
-	typeKey{tp: mysql.TypeFloat, aggregateCall: true}:                  "sql.NullInt32",
-	typeKey{tp: mysql.TypeDouble, aggregateCall: true}:                 "sql.NullFloat64",
-	typeKey{tp: mysql.TypeLonglong, aggregateCall: true}:               "sql.NullInt64",
-	typeKey{tp: mysql.TypeLonglong, signed: true, aggregateCall: true}: "sql.NullInt64",
-	typeKey{tp: mysql.TypeInt24, aggregateCall: true}:                  "sql.NullInt32",
-	typeKey{tp: mysql.TypeInt24, signed: true, aggregateCall: true}:    "sql.NullInt32",
-	typeKey{tp: mysql.TypeYear, aggregateCall: true}:                   "sql.NullString",
-	typeKey{tp: mysql.TypeVarchar, aggregateCall: true}:                "sql.NullString",
-	typeKey{tp: mysql.TypeBit, aggregateCall: true}:                    "sql.NullInt16",
-	typeKey{tp: mysql.TypeJSON, aggregateCall: true}:                   "sql.NullString",
+	typeKey{tp: mysql.TypeTiny, aggregateCall: true}:     "sql.NullInt16",
+	typeKey{tp: mysql.TypeShort, aggregateCall: true}:    "sql.NullInt16",
+	typeKey{tp: mysql.TypeLong, aggregateCall: true}:     "sql.NullInt32",
+	typeKey{tp: mysql.TypeFloat, aggregateCall: true}:    "sql.NullInt32",
+	typeKey{tp: mysql.TypeDouble, aggregateCall: true}:   "sql.NullFloat64",
+	typeKey{tp: mysql.TypeLonglong, aggregateCall: true}: "sql.NullInt64",
+	typeKey{tp: mysql.TypeInt24, aggregateCall: true}:    "sql.NullInt32",
+	typeKey{tp: mysql.TypeYear, aggregateCall: true}:     "sql.NullString",
+	typeKey{tp: mysql.TypeVarchar, aggregateCall: true}:  "sql.NullString",
+	typeKey{tp: mysql.TypeBit, aggregateCall: true}:      "sql.NullInt16",
+	typeKey{tp: mysql.TypeJSON, aggregateCall: true}:     "sql.NullString",
 	typeKey{
 		tp:            mysql.TypeNewDecimal,
 		thirdPkg:      defaultThirdDecimalPkg,
@@ -103,6 +96,13 @@ var typeMapper = map[typeKey]string{
 	typeKey{tp: mysql.TypeBlob, aggregateCall: true}:       "sql.NullString",
 	typeKey{tp: mysql.TypeVarString, aggregateCall: true}:  "sql.NullString",
 	typeKey{tp: mysql.TypeString, aggregateCall: true}:     "sql.NullString",
+	typeKey{tp: mysql.TypeString, aggregateCall: true}:     "sql.NullString",
+	typeKey{tp: TypeNullLongLong}:                          "sql.NullInt64",
+	typeKey{tp: TypeNullDecimal}:                           "decimal.NullDecimal",
+	typeKey{tp: TypeNullString}:                            "sql.NullString",
+	typeKey{tp: TypeNullLongLong, aggregateCall: true}:     "sql.NullInt64",
+	typeKey{tp: TypeNullDecimal, aggregateCall: true}:      "decimal.NullDecimal",
+	typeKey{tp: TypeNullString, aggregateCall: true}:       "sql.NullString",
 }
 
 // Type is the type of the column.
@@ -111,6 +111,9 @@ type Type byte
 // DataType returns the Go type, third-package of the column.
 func (c Column) DataType() (parameter.Parameter, error) {
 	var key = typeKey{tp: c.TP, signed: c.Unsigned, aggregateCall: c.AggregateCall}
+	if c.AggregateCall {
+		key = typeKey{tp: c.TP, aggregateCall: c.AggregateCall}
+	}
 	if c.TP == mysql.TypeNewDecimal {
 		key.thirdPkg = defaultThirdDecimalPkg
 	}

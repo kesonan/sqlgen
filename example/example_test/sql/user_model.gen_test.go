@@ -410,6 +410,26 @@ func TestFindMinID(t *testing.T) {
 	}))
 }
 
+func TestFindAvgID(t *testing.T) {
+	t.Run("noRows", initAndRun(func(t *testing.T) {
+		minID, err := um.FindAvgID(ctx)
+		assert.NoError(t, err)
+		assert.Equal(t, "0", minID.AvgID.Decimal.String())
+	}))
+
+	t.Run("FindAvgID", initAndRun(func(t *testing.T) {
+		var list []*model.User
+		for i := 0; i < 5; i++ {
+			list = append(list, mustMockUser())
+		}
+		err := um.Create(ctx, list...)
+		assert.NoError(t, err)
+		actual, err := um.FindAvgID(ctx)
+		assert.NoError(t, err)
+		assert.Equal(t, "3", actual.AvgID.Decimal.String())
+	}))
+}
+
 func assertUserEqual(t *testing.T, expected, actual *model.User) {
 	now := time.Now()
 	expected.CreateAt = now

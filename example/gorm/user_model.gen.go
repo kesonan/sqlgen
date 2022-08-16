@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"gorm.io/gorm"
+
+	"github.com/shopspring/decimal"
 )
 
 // UserModel represents a user model.
@@ -161,7 +163,7 @@ type FindMinIDResult struct {
 
 // FindAvgIDResult is a find avg id result.
 type FindAvgIDResult struct {
-	AvgID sql.NullInt64 `gorm:"column:avgID" json:"avgID"`
+	AvgID decimal.NullDecimal `gorm:"column:avgID" json:"avgID"`
 }
 
 // UpdateWhereParameter is a where parameter structure.

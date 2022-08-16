@@ -7,6 +7,7 @@ require (
 	github.com/iancoleman/strcase v0.2.0
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/satori/go.uuid v1.2.0
+	github.com/shopspring/decimal v1.3.1
 	github.com/stretchr/testify v1.7.0
 	github.com/uptrace/bun v1.1.7
 	gorm.io/gorm v1.23.8

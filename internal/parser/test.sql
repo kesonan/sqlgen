@@ -16,5 +16,5 @@ CREATE TABLE `user`
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '用户表' COLLATE=utf8mb4_general_ci;
 
 -- fn: test
-select * from user where id = ? and name in (?) limit 1;
+select avg(id) AS acg from user where id > ?;
 

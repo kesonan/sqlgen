@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/shopspring/decimal"
 	"xorm.io/builder"
 )
 
@@ -162,7 +163,7 @@ type FindMinIDResult struct {
 
 // FindAvgIDResult is a find avg id result.
 type FindAvgIDResult struct {
-	AvgID sql.NullInt64 `json:"avgID"`
+	AvgID decimal.NullDecimal `json:"avgID"`
 }
 
 // UpdateWhereParameter is a where parameter structure.

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/shopspring/decimal"
 	"github.com/uptrace/bun"
 )
 
@@ -167,7 +168,7 @@ type FindMinIDResult struct {
 // FindAvgIDResult is a find avg id result.
 type FindAvgIDResult struct {
 	bun.BaseModel `bun:"table:user"`
-	AvgID         sql.NullInt64 `bun:"avgID" json:"avgID"`
+	AvgID         decimal.NullDecimal `bun:"avgID" json:"avgID"`
 }
 
 // UpdateWhereParameter is a where parameter structure.

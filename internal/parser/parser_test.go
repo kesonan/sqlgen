@@ -27,7 +27,11 @@ func TestParse(t *testing.T) {
 
 	ctxOne := ctx[0]
 	selectOne := ctxOne.SelectStmt[0]
-	selectOne.Where.ParameterStructure("test")
+	p, err := selectOne.ColumnInfo[0].DataType()
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(p)
 }
 
 func TestFrom(t *testing.T) {
