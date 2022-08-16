@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/anqiansong/sqlgen/internal/set"
+	"github.com/anqiansong/sqlgen/internal/spec"
 	"github.com/pingcap/parser/ast"
 	"github.com/pingcap/parser/mysql"
 	"github.com/pingcap/parser/opcode"
 	"github.com/pingcap/parser/test_driver"
-
-	"github.com/anqiansong/sqlgen/internal/set"
-	"github.com/anqiansong/sqlgen/internal/spec"
 )
 
 func parseSelect(stmt *ast.SelectStmt) (*spec.SelectStmt, error) {
@@ -416,9 +415,10 @@ func parseFieldList(fieldList *ast.FieldList, from string) (spec.Fields, string,
 		}
 		selectField = append(selectField, funcSql)
 		columnSet.Add(spec.Field{
-			ASName:     f.AsName.String(),
-			ColumnName: columnName,
-			TP:         tp,
+			ASName:        f.AsName.String(),
+			ColumnName:    columnName,
+			TP:            tp,
+			AggregateCall: aggregate,
 		})
 	}
 

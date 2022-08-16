@@ -4,6 +4,7 @@ package model
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -135,7 +136,7 @@ type FindOnePartWhereParameter struct {
 
 // FindAllCountResult is a find all count result.
 type FindAllCountResult struct {
-	CountID uint64 `gorm:"column:countID" json:"countID"`
+	CountID sql.NullInt64 `gorm:"column:countID" json:"countID"`
 }
 
 // FindAllCountWhereWhereParameter is a where parameter structure.
@@ -145,22 +146,22 @@ type FindAllCountWhereWhereParameter struct {
 
 // FindAllCountWhereResult is a find all count where result.
 type FindAllCountWhereResult struct {
-	CountID uint64 `gorm:"column:countID" json:"countID"`
+	CountID sql.NullInt64 `gorm:"column:countID" json:"countID"`
 }
 
 // FindMaxIDResult is a find max id result.
 type FindMaxIDResult struct {
-	MaxID uint64 `gorm:"column:maxID" json:"maxID"`
+	MaxID sql.NullInt64 `gorm:"column:maxID" json:"maxID"`
 }
 
 // FindMinIDResult is a find min id result.
 type FindMinIDResult struct {
-	MinID uint64 `gorm:"column:minID" json:"minID"`
+	MinID sql.NullInt64 `gorm:"column:minID" json:"minID"`
 }
 
 // FindAvgIDResult is a find avg id result.
 type FindAvgIDResult struct {
-	AvgID uint64 `gorm:"column:avgID" json:"avgID"`
+	AvgID sql.NullInt64 `gorm:"column:avgID" json:"avgID"`
 }
 
 // UpdateWhereParameter is a where parameter structure.

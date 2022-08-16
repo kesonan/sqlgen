@@ -137,7 +137,7 @@ type FindOnePartWhereParameter struct {
 
 // FindAllCountResult is a find all count result.
 type FindAllCountResult struct {
-	CountID uint64 `db:"countID" json:"countID"`
+	CountID sql.NullInt64 `db:"countID" json:"countID"`
 }
 
 // FindAllCountWhereWhereParameter is a where parameter structure.
@@ -147,22 +147,22 @@ type FindAllCountWhereWhereParameter struct {
 
 // FindAllCountWhereResult is a find all count where result.
 type FindAllCountWhereResult struct {
-	CountID uint64 `db:"countID" json:"countID"`
+	CountID sql.NullInt64 `db:"countID" json:"countID"`
 }
 
 // FindMaxIDResult is a find max id result.
 type FindMaxIDResult struct {
-	MaxID uint64 `db:"maxID" json:"maxID"`
+	MaxID sql.NullInt64 `db:"maxID" json:"maxID"`
 }
 
 // FindMinIDResult is a find min id result.
 type FindMinIDResult struct {
-	MinID uint64 `db:"minID" json:"minID"`
+	MinID sql.NullInt64 `db:"minID" json:"minID"`
 }
 
 // FindAvgIDResult is a find avg id result.
 type FindAvgIDResult struct {
-	AvgID uint64 `db:"avgID" json:"avgID"`
+	AvgID sql.NullInt64 `db:"avgID" json:"avgID"`
 }
 
 // UpdateWhereParameter is a where parameter structure.

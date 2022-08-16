@@ -92,22 +92,17 @@ func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if 
         return nil, err
     }
 
-    {{if $stmt.Limit.One}}row := m.db.QueryRowContext(ctx, query, args...)
-    if err = row.Err(); err != nil {
-        return nil, err
-    }
-    err = m.scanner.ScanRow(row, result)
-    return
-    {{else}}var rows *sql.Rows
-    rows, err = m.db.QueryContext(ctx, query, args...)
+    rows, err := m.db.QueryContext(ctx, query, args...)
     if err != nil {
         return nil, err
     }
     defer rows.Close()
-    if err = m.scanner.ScanRows(rows, &result); err != nil{
+
+    if err = m.scanner. {{if $stmt.Limit.One}}ScanRow{{else}}ScanRows{{end}}(rows, &result); err != nil{
         return nil, err
     }
-    return result, nil{{end}}
+
+    return result, nil
 }
 {{end}}
 

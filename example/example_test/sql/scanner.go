@@ -6,29 +6,57 @@ import (
 	"reflect"
 
 	model "github.com/anqiansong/sqlgen/example/sql"
+	"github.com/iancoleman/strcase"
 )
 
 type customScanner struct {
 }
 
-func (c customScanner) getRowElem(v interface{}) ([]interface{}, error) {
+func (c customScanner) ColumnMapper(colName string) string {
+	return strcase.ToCamel(colName)
+}
+
+func (c customScanner) TagKey() string {
+	return `db`
+}
+
+func (c customScanner) getRowElem(rows *sql.Rows, v interface{}) ([]interface{}, error) {
 	var elem reflect.Value
 	value, ok := v.(reflect.Value)
 	if !ok {
-		elem = value.Elem()
-		value = reflect.ValueOf(v)
+		elem = reflect.ValueOf(v)
 	} else {
 		elem = value
 	}
 
 	switch elem.Kind() {
 	case reflect.Pointer:
-		return c.getRowElem(elem.Elem())
+		return c.getRowElem(rows, elem.Elem())
 	case reflect.Struct:
 		var list []interface{}
+		cols, err := rows.Columns()
+		if err != nil {
+			return nil, err
+		}
+
+		targetField := make(map[string]reflect.Value)
 		for i := 0; i < elem.NumField(); i++ {
 			f := elem.Field(i)
-			list = append(list, f.Addr().Interface())
+			t := elem.Type().Field(i)
+			tag, ok := t.Tag.Lookup(c.TagKey())
+			if ok {
+				targetField[tag] = f
+			}
+		}
+
+		for _, name := range cols {
+			f, ok := targetField[name]
+			if !ok {
+				f = elem.FieldByName(c.ColumnMapper(name))
+			}
+			if f.CanAddr() {
+				list = append(list, f.Addr().Interface())
+			}
 		}
 		return list, nil
 	default:
@@ -68,7 +96,7 @@ func (c customScanner) getRowsElem(rows *sql.Rows, v interface{}) error {
 
 	for rows.Next() {
 		value := reflect.New(itemReceiver)
-		dest, err := c.getRowElem(value)
+		dest, err := c.getRowElem(rows, value)
 		if err != nil {
 			return err
 		}
@@ -88,16 +116,20 @@ func (c customScanner) getRowsElem(rows *sql.Rows, v interface{}) error {
 	return nil
 }
 
-func (c customScanner) ScanRow(row *sql.Row, v interface{}) error {
-	dest, err := c.getRowElem(v)
+func (c customScanner) ScanRow(rows *sql.Rows, v interface{}) error {
+	if !rows.Next() {
+		return sql.ErrNoRows
+	}
+
+	dest, err := c.getRowElem(rows, v)
 	if err != nil {
 		return err
 	}
-	return row.Scan(dest...)
+
+	return rows.Scan(dest...)
 }
 
 func (c customScanner) ScanRows(rows *sql.Rows, v interface{}) error {
-	//return scan.Rows(v, rows)
 	return c.getRowsElem(rows, v)
 }
 

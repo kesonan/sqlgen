@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"log"
+	"sort"
 	"testing"
 	"time"
 
@@ -31,6 +32,11 @@ func TestMain(m *testing.M) {
 
 func mustInitDB(db *sql.DB) {
 	tx, err := db.Begin()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	_, err = tx.ExecContext(ctx, `SET SESSION sql_mode=(SELECT REPLACE(@@sql_mode,'ONLY_FULL_GROUP_BY,',''))`)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -263,27 +269,144 @@ func TestFindGroupHavingLimitOffset(t *testing.T) {
 		}
 		err := um.Create(ctx, list...)
 		assert.NoError(t, err)
-		actual, err := um.FindLimitOffset(ctx, model.FindLimitOffsetLimitParameter{
+		actual, err := um.FindGroupHavingLimitOffset(ctx, model.FindGroupHavingLimitOffsetWhereParameter{
+			IdGT: 0,
+		}, model.FindGroupHavingLimitOffsetHavingParameter{
+			IdGT: 0,
+		}, model.FindGroupHavingLimitOffsetLimitParameter{
 			Count:  2,
 			Offset: 0,
 		})
 		assert.NoError(t, err)
 		assertUsersEqual(t, list[:2], actual)
 	}))
+}
 
-	t.Run("FindGroupHavingLimitOffset1", initAndRun(func(t *testing.T) {
+func TestFindGroupHavingOrderDescLimitOffset(t *testing.T) {
+	t.Run("noRows", initAndRun(func(t *testing.T) {
+		actual, err := um.FindGroupHavingOrderDescLimitOffset(ctx, model.FindGroupHavingOrderDescLimitOffsetWhereParameter{
+			IdGT: 0,
+		}, model.FindGroupHavingOrderDescLimitOffsetHavingParameter{
+			IdGT: 0,
+		}, model.FindGroupHavingOrderDescLimitOffsetLimitParameter{
+			Count: 2,
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, 0, len(actual))
+	}))
+
+	t.Run("FindGroupHavingOrderDescLimitOffset", initAndRun(func(t *testing.T) {
 		var list []*model.User
 		for i := 0; i < 5; i++ {
 			list = append(list, mustMockUser())
 		}
 		err := um.Create(ctx, list...)
 		assert.NoError(t, err)
-		actual, err := um.FindLimitOffset(ctx, model.FindLimitOffsetLimitParameter{
+		actual, err := um.FindGroupHavingOrderDescLimitOffset(ctx, model.FindGroupHavingOrderDescLimitOffsetWhereParameter{
+			IdGT: 0,
+		}, model.FindGroupHavingOrderDescLimitOffsetHavingParameter{
+			IdGT: 0,
+		}, model.FindGroupHavingOrderDescLimitOffsetLimitParameter{
 			Count:  2,
 			Offset: 1,
 		})
 		assert.NoError(t, err)
+		sort.Slice(list, func(i, j int) bool {
+			return list[i].Id > list[j].Id
+		})
 		assertUsersEqual(t, list[1:3], actual)
+	}))
+}
+
+func TestFindOnePart(t *testing.T) {
+	t.Run("noRows", initAndRun(func(t *testing.T) {
+		_, err := um.FindOnePart(ctx, model.FindOnePartWhereParameter{IdGT: 1})
+		assert.ErrorIs(t, err, sql.ErrNoRows)
+	}))
+
+	t.Run("FindOnePart", initAndRun(func(t *testing.T) {
+		mockUser := mustMockUser()
+		err := um.Create(ctx, mockUser)
+		assert.NoError(t, err)
+		actual, err := um.FindOnePart(ctx, model.FindOnePartWhereParameter{IdGT: 0})
+		assert.NoError(t, err)
+		assert.Equal(t, mockUser.Name, actual.Name)
+		assert.Equal(t, mockUser.Password, actual.Password)
+		assert.Equal(t, mockUser.Mobile, actual.Mobile)
+	}))
+}
+
+func TestFindAllCount(t *testing.T) {
+	t.Run("noRows", initAndRun(func(t *testing.T) {
+		countID, err := um.FindAllCount(ctx)
+		assert.NoError(t, err)
+		assert.Equal(t, uint64(0), countID.CountID)
+	}))
+
+	t.Run("FindAllCount", initAndRun(func(t *testing.T) {
+		mockUser := mustMockUser()
+		err := um.Create(ctx, mockUser)
+		assert.NoError(t, err)
+		actual, err := um.FindAllCount(ctx)
+		assert.NoError(t, err)
+		assert.Equal(t, uint64(1), actual.CountID)
+	}))
+}
+
+func TestFindAllCountWhere(t *testing.T) {
+	t.Run("noRows", initAndRun(func(t *testing.T) {
+		countID, err := um.FindAllCountWhere(ctx, model.FindAllCountWhereWhereParameter{IdGT: 0})
+		assert.NoError(t, err)
+		assert.Equal(t, int64(0), countID.CountID.Int64)
+	}))
+
+	t.Run("FindAllCountWhere", initAndRun(func(t *testing.T) {
+		mockUser := mustMockUser()
+		err := um.Create(ctx, mockUser)
+		assert.NoError(t, err)
+		actual, err := um.FindAllCountWhere(ctx, model.FindAllCountWhereWhereParameter{IdGT: 0})
+		assert.NoError(t, err)
+		assert.Equal(t, int64(1), actual.CountID.Int64)
+	}))
+}
+
+func TestFindMaxID(t *testing.T) {
+	t.Run("noRows", initAndRun(func(t *testing.T) {
+		maxID, err := um.FindMaxID(ctx)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(0), maxID.MaxID.Int64)
+	}))
+
+	t.Run("FindMaxID", initAndRun(func(t *testing.T) {
+		var list []*model.User
+		for i := 0; i < 5; i++ {
+			list = append(list, mustMockUser())
+		}
+		err := um.Create(ctx, list...)
+		assert.NoError(t, err)
+		actual, err := um.FindMaxID(ctx)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(5), actual.MaxID.Int64)
+	}))
+}
+
+func TestFindMinID(t *testing.T) {
+	t.Run("noRows", initAndRun(func(t *testing.T) {
+		minID, err := um.FindMinID(ctx)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(0), minID.MinID.Int64)
+	}))
+
+	t.Run("FindMinID", initAndRun(func(t *testing.T) {
+		var list []*model.User
+		for i := 0; i < 5; i++ {
+			list = append(list, mustMockUser())
+		}
+		err := um.Create(ctx, list...)
+		assert.NoError(t, err)
+		actual, err := um.FindMinID(ctx)
+		assert.NoError(t, err)
+		assert.Equal(t, int64(1), actual.MinID.Int64)
 	}))
 }
 

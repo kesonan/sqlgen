@@ -4,6 +4,7 @@ package model
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
@@ -137,7 +138,7 @@ type FindOnePartWhereParameter struct {
 // FindAllCountResult is a find all count result.
 type FindAllCountResult struct {
 	bun.BaseModel `bun:"table:user"`
-	CountID       uint64 `bun:"countID" json:"countID"`
+	CountID       sql.NullInt64 `bun:"countID" json:"countID"`
 }
 
 // FindAllCountWhereWhereParameter is a where parameter structure.
@@ -148,25 +149,25 @@ type FindAllCountWhereWhereParameter struct {
 // FindAllCountWhereResult is a find all count where result.
 type FindAllCountWhereResult struct {
 	bun.BaseModel `bun:"table:user"`
-	CountID       uint64 `bun:"countID" json:"countID"`
+	CountID       sql.NullInt64 `bun:"countID" json:"countID"`
 }
 
 // FindMaxIDResult is a find max id result.
 type FindMaxIDResult struct {
 	bun.BaseModel `bun:"table:user"`
-	MaxID         uint64 `bun:"maxID" json:"maxID"`
+	MaxID         sql.NullInt64 `bun:"maxID" json:"maxID"`
 }
 
 // FindMinIDResult is a find min id result.
 type FindMinIDResult struct {
 	bun.BaseModel `bun:"table:user"`
-	MinID         uint64 `bun:"minID" json:"minID"`
+	MinID         sql.NullInt64 `bun:"minID" json:"minID"`
 }
 
 // FindAvgIDResult is a find avg id result.
 type FindAvgIDResult struct {
 	bun.BaseModel `bun:"table:user"`
-	AvgID         uint64 `bun:"avgID" json:"avgID"`
+	AvgID         sql.NullInt64 `bun:"avgID" json:"avgID"`
 }
 
 // UpdateWhereParameter is a where parameter structure.
