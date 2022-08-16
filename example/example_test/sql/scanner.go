@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"reflect"
-	"strings"
 
 	model "github.com/anqiansong/sqlgen/example/sql"
 )
@@ -13,11 +12,15 @@ type customScanner struct {
 }
 
 func (c customScanner) getRowElem(v interface{}) ([]interface{}, error) {
+	var elem reflect.Value
 	value, ok := v.(reflect.Value)
 	if !ok {
+		elem = value.Elem()
 		value = reflect.ValueOf(v)
+	} else {
+		elem = value
 	}
-	elem := value.Elem()
+
 	switch elem.Kind() {
 	case reflect.Pointer:
 		return c.getRowElem(elem.Elem())
@@ -33,63 +36,56 @@ func (c customScanner) getRowElem(v interface{}) ([]interface{}, error) {
 	}
 }
 
+// getRowsElem is inspired by https://github.com/zeromicro/go-zero/blob/8ed22eafdda04c4526164450d7c13c2f4b0f076c/core/stores/sqlx/orm.go#L163
 func (c customScanner) getRowsElem(rows *sql.Rows, v interface{}) error {
-	tp := reflect.TypeOf(v)
-	if tp.Kind() != reflect.Pointer {
-		return errors.New("expected a pointer")
-	}
-	sliceTp := tp.Elem()
-	if sliceTp.Kind() != reflect.Slice {
-		return errors.New("expected a slice")
+	valueOf := reflect.ValueOf(v)
+	if valueOf.Kind() != reflect.Ptr {
+		return errors.New("expect a pointer")
 	}
 
-	sliceValue := reflect.Indirect(reflect.ValueOf(v))
-	itemType := sliceTp.Elem()
-	cols, err := rows.Columns()
-	if err != nil {
-		return err
+	typeOf := reflect.TypeOf(v)
+	sliceTypeOf := typeOf.Elem()
+	sliceValueOf := valueOf.Elem()
+
+	if sliceTypeOf.Kind() != reflect.Slice {
+		return errors.New("expect a slice")
+	}
+	if !sliceValueOf.CanSet() {
+		return errors.New("expect a settable slice")
+	}
+	isASlicePointer := sliceTypeOf.Elem().Kind() == reflect.Ptr
+
+	var itemReceiver reflect.Type
+	itemType := sliceTypeOf.Elem()
+	if itemType.Kind() == reflect.Ptr {
+		itemReceiver = itemType.Elem()
+	} else {
+		itemReceiver = itemType
+	}
+	if itemReceiver.Kind() != reflect.Struct {
+		return errors.New("expect a struct")
 	}
 
 	for rows.Next() {
-		item := reflect.New(itemType.Elem()).Elem()
-		dest := structPointers(item.Elem(), cols)
-
-		err := rows.Scan(dest...)
+		value := reflect.New(itemReceiver)
+		dest, err := c.getRowElem(value)
 		if err != nil {
 			return err
 		}
-		sliceValue.Set(reflect.Append(sliceValue, item))
-	}
 
-	return rows.Err()
-}
+		err = rows.Scan(dest...)
+		if err != nil {
+			return err
+		}
 
-func fieldByName(v reflect.Value, name string) reflect.Value {
-	typ := v.Type()
-
-	for i := 0; i < v.NumField(); i++ {
-		tag, ok := typ.Field(i).Tag.Lookup("db")
-		if ok && tag == name {
-			return v.Field(i)
+		if isASlicePointer {
+			sliceValueOf.Set(reflect.Append(sliceValueOf, value))
+		} else {
+			sliceValueOf.Set(reflect.Append(sliceValueOf, reflect.Indirect(sliceValueOf)))
 		}
 	}
 
-	return v.FieldByName(strings.Title(name))
-}
-
-func structPointers(stct reflect.Value, cols []string) []interface{} {
-	pointers := make([]interface{}, 0, len(cols))
-	for _, colName := range cols {
-		fieldVal := fieldByName(stct, colName)
-		if !fieldVal.IsValid() || !fieldVal.CanSet() {
-			var nothing interface{}
-			pointers = append(pointers, &nothing)
-			continue
-		}
-
-		pointers = append(pointers, fieldVal.Addr().Interface())
-	}
-	return pointers
+	return nil
 }
 
 func (c customScanner) ScanRow(row *sql.Row, v interface{}) error {

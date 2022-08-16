@@ -357,12 +357,7 @@ func (m *UserModel) FindAll(ctx context.Context) (result []*User, err error) {
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 	if err = m.scanner.ScanRows(rows, &result); err != nil {
 		return nil, err
 	}
@@ -387,12 +382,7 @@ func (m *UserModel) FindLimit(ctx context.Context, where FindLimitWhereParameter
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 	if err = m.scanner.ScanRows(rows, &result); err != nil {
 		return nil, err
 	}
@@ -416,12 +406,7 @@ func (m *UserModel) FindLimitOffset(ctx context.Context, limit FindLimitOffsetLi
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 	if err = m.scanner.ScanRows(rows, &result); err != nil {
 		return nil, err
 	}
@@ -447,12 +432,7 @@ func (m *UserModel) FindGroupLimitOffset(ctx context.Context, where FindGroupLim
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 	if err = m.scanner.ScanRows(rows, &result); err != nil {
 		return nil, err
 	}
@@ -479,12 +459,7 @@ func (m *UserModel) FindGroupHavingLimitOffset(ctx context.Context, where FindGr
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 	if err = m.scanner.ScanRows(rows, &result); err != nil {
 		return nil, err
 	}
@@ -512,12 +487,7 @@ func (m *UserModel) FindGroupHavingOrderAscLimitOffset(ctx context.Context, wher
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 	if err = m.scanner.ScanRows(rows, &result); err != nil {
 		return nil, err
 	}
@@ -545,12 +515,7 @@ func (m *UserModel) FindGroupHavingOrderDescLimitOffset(ctx context.Context, whe
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 	if err = m.scanner.ScanRows(rows, &result); err != nil {
 		return nil, err
 	}

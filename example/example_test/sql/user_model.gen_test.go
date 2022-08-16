@@ -173,6 +173,120 @@ func TestFindAll(t *testing.T) {
 	}))
 }
 
+func TestFindLimit(t *testing.T) {
+	t.Run("noRows", initAndRun(func(t *testing.T) {
+		actual, err := um.FindLimit(ctx, model.FindLimitWhereParameter{
+			IdGT: 0,
+		}, model.FindLimitLimitParameter{
+			Count: 1,
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, 0, len(actual))
+	}))
+
+	t.Run("FindLimit", initAndRun(func(t *testing.T) {
+		var list []*model.User
+		for i := 0; i < 5; i++ {
+			list = append(list, mustMockUser())
+		}
+		err := um.Create(ctx, list...)
+		assert.NoError(t, err)
+		actual, err := um.FindLimit(ctx, model.FindLimitWhereParameter{
+			IdGT: 0,
+		}, model.FindLimitLimitParameter{
+			Count: 2,
+		})
+		assert.NoError(t, err)
+		assertUsersEqual(t, list[:2], actual)
+	}))
+}
+
+func TestFindLimitOffset(t *testing.T) {
+	t.Run("noRows", initAndRun(func(t *testing.T) {
+		actual, err := um.FindLimitOffset(ctx, model.FindLimitOffsetLimitParameter{
+			Count:  1,
+			Offset: 0,
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, 0, len(actual))
+	}))
+
+	t.Run("FindLimitOffset", initAndRun(func(t *testing.T) {
+		var list []*model.User
+		for i := 0; i < 5; i++ {
+			list = append(list, mustMockUser())
+		}
+		err := um.Create(ctx, list...)
+		assert.NoError(t, err)
+		actual, err := um.FindLimitOffset(ctx, model.FindLimitOffsetLimitParameter{
+			Count:  2,
+			Offset: 0,
+		})
+		assert.NoError(t, err)
+		assertUsersEqual(t, list[:2], actual)
+	}))
+
+	t.Run("FindLimitOffset1", initAndRun(func(t *testing.T) {
+		var list []*model.User
+		for i := 0; i < 5; i++ {
+			list = append(list, mustMockUser())
+		}
+		err := um.Create(ctx, list...)
+		assert.NoError(t, err)
+		actual, err := um.FindLimitOffset(ctx, model.FindLimitOffsetLimitParameter{
+			Count:  2,
+			Offset: 1,
+		})
+		assert.NoError(t, err)
+		assertUsersEqual(t, list[1:3], actual)
+	}))
+}
+
+func TestFindGroupHavingLimitOffset(t *testing.T) {
+	t.Run("noRows", initAndRun(func(t *testing.T) {
+		actual, err := um.FindGroupHavingLimitOffset(ctx, model.FindGroupHavingLimitOffsetWhereParameter{
+			IdGT: 0,
+		}, model.FindGroupHavingLimitOffsetHavingParameter{
+			IdGT: 0,
+		}, model.FindGroupHavingLimitOffsetLimitParameter{
+			Count:  1,
+			Offset: 0,
+		})
+		assert.NoError(t, err)
+		assert.Equal(t, 0, len(actual))
+	}))
+
+	t.Run("FindGroupHavingLimitOffset", initAndRun(func(t *testing.T) {
+		var list []*model.User
+		for i := 0; i < 5; i++ {
+			list = append(list, mustMockUser())
+		}
+		err := um.Create(ctx, list...)
+		assert.NoError(t, err)
+		actual, err := um.FindLimitOffset(ctx, model.FindLimitOffsetLimitParameter{
+			Count:  2,
+			Offset: 0,
+		})
+		assert.NoError(t, err)
+		assertUsersEqual(t, list[:2], actual)
+	}))
+
+	t.Run("FindGroupHavingLimitOffset1", initAndRun(func(t *testing.T) {
+		var list []*model.User
+		for i := 0; i < 5; i++ {
+			list = append(list, mustMockUser())
+		}
+		err := um.Create(ctx, list...)
+		assert.NoError(t, err)
+		actual, err := um.FindLimitOffset(ctx, model.FindLimitOffsetLimitParameter{
+			Count:  2,
+			Offset: 1,
+		})
+		assert.NoError(t, err)
+		assertUsersEqual(t, list[1:3], actual)
+	}))
+}
+
 func assertUserEqual(t *testing.T, expected, actual *model.User) {
 	now := time.Now()
 	expected.CreateAt = now

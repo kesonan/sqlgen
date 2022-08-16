@@ -103,12 +103,7 @@ func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if 
     if err != nil {
         return nil, err
     }
-    defer func() {
-        err = rows.Close()
-        if err != nil {
-            result = nil
-        }
-    }()
+    defer rows.Close()
     if err = m.scanner.ScanRows(rows, &result); err != nil{
         return nil, err
     }

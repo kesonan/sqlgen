@@ -96,12 +96,7 @@ func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if 
     if err != nil {
         return nil, err
     }
-    defer func() {
-        err = rows.Close()
-        if err != nil {
-            result = nil
-        }
-    }()
+    defer rows.Close()
 
     for rows.Next() {
         var v {{$stmt.ReceiverName}}

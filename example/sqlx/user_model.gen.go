@@ -264,12 +264,7 @@ func (m *UserModel) FindOne(ctx context.Context, where FindOneWhereParameter) (r
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 
 	for rows.Next() {
 		var v User
@@ -303,12 +298,7 @@ func (m *UserModel) FindOneByName(ctx context.Context, where FindOneByNameWhereP
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 
 	for rows.Next() {
 		var v User
@@ -343,12 +333,7 @@ func (m *UserModel) FindOneGroupByName(ctx context.Context, where FindOneGroupBy
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 
 	for rows.Next() {
 		var v User
@@ -384,12 +369,7 @@ func (m *UserModel) FindOneGroupByNameHavingName(ctx context.Context, where Find
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 
 	for rows.Next() {
 		var v User
@@ -420,12 +400,7 @@ func (m *UserModel) FindAll(ctx context.Context) (result []*User, err error) {
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 
 	for rows.Next() {
 		var v User
@@ -457,12 +432,7 @@ func (m *UserModel) FindLimit(ctx context.Context, where FindLimitWhereParameter
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 
 	for rows.Next() {
 		var v User
@@ -493,12 +463,7 @@ func (m *UserModel) FindLimitOffset(ctx context.Context, limit FindLimitOffsetLi
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 
 	for rows.Next() {
 		var v User
@@ -531,12 +496,7 @@ func (m *UserModel) FindGroupLimitOffset(ctx context.Context, where FindGroupLim
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 
 	for rows.Next() {
 		var v User
@@ -570,12 +530,7 @@ func (m *UserModel) FindGroupHavingLimitOffset(ctx context.Context, where FindGr
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 
 	for rows.Next() {
 		var v User
@@ -610,12 +565,7 @@ func (m *UserModel) FindGroupHavingOrderAscLimitOffset(ctx context.Context, wher
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 
 	for rows.Next() {
 		var v User
@@ -650,12 +600,7 @@ func (m *UserModel) FindGroupHavingOrderDescLimitOffset(ctx context.Context, whe
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 
 	for rows.Next() {
 		var v User
@@ -688,12 +633,7 @@ func (m *UserModel) FindOnePart(ctx context.Context, where FindOnePartWhereParam
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 
 	for rows.Next() {
 		var v User
@@ -726,12 +666,7 @@ func (m *UserModel) FindAllCount(ctx context.Context) (result *FindAllCountResul
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 
 	for rows.Next() {
 		var v FindAllCountResult
@@ -765,12 +700,7 @@ func (m *UserModel) FindAllCountWhere(ctx context.Context, where FindAllCountWhe
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 
 	for rows.Next() {
 		var v FindAllCountWhereResult
@@ -803,12 +733,7 @@ func (m *UserModel) FindMaxID(ctx context.Context) (result *FindMaxIDResult, err
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 
 	for rows.Next() {
 		var v FindMaxIDResult
@@ -841,12 +766,7 @@ func (m *UserModel) FindMinID(ctx context.Context) (result *FindMinIDResult, err
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 
 	for rows.Next() {
 		var v FindMinIDResult
@@ -879,12 +799,7 @@ func (m *UserModel) FindAvgID(ctx context.Context) (result *FindAvgIDResult, err
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 
 	for rows.Next() {
 		var v FindAvgIDResult
