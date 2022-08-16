@@ -27,7 +27,7 @@ func Run(list []spec.Context, output string) error {
 				return ctx.Table.IsPrimary(name)
 			},
 			"HavingSprintf": func(format string) string {
-				format = strings.ReplaceAll(format, "?", "%v")
+				format = strings.ReplaceAll(format, "?", "'%v'")
 				return format
 			},
 		})

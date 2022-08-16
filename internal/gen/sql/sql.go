@@ -62,7 +62,7 @@ func Run(list []spec.Context, output string) error {
 				return strings.Join(values, ", ")
 			},
 			"HavingSprintf": func(format string) string {
-				format = strings.ReplaceAll(format, "?", "%v")
+				format = strings.ReplaceAll(format, "?", "'%v'")
 				return format
 			},
 		})

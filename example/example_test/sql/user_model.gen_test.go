@@ -90,7 +90,87 @@ func TestFindOne(t *testing.T) {
 		assert.NoError(t, err)
 		assertUserEqual(t, mockUser, actual)
 	}))
+}
 
+func TestFindOneByName(t *testing.T) {
+	t.Run("noRows", initAndRun(func(t *testing.T) {
+		_, err := um.FindOneByName(ctx, model.FindOneByNameWhereParameter{NameEqual: "foo"})
+		assert.ErrorIs(t, err, sql.ErrNoRows)
+	}))
+
+	t.Run("FindOneByName", initAndRun(func(t *testing.T) {
+		mockUser := mustMockUser()
+		err := um.Create(ctx, mockUser)
+		assert.NoError(t, err)
+		actual, err := um.FindOneByName(ctx, model.FindOneByNameWhereParameter{NameEqual: mockUser.Name})
+		assert.NoError(t, err)
+		assertUserEqual(t, mockUser, actual)
+	}))
+}
+
+func TestFindOneGroupByName(t *testing.T) {
+	t.Run("noRows", initAndRun(func(t *testing.T) {
+		_, err := um.FindOneGroupByName(ctx, model.FindOneGroupByNameWhereParameter{NameEqual: "foo"})
+		assert.ErrorIs(t, err, sql.ErrNoRows)
+	}))
+
+	t.Run("FindOneGroupByName", initAndRun(func(t *testing.T) {
+		mockUser := mustMockUser()
+		err := um.Create(ctx, mockUser)
+		assert.NoError(t, err)
+		actual, err := um.FindOneGroupByName(ctx, model.FindOneGroupByNameWhereParameter{NameEqual: mockUser.Name})
+		assert.NoError(t, err)
+		assertUserEqual(t, mockUser, actual)
+	}))
+}
+
+func TestFindOneGroupByNameHavingName(t *testing.T) {
+	t.Run("noRows", initAndRun(func(t *testing.T) {
+		_, err := um.FindOneGroupByNameHavingName(ctx, model.FindOneGroupByNameHavingNameWhereParameter{NameEqual: "foo"}, model.FindOneGroupByNameHavingNameHavingParameter{
+			NameEqual: "foo",
+		})
+		assert.ErrorIs(t, err, sql.ErrNoRows)
+
+		mockUser := mustMockUser()
+		err = um.Create(ctx, mockUser)
+		assert.NoError(t, err)
+		_, err = um.FindOneGroupByNameHavingName(ctx, model.FindOneGroupByNameHavingNameWhereParameter{NameEqual: mockUser.Name}, model.FindOneGroupByNameHavingNameHavingParameter{
+			NameEqual: "foo",
+		})
+		assert.ErrorIs(t, err, sql.ErrNoRows)
+
+	}))
+
+	t.Run("FindOneGroupByNameHavingName", initAndRun(func(t *testing.T) {
+		mockUser := mustMockUser()
+		err := um.Create(ctx, mockUser)
+		assert.NoError(t, err)
+		actual, err := um.FindOneGroupByNameHavingName(ctx, model.FindOneGroupByNameHavingNameWhereParameter{NameEqual: mockUser.Name}, model.FindOneGroupByNameHavingNameHavingParameter{
+			NameEqual: mockUser.Name,
+		})
+		assert.NoError(t, err)
+		assertUserEqual(t, mockUser, actual)
+	}))
+}
+
+func TestFindAll(t *testing.T) {
+	t.Run("noRows", initAndRun(func(t *testing.T) {
+		actual, err := um.FindAll(ctx)
+		assert.NoError(t, err)
+		assert.Equal(t, 0, len(actual))
+	}))
+
+	t.Run("FindAll", initAndRun(func(t *testing.T) {
+		var list []*model.User
+		for i := 0; i < 5; i++ {
+			list = append(list, mustMockUser())
+		}
+		err := um.Create(ctx, list...)
+		assert.NoError(t, err)
+		actual, err := um.FindAll(ctx)
+		assert.NoError(t, err)
+		assertUsersEqual(t, list, actual)
+	}))
 }
 
 func assertUserEqual(t *testing.T, expected, actual *model.User) {
@@ -100,6 +180,14 @@ func assertUserEqual(t *testing.T, expected, actual *model.User) {
 	actual.CreateAt = now
 	actual.UpdateAt = now
 	assert.Equal(t, *expected, *actual)
+}
+
+func assertUsersEqual(t *testing.T, expected, actual []*model.User) {
+	assert.Equal(t, len(expected), len(actual))
+	for idx, expectedItem := range expected {
+		actual := actual[idx]
+		assertUserEqual(t, expectedItem, actual)
+	}
 }
 
 func initAndRun(f func(t *testing.T)) func(t *testing.T) {

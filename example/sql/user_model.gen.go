@@ -325,7 +325,7 @@ func (m *UserModel) FindOneGroupByNameHavingName(ctx context.Context, where Find
 	b.From("`user`")
 	b.Where(builder.Expr(`name = ?`, where.NameEqual))
 	b.GroupBy(`name`)
-	b.Having(fmt.Sprintf(`name = %v`, having.NameEqual))
+	b.Having(fmt.Sprintf(`name = '%v'`, having.NameEqual))
 	b.Limit(1)
 	query, args, err := b.ToSQL()
 	if err != nil {
@@ -363,7 +363,7 @@ func (m *UserModel) FindAll(ctx context.Context) (result []*User, err error) {
 			result = nil
 		}
 	}()
-	if err = m.scanner.ScanRows(rows, result); err != nil {
+	if err = m.scanner.ScanRows(rows, &result); err != nil {
 		return nil, err
 	}
 	return result, nil
@@ -393,7 +393,7 @@ func (m *UserModel) FindLimit(ctx context.Context, where FindLimitWhereParameter
 			result = nil
 		}
 	}()
-	if err = m.scanner.ScanRows(rows, result); err != nil {
+	if err = m.scanner.ScanRows(rows, &result); err != nil {
 		return nil, err
 	}
 	return result, nil
@@ -422,7 +422,7 @@ func (m *UserModel) FindLimitOffset(ctx context.Context, limit FindLimitOffsetLi
 			result = nil
 		}
 	}()
-	if err = m.scanner.ScanRows(rows, result); err != nil {
+	if err = m.scanner.ScanRows(rows, &result); err != nil {
 		return nil, err
 	}
 	return result, nil
@@ -453,7 +453,7 @@ func (m *UserModel) FindGroupLimitOffset(ctx context.Context, where FindGroupLim
 			result = nil
 		}
 	}()
-	if err = m.scanner.ScanRows(rows, result); err != nil {
+	if err = m.scanner.ScanRows(rows, &result); err != nil {
 		return nil, err
 	}
 	return result, nil
@@ -467,7 +467,7 @@ func (m *UserModel) FindGroupHavingLimitOffset(ctx context.Context, where FindGr
 	b.From("`user`")
 	b.Where(builder.Expr(`id > ?`, where.IdGT))
 	b.GroupBy(`name`)
-	b.Having(fmt.Sprintf(`id > %v`, having.IdGT))
+	b.Having(fmt.Sprintf(`id > '%v'`, having.IdGT))
 	b.Limit(limit.Count, limit.Offset)
 	query, args, err := b.ToSQL()
 	if err != nil {
@@ -485,7 +485,7 @@ func (m *UserModel) FindGroupHavingLimitOffset(ctx context.Context, where FindGr
 			result = nil
 		}
 	}()
-	if err = m.scanner.ScanRows(rows, result); err != nil {
+	if err = m.scanner.ScanRows(rows, &result); err != nil {
 		return nil, err
 	}
 	return result, nil
@@ -499,7 +499,7 @@ func (m *UserModel) FindGroupHavingOrderAscLimitOffset(ctx context.Context, wher
 	b.From("`user`")
 	b.Where(builder.Expr(`id > ?`, where.IdGT))
 	b.GroupBy(`name`)
-	b.Having(fmt.Sprintf(`id > %v`, having.IdGT))
+	b.Having(fmt.Sprintf(`id > '%v'`, having.IdGT))
 	b.OrderBy(`id`)
 	b.Limit(limit.Count, limit.Offset)
 	query, args, err := b.ToSQL()
@@ -518,7 +518,7 @@ func (m *UserModel) FindGroupHavingOrderAscLimitOffset(ctx context.Context, wher
 			result = nil
 		}
 	}()
-	if err = m.scanner.ScanRows(rows, result); err != nil {
+	if err = m.scanner.ScanRows(rows, &result); err != nil {
 		return nil, err
 	}
 	return result, nil
@@ -532,7 +532,7 @@ func (m *UserModel) FindGroupHavingOrderDescLimitOffset(ctx context.Context, whe
 	b.From("`user`")
 	b.Where(builder.Expr(`id > ?`, where.IdGT))
 	b.GroupBy(`name`)
-	b.Having(fmt.Sprintf(`id > %v`, having.IdGT))
+	b.Having(fmt.Sprintf(`id > '%v'`, having.IdGT))
 	b.OrderBy(`id desc`)
 	b.Limit(limit.Count, limit.Offset)
 	query, args, err := b.ToSQL()
@@ -551,7 +551,7 @@ func (m *UserModel) FindGroupHavingOrderDescLimitOffset(ctx context.Context, whe
 			result = nil
 		}
 	}()
-	if err = m.scanner.ScanRows(rows, result); err != nil {
+	if err = m.scanner.ScanRows(rows, &result); err != nil {
 		return nil, err
 	}
 	return result, nil
