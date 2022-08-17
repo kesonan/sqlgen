@@ -3,6 +3,7 @@ package sql
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
 	"sort"
 	"testing"
@@ -24,6 +25,12 @@ func TestMain(m *testing.M) {
 	db, err = sql.Open("mysql", "root:mysqlpw@tcp(127.0.0.1:55000)/test?charset=utf8mb4&parseTime=true&loc=Local")
 	if err != nil {
 		log.Fatalln(err)
+	}
+
+	err = db.Ping()
+	if err != nil {
+		fmt.Println("ping error")
+		return
 	}
 
 	um = model.NewUserModel(db, getScanner())
@@ -340,7 +347,7 @@ func TestFindAllCount(t *testing.T) {
 	t.Run("noRows", initAndRun(func(t *testing.T) {
 		countID, err := um.FindAllCount(ctx)
 		assert.NoError(t, err)
-		assert.Equal(t, uint64(0), countID.CountID)
+		assert.Equal(t, int64(0), countID.CountID.Int64)
 	}))
 
 	t.Run("FindAllCount", initAndRun(func(t *testing.T) {
@@ -349,7 +356,7 @@ func TestFindAllCount(t *testing.T) {
 		assert.NoError(t, err)
 		actual, err := um.FindAllCount(ctx)
 		assert.NoError(t, err)
-		assert.Equal(t, uint64(1), actual.CountID)
+		assert.Equal(t, int64(1), actual.CountID.Int64)
 	}))
 }
 
@@ -427,6 +434,107 @@ func TestFindAvgID(t *testing.T) {
 		actual, err := um.FindAvgID(ctx)
 		assert.NoError(t, err)
 		assert.Equal(t, "3", actual.AvgID.Decimal.String())
+	}))
+}
+
+func TestUpdate(t *testing.T) {
+	t.Run("Update", initAndRun(func(t *testing.T) {
+		mockUser := mustMockUser()
+		err := um.Create(ctx, mockUser)
+		assert.NoError(t, err)
+		mockUser.Name = "new name"
+		newUser := mustMockUser()
+		newUser.Id = mockUser.Id
+		err = um.Update(ctx, newUser, model.UpdateWhereParameter{IdEqual: mockUser.Id})
+		assert.NoError(t, err)
+		actual, err := um.FindOne(ctx, model.FindOneWhereParameter{IdEqual: mockUser.Id})
+		assert.NoError(t, err)
+		assertUserEqual(t, newUser, actual)
+	}))
+
+	t.Run("UpdateOrderByIdDesc", initAndRun(func(t *testing.T) {
+		mockUser := mustMockUser()
+		err := um.Create(ctx, mockUser)
+		assert.NoError(t, err)
+		mockUser.Name = "new name"
+		newUser := mustMockUser()
+		newUser.Id = mockUser.Id
+		err = um.UpdateOrderByIdDesc(ctx, newUser, model.UpdateOrderByIdDescWhereParameter{IdEqual: mockUser.Id})
+		assert.NoError(t, err)
+		actual, err := um.FindOne(ctx, model.FindOneWhereParameter{IdEqual: mockUser.Id})
+		assert.NoError(t, err)
+		assertUserEqual(t, newUser, actual)
+	}))
+
+	t.Run("UpdateOrderByIdDescLimitCount", initAndRun(func(t *testing.T) {
+		mockUser := mustMockUser()
+		err := um.Create(ctx, mockUser)
+		assert.NoError(t, err)
+		mockUser.Name = "new name"
+		newUser := mustMockUser()
+		newUser.Id = mockUser.Id
+		err = um.UpdateOrderByIdDescLimitCount(ctx, newUser, model.UpdateOrderByIdDescLimitCountWhereParameter{IdEqual: mockUser.Id}, model.UpdateOrderByIdDescLimitCountLimitParameter{Count: 1})
+		assert.NoError(t, err)
+		actual, err := um.FindOne(ctx, model.FindOneWhereParameter{IdEqual: mockUser.Id})
+		assert.NoError(t, err)
+		assertUserEqual(t, newUser, actual)
+	}))
+}
+
+func TestDelete(t *testing.T) {
+	t.Run("DeleteOne", initAndRun(func(t *testing.T) {
+		mockUser := mustMockUser()
+		err := um.Create(ctx, mockUser)
+		assert.NoError(t, err)
+		err = um.DeleteOne(ctx, model.DeleteOneWhereParameter{IdEqual: mockUser.Id})
+		assert.NoError(t, err)
+		_, err = um.FindOne(ctx, model.FindOneWhereParameter{IdEqual: mockUser.Id})
+		assert.ErrorIs(t, err, sql.ErrNoRows)
+	}))
+
+	t.Run("DeleteOneByName", initAndRun(func(t *testing.T) {
+		mockUser := mustMockUser()
+		err := um.Create(ctx, mockUser)
+		assert.NoError(t, err)
+		err = um.DeleteOneByName(ctx, model.DeleteOneByNameWhereParameter{NameEqual: mockUser.Name})
+		assert.NoError(t, err)
+		_, err = um.FindOne(ctx, model.FindOneWhereParameter{IdEqual: mockUser.Id})
+		assert.ErrorIs(t, err, sql.ErrNoRows)
+	}))
+
+	t.Run("DeleteOneOrderByIDAsc", initAndRun(func(t *testing.T) {
+		mockUser := mustMockUser()
+		err := um.Create(ctx, mockUser)
+		assert.NoError(t, err)
+		err = um.DeleteOneOrderByIDAsc(ctx, model.DeleteOneOrderByIDAscWhereParameter{NameEqual: mockUser.Name})
+		assert.NoError(t, err)
+		_, err = um.FindOne(ctx, model.FindOneWhereParameter{IdEqual: mockUser.Id})
+		assert.ErrorIs(t, err, sql.ErrNoRows)
+	}))
+
+	t.Run("DeleteOneOrderByIDDesc", initAndRun(func(t *testing.T) {
+		mockUser := mustMockUser()
+		err := um.Create(ctx, mockUser)
+		assert.NoError(t, err)
+		err = um.DeleteOneOrderByIDDesc(ctx, model.DeleteOneOrderByIDDescWhereParameter{NameEqual: mockUser.Name})
+		assert.NoError(t, err)
+		_, err = um.FindOne(ctx, model.FindOneWhereParameter{IdEqual: mockUser.Id})
+		assert.ErrorIs(t, err, sql.ErrNoRows)
+	}))
+
+	t.Run("DeleteOneOrderByIDDescLimitCount", initAndRun(func(t *testing.T) {
+		var list []*model.User
+		for i := 0; i < 5; i++ {
+			list = append(list, mustMockUser())
+		}
+		err := um.Create(ctx, list...)
+		assert.NoError(t, err)
+
+		err = um.DeleteOneOrderByIDDescLimitCount(ctx, model.DeleteOneOrderByIDDescLimitCountWhereParameter{NameEqual: list[0].Name}, model.DeleteOneOrderByIDDescLimitCountLimitParameter{Count: 1})
+		assert.NoError(t, err)
+		actual, err := um.FindAll(ctx)
+		assert.NoError(t, err)
+		assertUsersEqual(t, list[1:], actual)
 	}))
 }
 

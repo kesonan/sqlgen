@@ -42,7 +42,7 @@ update `user` set `name` = ?, `password` = ?, `mobile` = ?, `gender` = ?, `nickn
 
 -- test case: update one with order by desc, limit count clause.
 -- fn: UpdateOrderByIdDescLimitCount
-update `user` set `name` = ?, `password` = ?, `mobile` = ?, `gender` = ?, `nickname` = ?, `type` = ?, `create_at` = ?, `update_at` = ? where `id` = ? order by id desc;
+update `user` set `name` = ?, `password` = ?, `mobile` = ?, `gender` = ?, `nickname` = ?, `type` = ?, `create_at` = ?, `update_at` = ? where `id` = ? order by id desc limit ?;
 
 
 -- operation: read

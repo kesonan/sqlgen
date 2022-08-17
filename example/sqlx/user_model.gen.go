@@ -181,6 +181,11 @@ type UpdateOrderByIdDescLimitCountWhereParameter struct {
 	IdEqual uint64
 }
 
+// UpdateOrderByIdDescLimitCountLimitParameter is a limit parameter structure.
+type UpdateOrderByIdDescLimitCountLimitParameter struct {
+	Count int
+}
+
 // DeleteOneWhereParameter is a where parameter structure.
 type DeleteOneWhereParameter struct {
 	IdEqual uint64
@@ -865,8 +870,8 @@ func (m *UserModel) UpdateOrderByIdDesc(ctx context.Context, data *User, where U
 }
 
 // UpdateOrderByIdDescLimitCount is generated from sql:
-// update `user` set `name` = ?, `password` = ?, `mobile` = ?, `gender` = ?, `nickname` = ?, `type` = ?, `create_at` = ?, `update_at` = ? where `id` = ? order by id desc;
-func (m *UserModel) UpdateOrderByIdDescLimitCount(ctx context.Context, data *User, where UpdateOrderByIdDescLimitCountWhereParameter) error {
+// update `user` set `name` = ?, `password` = ?, `mobile` = ?, `gender` = ?, `nickname` = ?, `type` = ?, `create_at` = ?, `update_at` = ? where `id` = ? order by id desc limit ?;
+func (m *UserModel) UpdateOrderByIdDescLimitCount(ctx context.Context, data *User, where UpdateOrderByIdDescLimitCountWhereParameter, limit UpdateOrderByIdDescLimitCountLimitParameter) error {
 	b := builder.MySQL()
 	b.Update(builder.Eq{
 		"name":      data.Name,
@@ -881,6 +886,7 @@ func (m *UserModel) UpdateOrderByIdDescLimitCount(ctx context.Context, data *Use
 	b.From("`user`")
 	b.Where(builder.Expr(`id = ?`, where.IdEqual))
 	b.OrderBy(`id desc`)
+	b.Limit(limit.Count)
 	query, args, err := b.ToSQL()
 	if err != nil {
 		return err

@@ -26,6 +26,9 @@ func Run(list []spec.Context, output string) error {
 			"IsPrimary": func(name string) bool {
 				return ctx.Table.IsPrimary(name)
 			},
+			"IsExtraResult": func(name string) bool {
+				return name != templatex.UpperCamel(ctx.Table.Name)
+			},
 		})
 		gen.MustParse(gormGenTpl)
 		gen.MustExecute(ctx)

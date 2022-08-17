@@ -15,7 +15,7 @@ import (
 
 // UserModel represents a user model.
 type UserModel struct {
-	db gorm.DB
+	db *gorm.DB
 }
 
 // User represents a user struct data.
@@ -36,15 +36,21 @@ type FindOneWhereParameter struct {
 	IdEqual uint64
 }
 
+// TableName returns the table name. it implemented by gorm.Tabler.
+
 // FindOneByNameWhereParameter is a where parameter structure.
 type FindOneByNameWhereParameter struct {
 	NameEqual string
 }
 
+// TableName returns the table name. it implemented by gorm.Tabler.
+
 // FindOneGroupByNameWhereParameter is a where parameter structure.
 type FindOneGroupByNameWhereParameter struct {
 	NameEqual string
 }
+
+// TableName returns the table name. it implemented by gorm.Tabler.
 
 // FindOneGroupByNameHavingNameWhereParameter is a where parameter structure.
 type FindOneGroupByNameHavingNameWhereParameter struct {
@@ -56,6 +62,10 @@ type FindOneGroupByNameHavingNameHavingParameter struct {
 	NameEqual string
 }
 
+// TableName returns the table name. it implemented by gorm.Tabler.
+
+// TableName returns the table name. it implemented by gorm.Tabler.
+
 // FindLimitWhereParameter is a where parameter structure.
 type FindLimitWhereParameter struct {
 	IdGT uint64
@@ -66,11 +76,15 @@ type FindLimitLimitParameter struct {
 	Count int
 }
 
+// TableName returns the table name. it implemented by gorm.Tabler.
+
 // FindLimitOffsetLimitParameter is a limit parameter structure.
 type FindLimitOffsetLimitParameter struct {
 	Count  int
 	Offset int
 }
+
+// TableName returns the table name. it implemented by gorm.Tabler.
 
 // FindGroupLimitOffsetWhereParameter is a where parameter structure.
 type FindGroupLimitOffsetWhereParameter struct {
@@ -82,6 +96,8 @@ type FindGroupLimitOffsetLimitParameter struct {
 	Count  int
 	Offset int
 }
+
+// TableName returns the table name. it implemented by gorm.Tabler.
 
 // FindGroupHavingLimitOffsetWhereParameter is a where parameter structure.
 type FindGroupHavingLimitOffsetWhereParameter struct {
@@ -99,6 +115,8 @@ type FindGroupHavingLimitOffsetLimitParameter struct {
 	Offset int
 }
 
+// TableName returns the table name. it implemented by gorm.Tabler.
+
 // FindGroupHavingOrderAscLimitOffsetWhereParameter is a where parameter structure.
 type FindGroupHavingOrderAscLimitOffsetWhereParameter struct {
 	IdGT uint64
@@ -114,6 +132,8 @@ type FindGroupHavingOrderAscLimitOffsetLimitParameter struct {
 	Count  int
 	Offset int
 }
+
+// TableName returns the table name. it implemented by gorm.Tabler.
 
 // FindGroupHavingOrderDescLimitOffsetWhereParameter is a where parameter structure.
 type FindGroupHavingOrderDescLimitOffsetWhereParameter struct {
@@ -131,14 +151,23 @@ type FindGroupHavingOrderDescLimitOffsetLimitParameter struct {
 	Offset int
 }
 
+// TableName returns the table name. it implemented by gorm.Tabler.
+
 // FindOnePartWhereParameter is a where parameter structure.
 type FindOnePartWhereParameter struct {
 	IdGT uint64
 }
 
+// TableName returns the table name. it implemented by gorm.Tabler.
+
 // FindAllCountResult is a find all count result.
 type FindAllCountResult struct {
 	CountID sql.NullInt64 `gorm:"column:countID" json:"countID"`
+}
+
+// TableName returns the table name. it implemented by gorm.Tabler.
+func (FindAllCountResult) TableName() string {
+	return "user"
 }
 
 // FindAllCountWhereWhereParameter is a where parameter structure.
@@ -151,9 +180,19 @@ type FindAllCountWhereResult struct {
 	CountID sql.NullInt64 `gorm:"column:countID" json:"countID"`
 }
 
+// TableName returns the table name. it implemented by gorm.Tabler.
+func (FindAllCountWhereResult) TableName() string {
+	return "user"
+}
+
 // FindMaxIDResult is a find max id result.
 type FindMaxIDResult struct {
 	MaxID sql.NullInt64 `gorm:"column:maxID" json:"maxID"`
+}
+
+// TableName returns the table name. it implemented by gorm.Tabler.
+func (FindMaxIDResult) TableName() string {
+	return "user"
 }
 
 // FindMinIDResult is a find min id result.
@@ -161,9 +200,19 @@ type FindMinIDResult struct {
 	MinID sql.NullInt64 `gorm:"column:minID" json:"minID"`
 }
 
+// TableName returns the table name. it implemented by gorm.Tabler.
+func (FindMinIDResult) TableName() string {
+	return "user"
+}
+
 // FindAvgIDResult is a find avg id result.
 type FindAvgIDResult struct {
 	AvgID decimal.NullDecimal `gorm:"column:avgID" json:"avgID"`
+}
+
+// TableName returns the table name. it implemented by gorm.Tabler.
+func (FindAvgIDResult) TableName() string {
+	return "user"
 }
 
 // UpdateWhereParameter is a where parameter structure.
@@ -179,6 +228,11 @@ type UpdateOrderByIdDescWhereParameter struct {
 // UpdateOrderByIdDescLimitCountWhereParameter is a where parameter structure.
 type UpdateOrderByIdDescLimitCountWhereParameter struct {
 	IdEqual uint64
+}
+
+// UpdateOrderByIdDescLimitCountLimitParameter is a limit parameter structure.
+type UpdateOrderByIdDescLimitCountLimitParameter struct {
+	Count int
 }
 
 // DeleteOneWhereParameter is a where parameter structure.
@@ -217,7 +271,7 @@ func (User) TableName() string {
 }
 
 // NewUserModel returns a new user model.
-func NewUserModel(db gorm.DB) *UserModel {
+func NewUserModel(db *gorm.DB) *UserModel {
 	return &UserModel{db: db}
 }
 
@@ -228,11 +282,7 @@ func (m *UserModel) Create(ctx context.Context, data ...*User) error {
 	}
 
 	db := m.db.WithContext(ctx)
-	var list []User
-	for _, v := range data {
-		list = append(list, *v)
-	}
-
+	list := data[:]
 	return db.Create(&list).Error
 }
 
@@ -241,10 +291,10 @@ func (m *UserModel) Create(ctx context.Context, data ...*User) error {
 func (m *UserModel) FindOne(ctx context.Context, where FindOneWhereParameter) (*User, error) {
 	var result = new(User)
 	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
-	db.Where(`id = ?`, where.IdEqual)
-	db.Limit(1)
-	db.Find(result)
+	db = db.Select(`*`)
+	db = db.Where(`id = ?`, where.IdEqual)
+	db = db.Limit(1)
+	db = db.Take(result)
 	return result, db.Error
 }
 
@@ -253,10 +303,10 @@ func (m *UserModel) FindOne(ctx context.Context, where FindOneWhereParameter) (*
 func (m *UserModel) FindOneByName(ctx context.Context, where FindOneByNameWhereParameter) (*User, error) {
 	var result = new(User)
 	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
-	db.Where(`name = ?`, where.NameEqual)
-	db.Limit(1)
-	db.Find(result)
+	db = db.Select(`*`)
+	db = db.Where(`name = ?`, where.NameEqual)
+	db = db.Limit(1)
+	db = db.Take(result)
 	return result, db.Error
 }
 
@@ -265,11 +315,11 @@ func (m *UserModel) FindOneByName(ctx context.Context, where FindOneByNameWhereP
 func (m *UserModel) FindOneGroupByName(ctx context.Context, where FindOneGroupByNameWhereParameter) (*User, error) {
 	var result = new(User)
 	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
-	db.Where(`name = ?`, where.NameEqual)
-	db.Group(`name`)
-	db.Limit(1)
-	db.Find(result)
+	db = db.Select(`*`)
+	db = db.Where(`name = ?`, where.NameEqual)
+	db = db.Group(`name`)
+	db = db.Limit(1)
+	db = db.Take(result)
 	return result, db.Error
 }
 
@@ -278,12 +328,12 @@ func (m *UserModel) FindOneGroupByName(ctx context.Context, where FindOneGroupBy
 func (m *UserModel) FindOneGroupByNameHavingName(ctx context.Context, where FindOneGroupByNameHavingNameWhereParameter, having FindOneGroupByNameHavingNameHavingParameter) (*User, error) {
 	var result = new(User)
 	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
-	db.Where(`name = ?`, where.NameEqual)
-	db.Group(`name`)
-	db.Having(`name = ?`, having.NameEqual)
-	db.Limit(1)
-	db.Find(result)
+	db = db.Select(`*`)
+	db = db.Where(`name = ?`, where.NameEqual)
+	db = db.Group(`name`)
+	db = db.Having(`name = ?`, having.NameEqual)
+	db = db.Limit(1)
+	db = db.Take(result)
 	return result, db.Error
 }
 
@@ -292,8 +342,8 @@ func (m *UserModel) FindOneGroupByNameHavingName(ctx context.Context, where Find
 func (m *UserModel) FindAll(ctx context.Context) ([]*User, error) {
 	var result []*User
 	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
-	db.Find(&result)
+	db = db.Select(`*`)
+	db = db.Find(&result)
 	return result, db.Error
 }
 
@@ -302,10 +352,10 @@ func (m *UserModel) FindAll(ctx context.Context) ([]*User, error) {
 func (m *UserModel) FindLimit(ctx context.Context, where FindLimitWhereParameter, limit FindLimitLimitParameter) ([]*User, error) {
 	var result []*User
 	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
-	db.Where(`id > ?`, where.IdGT)
-	db.Limit(limit.Count)
-	db.Find(&result)
+	db = db.Select(`*`)
+	db = db.Where(`id > ?`, where.IdGT)
+	db = db.Limit(limit.Count)
+	db = db.Find(&result)
 	return result, db.Error
 }
 
@@ -314,9 +364,9 @@ func (m *UserModel) FindLimit(ctx context.Context, where FindLimitWhereParameter
 func (m *UserModel) FindLimitOffset(ctx context.Context, limit FindLimitOffsetLimitParameter) ([]*User, error) {
 	var result []*User
 	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
-	db.Offset(limit.Offset).Limit(limit.Count)
-	db.Find(&result)
+	db = db.Select(`*`)
+	db = db.Offset(limit.Offset).Limit(limit.Count)
+	db = db.Find(&result)
 	return result, db.Error
 }
 
@@ -325,11 +375,11 @@ func (m *UserModel) FindLimitOffset(ctx context.Context, limit FindLimitOffsetLi
 func (m *UserModel) FindGroupLimitOffset(ctx context.Context, where FindGroupLimitOffsetWhereParameter, limit FindGroupLimitOffsetLimitParameter) ([]*User, error) {
 	var result []*User
 	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
-	db.Where(`id > ?`, where.IdGT)
-	db.Group(`name`)
-	db.Offset(limit.Offset).Limit(limit.Count)
-	db.Find(&result)
+	db = db.Select(`*`)
+	db = db.Where(`id > ?`, where.IdGT)
+	db = db.Group(`name`)
+	db = db.Offset(limit.Offset).Limit(limit.Count)
+	db = db.Find(&result)
 	return result, db.Error
 }
 
@@ -338,12 +388,12 @@ func (m *UserModel) FindGroupLimitOffset(ctx context.Context, where FindGroupLim
 func (m *UserModel) FindGroupHavingLimitOffset(ctx context.Context, where FindGroupHavingLimitOffsetWhereParameter, having FindGroupHavingLimitOffsetHavingParameter, limit FindGroupHavingLimitOffsetLimitParameter) ([]*User, error) {
 	var result []*User
 	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
-	db.Where(`id > ?`, where.IdGT)
-	db.Group(`name`)
-	db.Having(`id > ?`, having.IdGT)
-	db.Offset(limit.Offset).Limit(limit.Count)
-	db.Find(&result)
+	db = db.Select(`*`)
+	db = db.Where(`id > ?`, where.IdGT)
+	db = db.Group(`name`)
+	db = db.Having(`id > ?`, having.IdGT)
+	db = db.Offset(limit.Offset).Limit(limit.Count)
+	db = db.Find(&result)
 	return result, db.Error
 }
 
@@ -352,13 +402,13 @@ func (m *UserModel) FindGroupHavingLimitOffset(ctx context.Context, where FindGr
 func (m *UserModel) FindGroupHavingOrderAscLimitOffset(ctx context.Context, where FindGroupHavingOrderAscLimitOffsetWhereParameter, having FindGroupHavingOrderAscLimitOffsetHavingParameter, limit FindGroupHavingOrderAscLimitOffsetLimitParameter) ([]*User, error) {
 	var result []*User
 	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
-	db.Where(`id > ?`, where.IdGT)
-	db.Group(`name`)
-	db.Having(`id > ?`, having.IdGT)
-	db.Order(`id`)
-	db.Offset(limit.Offset).Limit(limit.Count)
-	db.Find(&result)
+	db = db.Select(`*`)
+	db = db.Where(`id > ?`, where.IdGT)
+	db = db.Group(`name`)
+	db = db.Having(`id > ?`, having.IdGT)
+	db = db.Order(`id`)
+	db = db.Offset(limit.Offset).Limit(limit.Count)
+	db = db.Find(&result)
 	return result, db.Error
 }
 
@@ -367,13 +417,13 @@ func (m *UserModel) FindGroupHavingOrderAscLimitOffset(ctx context.Context, wher
 func (m *UserModel) FindGroupHavingOrderDescLimitOffset(ctx context.Context, where FindGroupHavingOrderDescLimitOffsetWhereParameter, having FindGroupHavingOrderDescLimitOffsetHavingParameter, limit FindGroupHavingOrderDescLimitOffsetLimitParameter) ([]*User, error) {
 	var result []*User
 	var db = m.db.WithContext(ctx)
-	db.Select(`*`)
-	db.Where(`id > ?`, where.IdGT)
-	db.Group(`name`)
-	db.Having(`id > ?`, having.IdGT)
-	db.Order(`id desc`)
-	db.Offset(limit.Offset).Limit(limit.Count)
-	db.Find(&result)
+	db = db.Select(`*`)
+	db = db.Where(`id > ?`, where.IdGT)
+	db = db.Group(`name`)
+	db = db.Having(`id > ?`, having.IdGT)
+	db = db.Order(`id desc`)
+	db = db.Offset(limit.Offset).Limit(limit.Count)
+	db = db.Find(&result)
 	return result, db.Error
 }
 
@@ -382,10 +432,10 @@ func (m *UserModel) FindGroupHavingOrderDescLimitOffset(ctx context.Context, whe
 func (m *UserModel) FindOnePart(ctx context.Context, where FindOnePartWhereParameter) (*User, error) {
 	var result = new(User)
 	var db = m.db.WithContext(ctx)
-	db.Select(`name, password, mobile`)
-	db.Where(`id > ?`, where.IdGT)
-	db.Limit(1)
-	db.Find(result)
+	db = db.Select(`name, password, mobile`)
+	db = db.Where(`id > ?`, where.IdGT)
+	db = db.Limit(1)
+	db = db.Take(result)
 	return result, db.Error
 }
 
@@ -394,9 +444,9 @@ func (m *UserModel) FindOnePart(ctx context.Context, where FindOnePartWhereParam
 func (m *UserModel) FindAllCount(ctx context.Context) (*FindAllCountResult, error) {
 	var result = new(FindAllCountResult)
 	var db = m.db.WithContext(ctx)
-	db.Select(`count(id) AS countID`)
-	db.Limit(1)
-	db.Find(result)
+	db = db.Select(`count(id) AS countID`)
+	db = db.Limit(1)
+	db = db.Take(result)
 	return result, db.Error
 }
 
@@ -405,10 +455,10 @@ func (m *UserModel) FindAllCount(ctx context.Context) (*FindAllCountResult, erro
 func (m *UserModel) FindAllCountWhere(ctx context.Context, where FindAllCountWhereWhereParameter) (*FindAllCountWhereResult, error) {
 	var result = new(FindAllCountWhereResult)
 	var db = m.db.WithContext(ctx)
-	db.Select(`count(id) AS countID`)
-	db.Where(`id > ?`, where.IdGT)
-	db.Limit(1)
-	db.Find(result)
+	db = db.Select(`count(id) AS countID`)
+	db = db.Where(`id > ?`, where.IdGT)
+	db = db.Limit(1)
+	db = db.Take(result)
 	return result, db.Error
 }
 
@@ -417,9 +467,9 @@ func (m *UserModel) FindAllCountWhere(ctx context.Context, where FindAllCountWhe
 func (m *UserModel) FindMaxID(ctx context.Context) (*FindMaxIDResult, error) {
 	var result = new(FindMaxIDResult)
 	var db = m.db.WithContext(ctx)
-	db.Select(`max(id) AS maxID`)
-	db.Limit(1)
-	db.Find(result)
+	db = db.Select(`max(id) AS maxID`)
+	db = db.Limit(1)
+	db = db.Take(result)
 	return result, db.Error
 }
 
@@ -428,9 +478,9 @@ func (m *UserModel) FindMaxID(ctx context.Context) (*FindMaxIDResult, error) {
 func (m *UserModel) FindMinID(ctx context.Context) (*FindMinIDResult, error) {
 	var result = new(FindMinIDResult)
 	var db = m.db.WithContext(ctx)
-	db.Select(`min(id) AS minID`)
-	db.Limit(1)
-	db.Find(result)
+	db = db.Select(`min(id) AS minID`)
+	db = db.Limit(1)
+	db = db.Take(result)
 	return result, db.Error
 }
 
@@ -439,9 +489,9 @@ func (m *UserModel) FindMinID(ctx context.Context) (*FindMinIDResult, error) {
 func (m *UserModel) FindAvgID(ctx context.Context) (*FindAvgIDResult, error) {
 	var result = new(FindAvgIDResult)
 	var db = m.db.WithContext(ctx)
-	db.Select(`avg(id) AS avgID`)
-	db.Limit(1)
-	db.Find(result)
+	db = db.Select(`avg(id) AS avgID`)
+	db = db.Limit(1)
+	db = db.Take(result)
 	return result, db.Error
 }
 
@@ -449,9 +499,9 @@ func (m *UserModel) FindAvgID(ctx context.Context) (*FindAvgIDResult, error) {
 // update `user` set `name` = ?, `password` = ?, `mobile` = ?, `gender` = ?, `nickname` = ?, `type` = ?, `create_at` = ?, `update_at` = ? where `id` = ?;
 func (m *UserModel) Update(ctx context.Context, data *User, where UpdateWhereParameter) error {
 	var db = m.db.WithContext(ctx)
-	db.Model(&User{})
-	db.Where(`id = ?`, where.IdEqual)
-	db.Updates(map[string]interface{}{
+	db = db.Model(&User{})
+	db = db.Where(`id = ?`, where.IdEqual)
+	db = db.Updates(map[string]interface{}{
 		"name":      data.Name,
 		"password":  data.Password,
 		"mobile":    data.Mobile,
@@ -468,10 +518,10 @@ func (m *UserModel) Update(ctx context.Context, data *User, where UpdateWherePar
 // update `user` set `name` = ?, `password` = ?, `mobile` = ?, `gender` = ?, `nickname` = ?, `type` = ?, `create_at` = ?, `update_at` = ? where `id` = ? order by id desc;
 func (m *UserModel) UpdateOrderByIdDesc(ctx context.Context, data *User, where UpdateOrderByIdDescWhereParameter) error {
 	var db = m.db.WithContext(ctx)
-	db.Model(&User{})
-	db.Where(`id = ?`, where.IdEqual)
-	db.Order(`id desc`)
-	db.Updates(map[string]interface{}{
+	db = db.Model(&User{})
+	db = db.Where(`id = ?`, where.IdEqual)
+	db = db.Order(`id desc`)
+	db = db.Updates(map[string]interface{}{
 		"name":      data.Name,
 		"password":  data.Password,
 		"mobile":    data.Mobile,
@@ -485,13 +535,14 @@ func (m *UserModel) UpdateOrderByIdDesc(ctx context.Context, data *User, where U
 }
 
 // UpdateOrderByIdDescLimitCount is generated from sql:
-// update `user` set `name` = ?, `password` = ?, `mobile` = ?, `gender` = ?, `nickname` = ?, `type` = ?, `create_at` = ?, `update_at` = ? where `id` = ? order by id desc;
-func (m *UserModel) UpdateOrderByIdDescLimitCount(ctx context.Context, data *User, where UpdateOrderByIdDescLimitCountWhereParameter) error {
+// update `user` set `name` = ?, `password` = ?, `mobile` = ?, `gender` = ?, `nickname` = ?, `type` = ?, `create_at` = ?, `update_at` = ? where `id` = ? order by id desc limit ?;
+func (m *UserModel) UpdateOrderByIdDescLimitCount(ctx context.Context, data *User, where UpdateOrderByIdDescLimitCountWhereParameter, limit UpdateOrderByIdDescLimitCountLimitParameter) error {
 	var db = m.db.WithContext(ctx)
-	db.Model(&User{})
-	db.Where(`id = ?`, where.IdEqual)
-	db.Order(`id desc`)
-	db.Updates(map[string]interface{}{
+	db = db.Model(&User{})
+	db = db.Where(`id = ?`, where.IdEqual)
+	db = db.Order(`id desc`)
+	db = db.Limit(limit.Count)
+	db = db.Updates(map[string]interface{}{
 		"name":      data.Name,
 		"password":  data.Password,
 		"mobile":    data.Mobile,
@@ -508,8 +559,8 @@ func (m *UserModel) UpdateOrderByIdDescLimitCount(ctx context.Context, data *Use
 // delete from `user` where `id` = ?;
 func (m *UserModel) DeleteOne(ctx context.Context, where DeleteOneWhereParameter) error {
 	var db = m.db.WithContext(ctx)
-	db.Where(`id = ?`, where.IdEqual)
-	db.Delete(&User{})
+	db = db.Where(`id = ?`, where.IdEqual)
+	db = db.Delete(&User{})
 	return db.Error
 }
 
@@ -517,8 +568,8 @@ func (m *UserModel) DeleteOne(ctx context.Context, where DeleteOneWhereParameter
 // delete from `user` where `name` = ?;
 func (m *UserModel) DeleteOneByName(ctx context.Context, where DeleteOneByNameWhereParameter) error {
 	var db = m.db.WithContext(ctx)
-	db.Where(`name = ?`, where.NameEqual)
-	db.Delete(&User{})
+	db = db.Where(`name = ?`, where.NameEqual)
+	db = db.Delete(&User{})
 	return db.Error
 }
 
@@ -526,9 +577,9 @@ func (m *UserModel) DeleteOneByName(ctx context.Context, where DeleteOneByNameWh
 // delete from `user` where `name` = ? order by id;
 func (m *UserModel) DeleteOneOrderByIDAsc(ctx context.Context, where DeleteOneOrderByIDAscWhereParameter) error {
 	var db = m.db.WithContext(ctx)
-	db.Where(`name = ?`, where.NameEqual)
-	db.Order(`id`)
-	db.Delete(&User{})
+	db = db.Where(`name = ?`, where.NameEqual)
+	db = db.Order(`id`)
+	db = db.Delete(&User{})
 	return db.Error
 }
 
@@ -536,9 +587,9 @@ func (m *UserModel) DeleteOneOrderByIDAsc(ctx context.Context, where DeleteOneOr
 // delete from `user` where `name` = ? order by id desc;
 func (m *UserModel) DeleteOneOrderByIDDesc(ctx context.Context, where DeleteOneOrderByIDDescWhereParameter) error {
 	var db = m.db.WithContext(ctx)
-	db.Where(`name = ?`, where.NameEqual)
-	db.Order(`id desc`)
-	db.Delete(&User{})
+	db = db.Where(`name = ?`, where.NameEqual)
+	db = db.Order(`id desc`)
+	db = db.Delete(&User{})
 	return db.Error
 }
 
@@ -546,9 +597,9 @@ func (m *UserModel) DeleteOneOrderByIDDesc(ctx context.Context, where DeleteOneO
 // delete from `user` where `name` = ? order by id desc limit ?;
 func (m *UserModel) DeleteOneOrderByIDDescLimitCount(ctx context.Context, where DeleteOneOrderByIDDescLimitCountWhereParameter, limit DeleteOneOrderByIDDescLimitCountLimitParameter) error {
 	var db = m.db.WithContext(ctx)
-	db.Where(`name = ?`, where.NameEqual)
-	db.Order(`id desc`)
-	db.Limit(limit.Count)
-	db.Delete(&User{})
+	db = db.Where(`name = ?`, where.NameEqual)
+	db = db.Order(`id desc`)
+	db = db.Limit(limit.Count)
+	db = db.Delete(&User{})
 	return db.Error
 }

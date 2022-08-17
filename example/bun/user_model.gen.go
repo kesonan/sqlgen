@@ -224,11 +224,7 @@ func (m *UserModel) Create(ctx context.Context, data ...*User) error {
 		return fmt.Errorf("data is empty")
 	}
 
-	var list []User
-	for _, v := range data {
-		list = append(list, *v)
-	}
-
+	list := data[:]
 	_, err := m.db.NewInsert().Model(&list).Exec(ctx)
 	return err
 }
@@ -463,7 +459,8 @@ func (m *UserModel) FindAvgID(ctx context.Context) (*FindAvgIDResult, error) {
 // update `user` set `name` = ?, `password` = ?, `mobile` = ?, `gender` = ?, `nickname` = ?, `type` = ?, `create_at` = ?, `update_at` = ? where `id` = ?;
 func (m *UserModel) Update(ctx context.Context, data *User, where UpdateWhereParameter) error {
 	var db = m.db.NewUpdate()
-	db.Model(map[string]interface{}{
+	db.Table("user")
+	db.Model(&map[string]interface{}{
 		"name":      data.Name,
 		"password":  data.Password,
 		"mobile":    data.Mobile,
@@ -482,7 +479,8 @@ func (m *UserModel) Update(ctx context.Context, data *User, where UpdateWherePar
 // update `user` set `name` = ?, `password` = ?, `mobile` = ?, `gender` = ?, `nickname` = ?, `type` = ?, `create_at` = ?, `update_at` = ? where `id` = ? order by id desc;
 func (m *UserModel) UpdateOrderByIdDesc(ctx context.Context, data *User, where UpdateOrderByIdDescWhereParameter) error {
 	var db = m.db.NewUpdate()
-	db.Model(map[string]interface{}{
+	db.Table("user")
+	db.Model(&map[string]interface{}{
 		"name":      data.Name,
 		"password":  data.Password,
 		"mobile":    data.Mobile,
@@ -498,10 +496,11 @@ func (m *UserModel) UpdateOrderByIdDesc(ctx context.Context, data *User, where U
 }
 
 // UpdateOrderByIdDescLimitCount is generated from sql:
-// update `user` set `name` = ?, `password` = ?, `mobile` = ?, `gender` = ?, `nickname` = ?, `type` = ?, `create_at` = ?, `update_at` = ? where `id` = ? order by id desc;
+// update `user` set `name` = ?, `password` = ?, `mobile` = ?, `gender` = ?, `nickname` = ?, `type` = ?, `create_at` = ?, `update_at` = ? where `id` = ? order by id desc limit ?;
 func (m *UserModel) UpdateOrderByIdDescLimitCount(ctx context.Context, data *User, where UpdateOrderByIdDescLimitCountWhereParameter) error {
 	var db = m.db.NewUpdate()
-	db.Model(map[string]interface{}{
+	db.Table("user")
+	db.Model(&map[string]interface{}{
 		"name":      data.Name,
 		"password":  data.Password,
 		"mobile":    data.Mobile,

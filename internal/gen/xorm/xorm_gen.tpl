@@ -54,11 +54,7 @@ func (m *{{UpperCamel $.Table.Name}}Model) Insert(ctx context.Context, data ...*
     }
 
     var session = m.engine.Context(ctx)
-    var list []{{UpperCamel $.Table.Name}}
-    for _,v := range data{
-        list = append(list,*v)
-    }
-
+    list := data[:]
     _,err := session.Insert(&list)
     return err
 }

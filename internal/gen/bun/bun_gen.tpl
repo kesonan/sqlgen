@@ -50,11 +50,7 @@ func (m *{{UpperCamel $.Table.Name}}Model) Create(ctx context.Context, data ...*
         return fmt.Errorf("data is empty")
     }
 
-    var list []{{UpperCamel $.Table.Name}}
-    for _,v:=range data{
-        list = append(list,*v)
-    }
-
+    list := data[:]
     _,err := m.db.NewInsert().Model(&list).Exec(ctx)
     return err
 }
@@ -81,7 +77,8 @@ func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if 
 // {{$stmt.SQL}}
 func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context, data *{{UpperCamel $.Table.Name}}{{if $stmt.Where.IsValid}}, where {{$stmt.Where.ParameterStructureName "Where"}}{{end}}) error {
     var db = m.db.NewUpdate()
-    db.Model(map[string]interface{}{
+    db.Table("{{$.Table.Name}}")
+    db.Model(&map[string]interface{}{
         {{range $name := $stmt.Columns}}"{{$name}}": data.{{UpperCamel $name}},
         {{end}}
     })
