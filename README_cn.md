@@ -47,7 +47,7 @@ select * from user where id = ? limit 1;
 ```
 
 ## 3. 使用 '?' 还是具体值？
-在 SQL 查询语句的编写中，你可以用 `?` 来替代一个参数，也可以是具体值，他们最终都会被 sqlgen 转换成一个变量，例如：
+在 SQL 查询语句的编写中，你可以用 `?` 来替代一个参数，也可以是具体值，他们最终都会被 sqlgen 转换成一个变量，下列示例中的两个查询是等价的。
 
 > 注意: 此规则不适用于规则 2
 
@@ -55,6 +55,7 @@ select * from user where id = ? limit 1;
 -- fn: FineLimit
 select * from user where id = ?;
 
+-- fn: FineLimit
 select * from user where id = 1;
 
 ```

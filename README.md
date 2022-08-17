@@ -53,6 +53,7 @@ For arguments of SQL, you can use `?` or explicitly values to mark them, in sqlg
 -- fn: FineLimit
 select * from user where id = ?;
 
+-- fn: FineLimit
 select * from user where id = 1;
 
 ```
