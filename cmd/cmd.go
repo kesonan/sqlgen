@@ -8,6 +8,8 @@ import (
 	"github.com/anqiansong/sqlgen/internal/gen/flags"
 )
 
+const buildVersion = "0.0.1"
+
 var arg flags.RunArg
 
 var rootCmd = &cobra.Command{
@@ -74,6 +76,7 @@ func init() {
 	rootCmd.AddCommand(sqlCmd)
 	rootCmd.AddCommand(sqlxCmd)
 	rootCmd.AddCommand(xormCmd)
+	rootCmd.Version = buildVersion
 }
 
 func Execute() {
