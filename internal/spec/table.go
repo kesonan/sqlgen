@@ -28,7 +28,8 @@ type Column struct {
 	// Name is the name of the column.
 	Name string
 	// TP is the type of the column.
-	TP byte
+	TP            byte
+	AggregateCall bool
 }
 
 // ColumnOption is a column option.

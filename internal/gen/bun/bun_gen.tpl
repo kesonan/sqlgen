@@ -20,7 +20,7 @@ type {{UpperCamel $.Table.Name}}Model struct {
 // {{UpperCamel $.Table.Name}} represents a {{$.Table.Name}} struct data.
 type {{UpperCamel $.Table.Name}} struct {
     bun.BaseModel `bun:"table:{{$.Table.Name}}"`{{range $.Table.Columns}}
-    {{UpperCamel .Name}} {{.GoType}} `bun:"{{.Name}}{{if IsPrimary .Name}},pk{{end}}{{if .AutoIncrement}},autoincrement;{{end}}" json:"{{LowerCamel .Name}}"`{{end}}
+    {{UpperCamel .Name}} {{.GoType}} `bun:"{{.Name}}{{if IsPrimary .Name}},pk{{end}}{{if .AutoIncrement}},autoincrement{{end}}" json:"{{LowerCamel .Name}}"`{{end}}
 }
 {{range $stmt := .SelectStmt}}{{if $stmt.Where.IsValid}}{{$stmt.Where.ParameterStructure "Where"}}
 {{end}}{{if $stmt.Having.IsValid}}{{$stmt.Having.ParameterStructure "Having"}}
@@ -50,11 +50,7 @@ func (m *{{UpperCamel $.Table.Name}}Model) Create(ctx context.Context, data ...*
         return fmt.Errorf("data is empty")
     }
 
-    var list []{{UpperCamel $.Table.Name}}
-    for _,v:=range data{
-        list = append(list,*v)
-    }
-
+    list := data[:]
     _,err := m.db.NewInsert().Model(&list).Exec(ctx)
     return err
 }
@@ -81,7 +77,8 @@ func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if 
 // {{$stmt.SQL}}
 func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context, data *{{UpperCamel $.Table.Name}}{{if $stmt.Where.IsValid}}, where {{$stmt.Where.ParameterStructureName "Where"}}{{end}}) error {
     var db = m.db.NewUpdate()
-    db.Model(map[string]interface{}{
+    db.Table("{{$.Table.Name}}")
+    db.Model(&map[string]interface{}{
         {{range $name := $stmt.Columns}}"{{$name}}": data.{{UpperCamel $name}},
         {{end}}
     })

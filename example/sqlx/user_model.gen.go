@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/shopspring/decimal"
 	"xorm.io/builder"
 )
 
@@ -137,7 +138,7 @@ type FindOnePartWhereParameter struct {
 
 // FindAllCountResult is a find all count result.
 type FindAllCountResult struct {
-	CountID uint64 `db:"countID" json:"countID"`
+	CountID sql.NullInt64 `db:"countID" json:"countID"`
 }
 
 // FindAllCountWhereWhereParameter is a where parameter structure.
@@ -147,22 +148,22 @@ type FindAllCountWhereWhereParameter struct {
 
 // FindAllCountWhereResult is a find all count where result.
 type FindAllCountWhereResult struct {
-	CountID uint64 `db:"countID" json:"countID"`
+	CountID sql.NullInt64 `db:"countID" json:"countID"`
 }
 
 // FindMaxIDResult is a find max id result.
 type FindMaxIDResult struct {
-	MaxID uint64 `db:"maxID" json:"maxID"`
+	MaxID sql.NullInt64 `db:"maxID" json:"maxID"`
 }
 
 // FindMinIDResult is a find min id result.
 type FindMinIDResult struct {
-	MinID uint64 `db:"minID" json:"minID"`
+	MinID sql.NullInt64 `db:"minID" json:"minID"`
 }
 
 // FindAvgIDResult is a find avg id result.
 type FindAvgIDResult struct {
-	AvgID uint64 `db:"avgID" json:"avgID"`
+	AvgID decimal.NullDecimal `db:"avgID" json:"avgID"`
 }
 
 // UpdateWhereParameter is a where parameter structure.
@@ -178,6 +179,11 @@ type UpdateOrderByIdDescWhereParameter struct {
 // UpdateOrderByIdDescLimitCountWhereParameter is a where parameter structure.
 type UpdateOrderByIdDescLimitCountWhereParameter struct {
 	IdEqual uint64
+}
+
+// UpdateOrderByIdDescLimitCountLimitParameter is a limit parameter structure.
+type UpdateOrderByIdDescLimitCountLimitParameter struct {
+	Count int
 }
 
 // DeleteOneWhereParameter is a where parameter structure.
@@ -218,19 +224,17 @@ func NewUserModel(db *sqlx.DB) *UserModel {
 }
 
 // Create creates  user data.
-func (m *UserModel) Create(ctx context.Context, data ...*User) (err error) {
+func (m *UserModel) Create(ctx context.Context, data ...*User) error {
 	if len(data) == 0 {
 		return fmt.Errorf("data is empty")
 	}
 
 	var stmt *sql.Stmt
-	stmt, err = m.db.PrepareContext(ctx, "INSERT INTO user (`name`, `password`, `mobile`, `gender`, `nickname`, `type`, `create_at`, `update_at`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+	stmt, err := m.db.PrepareContext(ctx, "INSERT INTO user (`name`, `password`, `mobile`, `gender`, `nickname`, `type`, `create_at`, `update_at`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
 	if err != nil {
-		return
+		return err
 	}
-	defer func() {
-		err = stmt.Close()
-	}()
+	defer stmt.Close()
 	for _, v := range data {
 		result, err := stmt.ExecContext(ctx, v.Name, v.Password, v.Mobile, v.Gender, v.Nickname, v.Type, v.CreateAt, v.UpdateAt)
 		if err != nil {
@@ -244,165 +248,165 @@ func (m *UserModel) Create(ctx context.Context, data ...*User) (err error) {
 
 		v.Id = uint64(id)
 	}
-	return
+	return nil
 }
 
 // FindOne is generated from sql:
 // select * from `user` where `id` = ? limit 1;
 func (m *UserModel) FindOne(ctx context.Context, where FindOneWhereParameter) (result *User, err error) {
 	result = new(User)
-	b := builder.Select(`*`)
+	b := builder.MySQL()
+	b.Select(`*`)
 	b.From("`user`")
 	b.Where(builder.Expr(`id = ?`, where.IdEqual))
 	b.Limit(1)
 	query, args, err := b.ToSQL()
+	if err != nil {
+		return nil, err
+	}
+
 	var rows *sqlx.Rows
 	rows, err = m.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 
-	for rows.Next() {
-		var v User
-		err = rows.StructScan(&v)
-		if err != nil {
-			return nil, err
-		}
-		result = &v
-		break
+	if !rows.Next() {
+		return nil, sql.ErrNoRows
+	}
+
+	err = rows.StructScan(result)
+	if err != nil {
+		return nil, err
 	}
 
 	return result, nil
+
 }
 
 // FindOneByName is generated from sql:
 // select * from `user` where `name` = ? limit 1;
 func (m *UserModel) FindOneByName(ctx context.Context, where FindOneByNameWhereParameter) (result *User, err error) {
 	result = new(User)
-	b := builder.Select(`*`)
+	b := builder.MySQL()
+	b.Select(`*`)
 	b.From("`user`")
 	b.Where(builder.Expr(`name = ?`, where.NameEqual))
 	b.Limit(1)
 	query, args, err := b.ToSQL()
+	if err != nil {
+		return nil, err
+	}
+
 	var rows *sqlx.Rows
 	rows, err = m.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 
-	for rows.Next() {
-		var v User
-		err = rows.StructScan(&v)
-		if err != nil {
-			return nil, err
-		}
-		result = &v
-		break
+	if !rows.Next() {
+		return nil, sql.ErrNoRows
+	}
+
+	err = rows.StructScan(result)
+	if err != nil {
+		return nil, err
 	}
 
 	return result, nil
+
 }
 
 // FindOneGroupByName is generated from sql:
 // select * from `user` where `name` = ? group by name limit 1;
 func (m *UserModel) FindOneGroupByName(ctx context.Context, where FindOneGroupByNameWhereParameter) (result *User, err error) {
 	result = new(User)
-	b := builder.Select(`*`)
+	b := builder.MySQL()
+	b.Select(`*`)
 	b.From("`user`")
 	b.Where(builder.Expr(`name = ?`, where.NameEqual))
 	b.GroupBy(`name`)
 	b.Limit(1)
 	query, args, err := b.ToSQL()
+	if err != nil {
+		return nil, err
+	}
+
 	var rows *sqlx.Rows
 	rows, err = m.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 
-	for rows.Next() {
-		var v User
-		err = rows.StructScan(&v)
-		if err != nil {
-			return nil, err
-		}
-		result = &v
-		break
+	if !rows.Next() {
+		return nil, sql.ErrNoRows
+	}
+
+	err = rows.StructScan(result)
+	if err != nil {
+		return nil, err
 	}
 
 	return result, nil
+
 }
 
 // FindOneGroupByNameHavingName is generated from sql:
 // select * from `user` where `name` = ? group by name having name = ? limit 1;
 func (m *UserModel) FindOneGroupByNameHavingName(ctx context.Context, where FindOneGroupByNameHavingNameWhereParameter, having FindOneGroupByNameHavingNameHavingParameter) (result *User, err error) {
 	result = new(User)
-	b := builder.Select(`*`)
+	b := builder.MySQL()
+	b.Select(`*`)
 	b.From("`user`")
 	b.Where(builder.Expr(`name = ?`, where.NameEqual))
 	b.GroupBy(`name`)
-	b.Having(fmt.Sprintf(`name = %v`, having.NameEqual))
+	b.Having(fmt.Sprintf(`name = '%v'`, having.NameEqual))
 	b.Limit(1)
 	query, args, err := b.ToSQL()
+	if err != nil {
+		return nil, err
+	}
+
 	var rows *sqlx.Rows
 	rows, err = m.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 
-	for rows.Next() {
-		var v User
-		err = rows.StructScan(&v)
-		if err != nil {
-			return nil, err
-		}
-		result = &v
-		break
+	if !rows.Next() {
+		return nil, sql.ErrNoRows
+	}
+
+	err = rows.StructScan(result)
+	if err != nil {
+		return nil, err
 	}
 
 	return result, nil
+
 }
 
 // FindAll is generated from sql:
 // select * from `user`;
 func (m *UserModel) FindAll(ctx context.Context) (result []*User, err error) {
-	b := builder.Select(`*`)
+	b := builder.MySQL()
+	b.Select(`*`)
 	b.From("`user`")
 	query, args, err := b.ToSQL()
+	if err != nil {
+		return nil, err
+	}
+
 	var rows *sqlx.Rows
 	rows, err = m.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 
 	for rows.Next() {
 		var v User
@@ -414,27 +418,28 @@ func (m *UserModel) FindAll(ctx context.Context) (result []*User, err error) {
 	}
 
 	return result, nil
+
 }
 
 // FindLimit is generated from sql:
 // select * from `user` where id > ? limit ?;
 func (m *UserModel) FindLimit(ctx context.Context, where FindLimitWhereParameter, limit FindLimitLimitParameter) (result []*User, err error) {
-	b := builder.Select(`*`)
+	b := builder.MySQL()
+	b.Select(`*`)
 	b.From("`user`")
 	b.Where(builder.Expr(`id > ?`, where.IdGT))
 	b.Limit(limit.Count)
 	query, args, err := b.ToSQL()
+	if err != nil {
+		return nil, err
+	}
+
 	var rows *sqlx.Rows
 	rows, err = m.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 
 	for rows.Next() {
 		var v User
@@ -446,26 +451,27 @@ func (m *UserModel) FindLimit(ctx context.Context, where FindLimitWhereParameter
 	}
 
 	return result, nil
+
 }
 
 // FindLimitOffset is generated from sql:
 // select * from `user` limit ?, ?;
 func (m *UserModel) FindLimitOffset(ctx context.Context, limit FindLimitOffsetLimitParameter) (result []*User, err error) {
-	b := builder.Select(`*`)
+	b := builder.MySQL()
+	b.Select(`*`)
 	b.From("`user`")
 	b.Limit(limit.Count, limit.Offset)
 	query, args, err := b.ToSQL()
+	if err != nil {
+		return nil, err
+	}
+
 	var rows *sqlx.Rows
 	rows, err = m.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 
 	for rows.Next() {
 		var v User
@@ -477,28 +483,29 @@ func (m *UserModel) FindLimitOffset(ctx context.Context, limit FindLimitOffsetLi
 	}
 
 	return result, nil
+
 }
 
 // FindGroupLimitOffset is generated from sql:
 // select * from `user` where id > ? group by name limit ?, ?;
 func (m *UserModel) FindGroupLimitOffset(ctx context.Context, where FindGroupLimitOffsetWhereParameter, limit FindGroupLimitOffsetLimitParameter) (result []*User, err error) {
-	b := builder.Select(`*`)
+	b := builder.MySQL()
+	b.Select(`*`)
 	b.From("`user`")
 	b.Where(builder.Expr(`id > ?`, where.IdGT))
 	b.GroupBy(`name`)
 	b.Limit(limit.Count, limit.Offset)
 	query, args, err := b.ToSQL()
+	if err != nil {
+		return nil, err
+	}
+
 	var rows *sqlx.Rows
 	rows, err = m.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 
 	for rows.Next() {
 		var v User
@@ -510,29 +517,30 @@ func (m *UserModel) FindGroupLimitOffset(ctx context.Context, where FindGroupLim
 	}
 
 	return result, nil
+
 }
 
 // FindGroupHavingLimitOffset is generated from sql:
 // select * from `user` where id > ? group by name having id > ? limit ?, ?;
 func (m *UserModel) FindGroupHavingLimitOffset(ctx context.Context, where FindGroupHavingLimitOffsetWhereParameter, having FindGroupHavingLimitOffsetHavingParameter, limit FindGroupHavingLimitOffsetLimitParameter) (result []*User, err error) {
-	b := builder.Select(`*`)
+	b := builder.MySQL()
+	b.Select(`*`)
 	b.From("`user`")
 	b.Where(builder.Expr(`id > ?`, where.IdGT))
 	b.GroupBy(`name`)
-	b.Having(fmt.Sprintf(`id > %v`, having.IdGT))
+	b.Having(fmt.Sprintf(`id > '%v'`, having.IdGT))
 	b.Limit(limit.Count, limit.Offset)
 	query, args, err := b.ToSQL()
+	if err != nil {
+		return nil, err
+	}
+
 	var rows *sqlx.Rows
 	rows, err = m.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 
 	for rows.Next() {
 		var v User
@@ -544,30 +552,31 @@ func (m *UserModel) FindGroupHavingLimitOffset(ctx context.Context, where FindGr
 	}
 
 	return result, nil
+
 }
 
 // FindGroupHavingOrderAscLimitOffset is generated from sql:
 // select * from `user` where id > ? group by name having id > ? order by id limit ?, ?;
 func (m *UserModel) FindGroupHavingOrderAscLimitOffset(ctx context.Context, where FindGroupHavingOrderAscLimitOffsetWhereParameter, having FindGroupHavingOrderAscLimitOffsetHavingParameter, limit FindGroupHavingOrderAscLimitOffsetLimitParameter) (result []*User, err error) {
-	b := builder.Select(`*`)
+	b := builder.MySQL()
+	b.Select(`*`)
 	b.From("`user`")
 	b.Where(builder.Expr(`id > ?`, where.IdGT))
 	b.GroupBy(`name`)
-	b.Having(fmt.Sprintf(`id > %v`, having.IdGT))
+	b.Having(fmt.Sprintf(`id > '%v'`, having.IdGT))
 	b.OrderBy(`id`)
 	b.Limit(limit.Count, limit.Offset)
 	query, args, err := b.ToSQL()
+	if err != nil {
+		return nil, err
+	}
+
 	var rows *sqlx.Rows
 	rows, err = m.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 
 	for rows.Next() {
 		var v User
@@ -579,30 +588,31 @@ func (m *UserModel) FindGroupHavingOrderAscLimitOffset(ctx context.Context, wher
 	}
 
 	return result, nil
+
 }
 
 // FindGroupHavingOrderDescLimitOffset is generated from sql:
 // select * from `user` where id > ? group by name having id > ? order by id desc limit ?, ?;
 func (m *UserModel) FindGroupHavingOrderDescLimitOffset(ctx context.Context, where FindGroupHavingOrderDescLimitOffsetWhereParameter, having FindGroupHavingOrderDescLimitOffsetHavingParameter, limit FindGroupHavingOrderDescLimitOffsetLimitParameter) (result []*User, err error) {
-	b := builder.Select(`*`)
+	b := builder.MySQL()
+	b.Select(`*`)
 	b.From("`user`")
 	b.Where(builder.Expr(`id > ?`, where.IdGT))
 	b.GroupBy(`name`)
-	b.Having(fmt.Sprintf(`id > %v`, having.IdGT))
+	b.Having(fmt.Sprintf(`id > '%v'`, having.IdGT))
 	b.OrderBy(`id desc`)
 	b.Limit(limit.Count, limit.Offset)
 	query, args, err := b.ToSQL()
+	if err != nil {
+		return nil, err
+	}
+
 	var rows *sqlx.Rows
 	rows, err = m.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 
 	for rows.Next() {
 		var v User
@@ -614,212 +624,214 @@ func (m *UserModel) FindGroupHavingOrderDescLimitOffset(ctx context.Context, whe
 	}
 
 	return result, nil
+
 }
 
 // FindOnePart is generated from sql:
 // select `name`, `password`, `mobile` from `user` where id > ? limit 1;
 func (m *UserModel) FindOnePart(ctx context.Context, where FindOnePartWhereParameter) (result *User, err error) {
 	result = new(User)
-	b := builder.Select(`name, password, mobile`)
+	b := builder.MySQL()
+	b.Select(`name, password, mobile`)
 	b.From("`user`")
 	b.Where(builder.Expr(`id > ?`, where.IdGT))
 	b.Limit(1)
 	query, args, err := b.ToSQL()
+	if err != nil {
+		return nil, err
+	}
+
 	var rows *sqlx.Rows
 	rows, err = m.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 
-	for rows.Next() {
-		var v User
-		err = rows.StructScan(&v)
-		if err != nil {
-			return nil, err
-		}
-		result = &v
-		break
+	if !rows.Next() {
+		return nil, sql.ErrNoRows
+	}
+
+	err = rows.StructScan(result)
+	if err != nil {
+		return nil, err
 	}
 
 	return result, nil
+
 }
 
 // FindAllCount is generated from sql:
 // select count(id) AS countID from `user`;
 func (m *UserModel) FindAllCount(ctx context.Context) (result *FindAllCountResult, err error) {
 	result = new(FindAllCountResult)
-	b := builder.Select(`count(id) AS countID`)
+	b := builder.MySQL()
+	b.Select(`count(id) AS countID`)
 	b.From("`user`")
 	b.Limit(1)
 	query, args, err := b.ToSQL()
+	if err != nil {
+		return nil, err
+	}
+
 	var rows *sqlx.Rows
 	rows, err = m.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 
-	for rows.Next() {
-		var v FindAllCountResult
-		err = rows.StructScan(&v)
-		if err != nil {
-			return nil, err
-		}
-		result = &v
-		break
+	if !rows.Next() {
+		return nil, sql.ErrNoRows
+	}
+
+	err = rows.StructScan(result)
+	if err != nil {
+		return nil, err
 	}
 
 	return result, nil
+
 }
 
 // FindAllCountWhere is generated from sql:
 // select count(id) AS countID from `user` where id > ?;
 func (m *UserModel) FindAllCountWhere(ctx context.Context, where FindAllCountWhereWhereParameter) (result *FindAllCountWhereResult, err error) {
 	result = new(FindAllCountWhereResult)
-	b := builder.Select(`count(id) AS countID`)
+	b := builder.MySQL()
+	b.Select(`count(id) AS countID`)
 	b.From("`user`")
 	b.Where(builder.Expr(`id > ?`, where.IdGT))
 	b.Limit(1)
 	query, args, err := b.ToSQL()
+	if err != nil {
+		return nil, err
+	}
+
 	var rows *sqlx.Rows
 	rows, err = m.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 
-	for rows.Next() {
-		var v FindAllCountWhereResult
-		err = rows.StructScan(&v)
-		if err != nil {
-			return nil, err
-		}
-		result = &v
-		break
+	if !rows.Next() {
+		return nil, sql.ErrNoRows
+	}
+
+	err = rows.StructScan(result)
+	if err != nil {
+		return nil, err
 	}
 
 	return result, nil
+
 }
 
 // FindMaxID is generated from sql:
 // select max(id) AS maxID from `user`;
 func (m *UserModel) FindMaxID(ctx context.Context) (result *FindMaxIDResult, err error) {
 	result = new(FindMaxIDResult)
-	b := builder.Select(`max(id) AS maxID`)
+	b := builder.MySQL()
+	b.Select(`max(id) AS maxID`)
 	b.From("`user`")
 	b.Limit(1)
 	query, args, err := b.ToSQL()
+	if err != nil {
+		return nil, err
+	}
+
 	var rows *sqlx.Rows
 	rows, err = m.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 
-	for rows.Next() {
-		var v FindMaxIDResult
-		err = rows.StructScan(&v)
-		if err != nil {
-			return nil, err
-		}
-		result = &v
-		break
+	if !rows.Next() {
+		return nil, sql.ErrNoRows
+	}
+
+	err = rows.StructScan(result)
+	if err != nil {
+		return nil, err
 	}
 
 	return result, nil
+
 }
 
 // FindMinID is generated from sql:
 // select min(id) AS minID from `user`;
 func (m *UserModel) FindMinID(ctx context.Context) (result *FindMinIDResult, err error) {
 	result = new(FindMinIDResult)
-	b := builder.Select(`min(id) AS minID`)
+	b := builder.MySQL()
+	b.Select(`min(id) AS minID`)
 	b.From("`user`")
 	b.Limit(1)
 	query, args, err := b.ToSQL()
+	if err != nil {
+		return nil, err
+	}
+
 	var rows *sqlx.Rows
 	rows, err = m.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 
-	for rows.Next() {
-		var v FindMinIDResult
-		err = rows.StructScan(&v)
-		if err != nil {
-			return nil, err
-		}
-		result = &v
-		break
+	if !rows.Next() {
+		return nil, sql.ErrNoRows
+	}
+
+	err = rows.StructScan(result)
+	if err != nil {
+		return nil, err
 	}
 
 	return result, nil
+
 }
 
 // FindAvgID is generated from sql:
 // select avg(id) AS avgID from `user`;
 func (m *UserModel) FindAvgID(ctx context.Context) (result *FindAvgIDResult, err error) {
 	result = new(FindAvgIDResult)
-	b := builder.Select(`avg(id) AS avgID`)
+	b := builder.MySQL()
+	b.Select(`avg(id) AS avgID`)
 	b.From("`user`")
 	b.Limit(1)
 	query, args, err := b.ToSQL()
+	if err != nil {
+		return nil, err
+	}
+
 	var rows *sqlx.Rows
 	rows, err = m.db.QueryxContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
-	defer func() {
-		err = rows.Close()
-		if err != nil {
-			result = nil
-		}
-	}()
+	defer rows.Close()
 
-	for rows.Next() {
-		var v FindAvgIDResult
-		err = rows.StructScan(&v)
-		if err != nil {
-			return nil, err
-		}
-		result = &v
-		break
+	if !rows.Next() {
+		return nil, sql.ErrNoRows
+	}
+
+	err = rows.StructScan(result)
+	if err != nil {
+		return nil, err
 	}
 
 	return result, nil
+
 }
 
 // Update is generated from sql:
 // update `user` set `name` = ?, `password` = ?, `mobile` = ?, `gender` = ?, `nickname` = ?, `type` = ?, `create_at` = ?, `update_at` = ? where `id` = ?;
 func (m *UserModel) Update(ctx context.Context, data *User, where UpdateWhereParameter) error {
-	b := builder.Update(builder.Eq{
+	b := builder.MySQL()
+	b.Update(builder.Eq{
 		"name":      data.Name,
 		"password":  data.Password,
 		"mobile":    data.Mobile,
@@ -842,7 +854,8 @@ func (m *UserModel) Update(ctx context.Context, data *User, where UpdateWherePar
 // UpdateOrderByIdDesc is generated from sql:
 // update `user` set `name` = ?, `password` = ?, `mobile` = ?, `gender` = ?, `nickname` = ?, `type` = ?, `create_at` = ?, `update_at` = ? where `id` = ? order by id desc;
 func (m *UserModel) UpdateOrderByIdDesc(ctx context.Context, data *User, where UpdateOrderByIdDescWhereParameter) error {
-	b := builder.Update(builder.Eq{
+	b := builder.MySQL()
+	b.Update(builder.Eq{
 		"name":      data.Name,
 		"password":  data.Password,
 		"mobile":    data.Mobile,
@@ -864,9 +877,10 @@ func (m *UserModel) UpdateOrderByIdDesc(ctx context.Context, data *User, where U
 }
 
 // UpdateOrderByIdDescLimitCount is generated from sql:
-// update `user` set `name` = ?, `password` = ?, `mobile` = ?, `gender` = ?, `nickname` = ?, `type` = ?, `create_at` = ?, `update_at` = ? where `id` = ? order by id desc;
-func (m *UserModel) UpdateOrderByIdDescLimitCount(ctx context.Context, data *User, where UpdateOrderByIdDescLimitCountWhereParameter) error {
-	b := builder.Update(builder.Eq{
+// update `user` set `name` = ?, `password` = ?, `mobile` = ?, `gender` = ?, `nickname` = ?, `type` = ?, `create_at` = ?, `update_at` = ? where `id` = ? order by id desc limit ?;
+func (m *UserModel) UpdateOrderByIdDescLimitCount(ctx context.Context, data *User, where UpdateOrderByIdDescLimitCountWhereParameter, limit UpdateOrderByIdDescLimitCountLimitParameter) error {
+	b := builder.MySQL()
+	b.Update(builder.Eq{
 		"name":      data.Name,
 		"password":  data.Password,
 		"mobile":    data.Mobile,
@@ -879,6 +893,7 @@ func (m *UserModel) UpdateOrderByIdDescLimitCount(ctx context.Context, data *Use
 	b.From("`user`")
 	b.Where(builder.Expr(`id = ?`, where.IdEqual))
 	b.OrderBy(`id desc`)
+	b.Limit(limit.Count)
 	query, args, err := b.ToSQL()
 	if err != nil {
 		return err
@@ -890,7 +905,8 @@ func (m *UserModel) UpdateOrderByIdDescLimitCount(ctx context.Context, data *Use
 // DeleteOne is generated from sql:
 // delete from `user` where `id` = ?;
 func (m *UserModel) DeleteOne(ctx context.Context, where DeleteOneWhereParameter) error {
-	b := builder.Delete()
+	b := builder.MySQL()
+	b.Delete()
 	b.From("`user`")
 	b.Where(builder.Expr(`id = ?`, where.IdEqual))
 	query, args, err := b.ToSQL()
@@ -904,7 +920,8 @@ func (m *UserModel) DeleteOne(ctx context.Context, where DeleteOneWhereParameter
 // DeleteOneByName is generated from sql:
 // delete from `user` where `name` = ?;
 func (m *UserModel) DeleteOneByName(ctx context.Context, where DeleteOneByNameWhereParameter) error {
-	b := builder.Delete()
+	b := builder.MySQL()
+	b.Delete()
 	b.From("`user`")
 	b.Where(builder.Expr(`name = ?`, where.NameEqual))
 	query, args, err := b.ToSQL()
@@ -918,7 +935,8 @@ func (m *UserModel) DeleteOneByName(ctx context.Context, where DeleteOneByNameWh
 // DeleteOneOrderByIDAsc is generated from sql:
 // delete from `user` where `name` = ? order by id;
 func (m *UserModel) DeleteOneOrderByIDAsc(ctx context.Context, where DeleteOneOrderByIDAscWhereParameter) error {
-	b := builder.Delete()
+	b := builder.MySQL()
+	b.Delete()
 	b.From("`user`")
 	b.Where(builder.Expr(`name = ?`, where.NameEqual))
 	b.OrderBy(`id`)
@@ -933,7 +951,8 @@ func (m *UserModel) DeleteOneOrderByIDAsc(ctx context.Context, where DeleteOneOr
 // DeleteOneOrderByIDDesc is generated from sql:
 // delete from `user` where `name` = ? order by id desc;
 func (m *UserModel) DeleteOneOrderByIDDesc(ctx context.Context, where DeleteOneOrderByIDDescWhereParameter) error {
-	b := builder.Delete()
+	b := builder.MySQL()
+	b.Delete()
 	b.From("`user`")
 	b.Where(builder.Expr(`name = ?`, where.NameEqual))
 	b.OrderBy(`id desc`)
@@ -948,7 +967,8 @@ func (m *UserModel) DeleteOneOrderByIDDesc(ctx context.Context, where DeleteOneO
 // DeleteOneOrderByIDDescLimitCount is generated from sql:
 // delete from `user` where `name` = ? order by id desc limit ?;
 func (m *UserModel) DeleteOneOrderByIDDescLimitCount(ctx context.Context, where DeleteOneOrderByIDDescLimitCountWhereParameter, limit DeleteOneOrderByIDDescLimitCountLimitParameter) error {
-	b := builder.Delete()
+	b := builder.MySQL()
+	b.Delete()
 	b.From("`user`")
 	b.Where(builder.Expr(`name = ?`, where.NameEqual))
 	b.OrderBy(`id desc`)

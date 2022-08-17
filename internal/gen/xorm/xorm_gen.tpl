@@ -26,6 +26,10 @@ type {{UpperCamel $.Table.Name}} struct { {{range $.Table.Columns}}
 {{end}}{{if $stmt.Having.IsValid}}{{$stmt.Having.ParameterStructure "Having"}}
 {{end}}{{if $stmt.Limit.Multiple}}{{$stmt.Limit.ParameterStructure}}
 {{end}}{{$stmt.ReceiverStructure "xorm"}}
+// TableName returns the table name. it implemented by gorm.Tabler.
+{{if IsExtraResult $stmt.ReceiverName}}func ({{$stmt.ReceiverName}}) TableName() string {
+    return "{{$.Table.Name}}"
+}{{end}}
 {{end}}
 
 {{range $stmt := .UpdateStmt}}{{if $stmt.Where.IsValid}}{{$stmt.Where.ParameterStructure "Where"}}
@@ -47,19 +51,19 @@ func New{{UpperCamel $.Table.Name}}Model (engine xorm.EngineInterface) *{{UpperC
     return &{{UpperCamel $.Table.Name}}Model{engine: engine}
 }
 
-// Insert creates  {{$.Table.Name}} data.
-func (m *{{UpperCamel $.Table.Name}}Model) Insert(ctx context.Context, data ...*{{UpperCamel $.Table.Name}}) error {
+// Create creates  {{$.Table.Name}} data.
+func (m *{{UpperCamel $.Table.Name}}Model) Create(ctx context.Context, data ...*{{UpperCamel $.Table.Name}}) error {
     if len(data)==0{
         return fmt.Errorf("data is empty")
     }
 
     var session = m.engine.Context(ctx)
-    var list []{{UpperCamel $.Table.Name}}
-    for _,v := range data{
-        list = append(list,*v)
+    var list []interface{}
+    for _, v := range data {
+        list = append(list, v)
     }
 
-    _,err := session.Insert(&list)
+    _,err := session.Insert(list...)
     return err
 }
 {{range $stmt := .SelectStmt}}
@@ -74,7 +78,11 @@ func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if 
     {{end}}{{if $stmt.Having.IsValid}}session.Having(fmt.Sprintf({{HavingSprintf $stmt.Having.SQL}}, {{$stmt.Having.Parameters "having"}}))
     {{end}}{{if $stmt.OrderBy.IsValid}}session.OrderBy({{$stmt.OrderBy.SQL}})
     {{end}}{{if $stmt.Limit.IsValid}}session.Limit({{if $stmt.Limit.One}}1{{else}}{{$stmt.Limit.LimitParameter "limit"}}{{end}}{{if gt $stmt.Limit.Offset 0}}, {{$stmt.Limit.OffsetParameter "limit"}}{{end}})
-    {{end}}{{if $stmt.Limit.One}}_,{{end}} err := session{{if $stmt.Limit.One}}.Get({{if $stmt.Limit.One}}result{{end}}){{else}}.Find(&result){{end}}
+    {{end}}{{if $stmt.Limit.One}}has, err := session.Get(result)
+    if !has{
+        return nil, sql.ErrNoRows
+    }
+    {{else}}err :=session.Find(&result){{end}}
     return result, err
 }
 {{end}}
@@ -84,6 +92,7 @@ func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if 
 // {{$stmt.SQL}}
 func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context, data *{{UpperCamel $.Table.Name}}{{if $stmt.Where.IsValid}}, where {{$stmt.Where.ParameterStructureName "Where"}}{{end}}{{if $stmt.Limit.Multiple}}, limit {{$stmt.Limit.ParameterStructureName}}{{end}}) error {
     var session = m.engine.Context(ctx)
+    session.Table(&{{UpperCamel $.Table.Name}}{})
     {{if $stmt.Where.IsValid}}session.Where({{$stmt.Where.SQL}}, {{$stmt.Where.Parameters "where"}})
     {{end}}{{if $stmt.OrderBy.IsValid}}session.OrderBy({{$stmt.OrderBy.SQL}})
     {{end}}{{if $stmt.Limit.IsValid}}session.Limit({{if $stmt.Limit.One}}1{{else}}{{$stmt.Limit.LimitParameter "limit"}}{{end}}{{if gt $stmt.Limit.Offset 0}}, {{$stmt.Limit.OffsetParameter "limit"}}{{end}})

@@ -14,7 +14,7 @@ import (
 
 // {{UpperCamel $.Table.Name}}Model represents a {{$.Table.Name}} model.
 type {{UpperCamel $.Table.Name}}Model struct {
-    db gorm.DB
+    db *gorm.DB
 }
 
 // {{UpperCamel $.Table.Name}} represents a {{$.Table.Name}} struct data.
@@ -25,6 +25,10 @@ type {{UpperCamel $.Table.Name}} struct { {{range $.Table.Columns}}
 {{end}}{{if $stmt.Having.IsValid}}{{$stmt.Having.ParameterStructure "Having"}}
 {{end}}{{if $stmt.Limit.Multiple}}{{$stmt.Limit.ParameterStructure}}
 {{end}}{{$stmt.ReceiverStructure "gorm"}}
+// TableName returns the table name. it implemented by gorm.Tabler.
+{{if IsExtraResult $stmt.ReceiverName}}func ({{$stmt.ReceiverName}}) TableName() string {
+    return "{{$.Table.Name}}"
+}{{end}}
 {{end}}
 
 {{range $stmt := .UpdateStmt}}{{if $stmt.Where.IsValid}}{{$stmt.Where.ParameterStructure "Where"}}
@@ -43,7 +47,7 @@ func ({{UpperCamel $.Table.Name}}) TableName() string {
 }
 
 // New{{UpperCamel $.Table.Name}}Model returns a new {{$.Table.Name}} model.
-func New{{UpperCamel $.Table.Name}}Model (db gorm.DB) *{{UpperCamel $.Table.Name}}Model {
+func New{{UpperCamel $.Table.Name}}Model (db *gorm.DB) *{{UpperCamel $.Table.Name}}Model {
     return &{{UpperCamel $.Table.Name}}Model{db: db}
 }
 
@@ -54,11 +58,7 @@ func (m *{{UpperCamel $.Table.Name}}Model) Create(ctx context.Context, data ...*
     }
 
     db:=m.db.WithContext(ctx)
-    var list []{{UpperCamel $.Table.Name}}
-    for _,v:=range data{
-        list = append(list,*v)
-    }
-
+    list := data[:]
     return db.Create(&list).Error
 }
 {{range $stmt := .SelectStmt}}
@@ -67,13 +67,13 @@ func (m *{{UpperCamel $.Table.Name}}Model) Create(ctx context.Context, data ...*
 func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if $stmt.Where.IsValid}}, where {{$stmt.Where.ParameterStructureName "Where"}}{{end}}{{if $stmt.Having.IsValid}}, having {{$stmt.Having.ParameterStructureName "Having"}}{{end}}{{if $stmt.Limit.Multiple}}, limit {{$stmt.Limit.ParameterStructureName}}{{end}})({{if $stmt.Limit.One}}*{{$stmt.ReceiverName}}, {{else}}[]*{{$stmt.ReceiverName}}, {{end}} error){
     var result {{if $stmt.Limit.One}} = new({{$stmt.ReceiverName}}){{else}}[]*{{$stmt.ReceiverName}}{{end}}
     var db = m.db.WithContext(ctx)
-    db.Select(`{{$stmt.SelectSQL}}`)
-    {{if $stmt.Where.IsValid}}db.Where({{$stmt.Where.SQL}}, {{$stmt.Where.Parameters "where"}})
-    {{end }}{{if $stmt.GroupBy.IsValid}}db.Group({{$stmt.GroupBy.SQL}})
-    {{end}}{{if $stmt.Having.IsValid}}db.Having({{$stmt.Having.SQL}}, {{$stmt.Having.Parameters "having"}})
-    {{end}}{{if $stmt.OrderBy.IsValid}}db.Order({{$stmt.OrderBy.SQL}})
-    {{end}}{{if $stmt.Limit.IsValid}}db{{if gt $stmt.Limit.Offset 0}}.Offset({{$stmt.Limit.OffsetParameter "limit"}}){{end}}.Limit({{if $stmt.Limit.One}}1{{else}}{{$stmt.Limit.LimitParameter "limit"}}{{end}})
-    {{end}}db.Find({{if $stmt.Limit.One}}result{{else}}&result{{end}})
+    db=db.Select(`{{$stmt.SelectSQL}}`)
+    {{if $stmt.Where.IsValid}}db=db.Where({{$stmt.Where.SQL}}, {{$stmt.Where.Parameters "where"}})
+    {{end }}{{if $stmt.GroupBy.IsValid}}db=db.Group({{$stmt.GroupBy.SQL}})
+    {{end}}{{if $stmt.Having.IsValid}}db=db.Having({{$stmt.Having.SQL}}, {{$stmt.Having.Parameters "having"}})
+    {{end}}{{if $stmt.OrderBy.IsValid}}db=db.Order({{$stmt.OrderBy.SQL}})
+    {{end}}{{if $stmt.Limit.IsValid}}db=db{{if gt $stmt.Limit.Offset 0}}.Offset({{$stmt.Limit.OffsetParameter "limit"}}){{end}}.Limit({{if $stmt.Limit.One}}1{{else}}{{$stmt.Limit.LimitParameter "limit"}}{{end}})
+    {{end}}db={{if $stmt.Limit.One}}db.Take(result){{else}}db.Find(&result){{end}}
     return result, db.Error
 }
 {{end}}
@@ -83,11 +83,11 @@ func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if 
 // {{$stmt.SQL}}
 func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context, data *{{UpperCamel $.Table.Name}}{{if $stmt.Where.IsValid}}, where {{$stmt.Where.ParameterStructureName "Where"}}{{end}}{{if $stmt.Limit.Multiple}}, limit {{$stmt.Limit.ParameterStructureName}}{{end}}) error {
     var db = m.db.WithContext(ctx)
-    db.Model(&{{UpperCamel $.Table.Name}}{})
-    {{if $stmt.Where.IsValid}}db.Where({{$stmt.Where.SQL}}, {{$stmt.Where.Parameters "where"}})
-    {{end}}{{if $stmt.OrderBy.IsValid}}db.Order({{$stmt.OrderBy.SQL}})
-    {{end}}{{if $stmt.Limit.IsValid}}db{{if gt $stmt.Limit.Offset 0}}.Offset({{$stmt.Limit.OffsetParameter "limit"}}){{end}}.Limit({{if $stmt.Limit.One}}1{{else}}{{$stmt.Limit.LimitParameter "limit"}}{{end}})
-    {{end}}db.Updates(map[string]interface{}{
+    db=db.Model(&{{UpperCamel $.Table.Name}}{})
+    {{if $stmt.Where.IsValid}}db=db.Where({{$stmt.Where.SQL}}, {{$stmt.Where.Parameters "where"}})
+    {{end}}{{if $stmt.OrderBy.IsValid}}db=db.Order({{$stmt.OrderBy.SQL}})
+    {{end}}{{if $stmt.Limit.IsValid}}db=db{{if gt $stmt.Limit.Offset 0}}.Offset({{$stmt.Limit.OffsetParameter "limit"}}){{end}}.Limit({{if $stmt.Limit.One}}1{{else}}{{$stmt.Limit.LimitParameter "limit"}}{{end}})
+    {{end}}db=db.Updates(map[string]interface{}{
         {{range $name := $stmt.Columns}}"{{$name}}": data.{{UpperCamel $name}},
         {{end}}
     })
@@ -100,10 +100,10 @@ func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context, dat
 // {{$stmt.SQL}}
 func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if $stmt.Where.IsValid}}, where {{$stmt.Where.ParameterStructureName "Where"}}{{end}}{{if $stmt.Limit.Multiple}}, limit {{$stmt.Limit.ParameterStructureName}}{{end}}) error {
     var db = m.db.WithContext(ctx)
-    {{if $stmt.Where.IsValid}}db.Where({{$stmt.Where.SQL}}, {{$stmt.Where.Parameters "where"}})
-    {{end}}{{if $stmt.OrderBy.IsValid}}db.Order({{$stmt.OrderBy.SQL}})
-    {{end}}{{if $stmt.Limit.IsValid}}db{{if gt $stmt.Limit.Offset 0}}.Offset({{$stmt.Limit.OffsetParameter "limit"}}){{end}}.Limit({{if $stmt.Limit.One}}1{{else}}{{$stmt.Limit.LimitParameter "limit"}}{{end}})
-    {{end}}db.Delete(&{{UpperCamel $.Table.Name}}{})
+    {{if $stmt.Where.IsValid}}db=db.Where({{$stmt.Where.SQL}}, {{$stmt.Where.Parameters "where"}})
+    {{end}}{{if $stmt.OrderBy.IsValid}}db=db.Order({{$stmt.OrderBy.SQL}})
+    {{end}}{{if $stmt.Limit.IsValid}}db=db{{if gt $stmt.Limit.Offset 0}}.Offset({{$stmt.Limit.OffsetParameter "limit"}}){{end}}.Limit({{if $stmt.Limit.One}}1{{else}}{{$stmt.Limit.LimitParameter "limit"}}{{end}})
+    {{end}}db=db.Delete(&{{UpperCamel $.Table.Name}}{})
     return db.Error
 }
 {{end}}

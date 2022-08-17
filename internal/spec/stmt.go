@@ -16,9 +16,10 @@ type Fields []Field
 
 // Field represents a select filed.
 type Field struct {
-	ASName     string
-	ColumnName string
-	TP         byte
+	ASName        string
+	ColumnName    string
+	TP            byte
+	AggregateCall bool
 }
 
 // Limit represents a limit clause.

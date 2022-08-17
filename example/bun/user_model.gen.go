@@ -4,9 +4,11 @@ package model
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"time"
 
+	"github.com/shopspring/decimal"
 	"github.com/uptrace/bun"
 )
 
@@ -18,7 +20,7 @@ type UserModel struct {
 // User represents a user struct data.
 type User struct {
 	bun.BaseModel `bun:"table:user"`
-	Id            uint64    `bun:"id,pk,autoincrement;" json:"id"`
+	Id            uint64    `bun:"id,pk,autoincrement" json:"id"`
 	Name          string    `bun:"name" json:"name"`
 	Password      string    `bun:"password" json:"password"`
 	Mobile        string    `bun:"mobile" json:"mobile"`
@@ -137,7 +139,7 @@ type FindOnePartWhereParameter struct {
 // FindAllCountResult is a find all count result.
 type FindAllCountResult struct {
 	bun.BaseModel `bun:"table:user"`
-	CountID       uint64 `bun:"countID" json:"countID"`
+	CountID       sql.NullInt64 `bun:"countID" json:"countID"`
 }
 
 // FindAllCountWhereWhereParameter is a where parameter structure.
@@ -148,25 +150,25 @@ type FindAllCountWhereWhereParameter struct {
 // FindAllCountWhereResult is a find all count where result.
 type FindAllCountWhereResult struct {
 	bun.BaseModel `bun:"table:user"`
-	CountID       uint64 `bun:"countID" json:"countID"`
+	CountID       sql.NullInt64 `bun:"countID" json:"countID"`
 }
 
 // FindMaxIDResult is a find max id result.
 type FindMaxIDResult struct {
 	bun.BaseModel `bun:"table:user"`
-	MaxID         uint64 `bun:"maxID" json:"maxID"`
+	MaxID         sql.NullInt64 `bun:"maxID" json:"maxID"`
 }
 
 // FindMinIDResult is a find min id result.
 type FindMinIDResult struct {
 	bun.BaseModel `bun:"table:user"`
-	MinID         uint64 `bun:"minID" json:"minID"`
+	MinID         sql.NullInt64 `bun:"minID" json:"minID"`
 }
 
 // FindAvgIDResult is a find avg id result.
 type FindAvgIDResult struct {
 	bun.BaseModel `bun:"table:user"`
-	AvgID         uint64 `bun:"avgID" json:"avgID"`
+	AvgID         decimal.NullDecimal `bun:"avgID" json:"avgID"`
 }
 
 // UpdateWhereParameter is a where parameter structure.
@@ -222,11 +224,7 @@ func (m *UserModel) Create(ctx context.Context, data ...*User) error {
 		return fmt.Errorf("data is empty")
 	}
 
-	var list []User
-	for _, v := range data {
-		list = append(list, *v)
-	}
-
+	list := data[:]
 	_, err := m.db.NewInsert().Model(&list).Exec(ctx)
 	return err
 }
@@ -461,7 +459,8 @@ func (m *UserModel) FindAvgID(ctx context.Context) (*FindAvgIDResult, error) {
 // update `user` set `name` = ?, `password` = ?, `mobile` = ?, `gender` = ?, `nickname` = ?, `type` = ?, `create_at` = ?, `update_at` = ? where `id` = ?;
 func (m *UserModel) Update(ctx context.Context, data *User, where UpdateWhereParameter) error {
 	var db = m.db.NewUpdate()
-	db.Model(map[string]interface{}{
+	db.Table("user")
+	db.Model(&map[string]interface{}{
 		"name":      data.Name,
 		"password":  data.Password,
 		"mobile":    data.Mobile,
@@ -480,7 +479,8 @@ func (m *UserModel) Update(ctx context.Context, data *User, where UpdateWherePar
 // update `user` set `name` = ?, `password` = ?, `mobile` = ?, `gender` = ?, `nickname` = ?, `type` = ?, `create_at` = ?, `update_at` = ? where `id` = ? order by id desc;
 func (m *UserModel) UpdateOrderByIdDesc(ctx context.Context, data *User, where UpdateOrderByIdDescWhereParameter) error {
 	var db = m.db.NewUpdate()
-	db.Model(map[string]interface{}{
+	db.Table("user")
+	db.Model(&map[string]interface{}{
 		"name":      data.Name,
 		"password":  data.Password,
 		"mobile":    data.Mobile,
@@ -496,10 +496,11 @@ func (m *UserModel) UpdateOrderByIdDesc(ctx context.Context, data *User, where U
 }
 
 // UpdateOrderByIdDescLimitCount is generated from sql:
-// update `user` set `name` = ?, `password` = ?, `mobile` = ?, `gender` = ?, `nickname` = ?, `type` = ?, `create_at` = ?, `update_at` = ? where `id` = ? order by id desc;
+// update `user` set `name` = ?, `password` = ?, `mobile` = ?, `gender` = ?, `nickname` = ?, `type` = ?, `create_at` = ?, `update_at` = ? where `id` = ? order by id desc limit ?;
 func (m *UserModel) UpdateOrderByIdDescLimitCount(ctx context.Context, data *User, where UpdateOrderByIdDescLimitCountWhereParameter) error {
 	var db = m.db.NewUpdate()
-	db.Model(map[string]interface{}{
+	db.Table("user")
+	db.Model(&map[string]interface{}{
 		"name":      data.Name,
 		"password":  data.Password,
 		"mobile":    data.Mobile,
