@@ -4,7 +4,7 @@
 
 [![Go](https://github.com/anqiansong/sqlgen/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/anqiansong/sqlgen/actions/workflows/go.yml)
 
-sqlgen 是一个 SQL 代码生成工具，其支持 **bun**, **gorm**, **sql**, **sqlx** and **xorm** 的代码生成，灵感来自于：
+sqlgen 是一个 SQL 代码生成工具，其支持 **bun**， **gorm**， **sql**， **sqlx**， **xorm** 的代码生成，灵感来自于：
 
 - [go-zero](https://github.com/zeromicro/go-zero)
 - [goctl](https://github.com/zeromicro/go-zero/tree/master/tools/goctl)
