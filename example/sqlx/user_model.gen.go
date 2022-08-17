@@ -272,17 +272,17 @@ func (m *UserModel) FindOne(ctx context.Context, where FindOneWhereParameter) (r
 	}
 	defer rows.Close()
 
-	for rows.Next() {
-		var v User
-		err = rows.StructScan(&v)
-		if err != nil {
-			return nil, err
-		}
-		result = &v
-		break
+	if !rows.Next() {
+		return nil, sql.ErrNoRows
+	}
+
+	err = rows.StructScan(result)
+	if err != nil {
+		return nil, err
 	}
 
 	return result, nil
+
 }
 
 // FindOneByName is generated from sql:
@@ -306,17 +306,17 @@ func (m *UserModel) FindOneByName(ctx context.Context, where FindOneByNameWhereP
 	}
 	defer rows.Close()
 
-	for rows.Next() {
-		var v User
-		err = rows.StructScan(&v)
-		if err != nil {
-			return nil, err
-		}
-		result = &v
-		break
+	if !rows.Next() {
+		return nil, sql.ErrNoRows
+	}
+
+	err = rows.StructScan(result)
+	if err != nil {
+		return nil, err
 	}
 
 	return result, nil
+
 }
 
 // FindOneGroupByName is generated from sql:
@@ -341,17 +341,17 @@ func (m *UserModel) FindOneGroupByName(ctx context.Context, where FindOneGroupBy
 	}
 	defer rows.Close()
 
-	for rows.Next() {
-		var v User
-		err = rows.StructScan(&v)
-		if err != nil {
-			return nil, err
-		}
-		result = &v
-		break
+	if !rows.Next() {
+		return nil, sql.ErrNoRows
+	}
+
+	err = rows.StructScan(result)
+	if err != nil {
+		return nil, err
 	}
 
 	return result, nil
+
 }
 
 // FindOneGroupByNameHavingName is generated from sql:
@@ -377,17 +377,17 @@ func (m *UserModel) FindOneGroupByNameHavingName(ctx context.Context, where Find
 	}
 	defer rows.Close()
 
-	for rows.Next() {
-		var v User
-		err = rows.StructScan(&v)
-		if err != nil {
-			return nil, err
-		}
-		result = &v
-		break
+	if !rows.Next() {
+		return nil, sql.ErrNoRows
+	}
+
+	err = rows.StructScan(result)
+	if err != nil {
+		return nil, err
 	}
 
 	return result, nil
+
 }
 
 // FindAll is generated from sql:
@@ -418,6 +418,7 @@ func (m *UserModel) FindAll(ctx context.Context) (result []*User, err error) {
 	}
 
 	return result, nil
+
 }
 
 // FindLimit is generated from sql:
@@ -450,6 +451,7 @@ func (m *UserModel) FindLimit(ctx context.Context, where FindLimitWhereParameter
 	}
 
 	return result, nil
+
 }
 
 // FindLimitOffset is generated from sql:
@@ -481,6 +483,7 @@ func (m *UserModel) FindLimitOffset(ctx context.Context, limit FindLimitOffsetLi
 	}
 
 	return result, nil
+
 }
 
 // FindGroupLimitOffset is generated from sql:
@@ -514,6 +517,7 @@ func (m *UserModel) FindGroupLimitOffset(ctx context.Context, where FindGroupLim
 	}
 
 	return result, nil
+
 }
 
 // FindGroupHavingLimitOffset is generated from sql:
@@ -548,6 +552,7 @@ func (m *UserModel) FindGroupHavingLimitOffset(ctx context.Context, where FindGr
 	}
 
 	return result, nil
+
 }
 
 // FindGroupHavingOrderAscLimitOffset is generated from sql:
@@ -583,6 +588,7 @@ func (m *UserModel) FindGroupHavingOrderAscLimitOffset(ctx context.Context, wher
 	}
 
 	return result, nil
+
 }
 
 // FindGroupHavingOrderDescLimitOffset is generated from sql:
@@ -618,6 +624,7 @@ func (m *UserModel) FindGroupHavingOrderDescLimitOffset(ctx context.Context, whe
 	}
 
 	return result, nil
+
 }
 
 // FindOnePart is generated from sql:
@@ -641,17 +648,17 @@ func (m *UserModel) FindOnePart(ctx context.Context, where FindOnePartWhereParam
 	}
 	defer rows.Close()
 
-	for rows.Next() {
-		var v User
-		err = rows.StructScan(&v)
-		if err != nil {
-			return nil, err
-		}
-		result = &v
-		break
+	if !rows.Next() {
+		return nil, sql.ErrNoRows
+	}
+
+	err = rows.StructScan(result)
+	if err != nil {
+		return nil, err
 	}
 
 	return result, nil
+
 }
 
 // FindAllCount is generated from sql:
@@ -674,17 +681,17 @@ func (m *UserModel) FindAllCount(ctx context.Context) (result *FindAllCountResul
 	}
 	defer rows.Close()
 
-	for rows.Next() {
-		var v FindAllCountResult
-		err = rows.StructScan(&v)
-		if err != nil {
-			return nil, err
-		}
-		result = &v
-		break
+	if !rows.Next() {
+		return nil, sql.ErrNoRows
+	}
+
+	err = rows.StructScan(result)
+	if err != nil {
+		return nil, err
 	}
 
 	return result, nil
+
 }
 
 // FindAllCountWhere is generated from sql:
@@ -708,17 +715,17 @@ func (m *UserModel) FindAllCountWhere(ctx context.Context, where FindAllCountWhe
 	}
 	defer rows.Close()
 
-	for rows.Next() {
-		var v FindAllCountWhereResult
-		err = rows.StructScan(&v)
-		if err != nil {
-			return nil, err
-		}
-		result = &v
-		break
+	if !rows.Next() {
+		return nil, sql.ErrNoRows
+	}
+
+	err = rows.StructScan(result)
+	if err != nil {
+		return nil, err
 	}
 
 	return result, nil
+
 }
 
 // FindMaxID is generated from sql:
@@ -741,17 +748,17 @@ func (m *UserModel) FindMaxID(ctx context.Context) (result *FindMaxIDResult, err
 	}
 	defer rows.Close()
 
-	for rows.Next() {
-		var v FindMaxIDResult
-		err = rows.StructScan(&v)
-		if err != nil {
-			return nil, err
-		}
-		result = &v
-		break
+	if !rows.Next() {
+		return nil, sql.ErrNoRows
+	}
+
+	err = rows.StructScan(result)
+	if err != nil {
+		return nil, err
 	}
 
 	return result, nil
+
 }
 
 // FindMinID is generated from sql:
@@ -774,17 +781,17 @@ func (m *UserModel) FindMinID(ctx context.Context) (result *FindMinIDResult, err
 	}
 	defer rows.Close()
 
-	for rows.Next() {
-		var v FindMinIDResult
-		err = rows.StructScan(&v)
-		if err != nil {
-			return nil, err
-		}
-		result = &v
-		break
+	if !rows.Next() {
+		return nil, sql.ErrNoRows
+	}
+
+	err = rows.StructScan(result)
+	if err != nil {
+		return nil, err
 	}
 
 	return result, nil
+
 }
 
 // FindAvgID is generated from sql:
@@ -807,17 +814,17 @@ func (m *UserModel) FindAvgID(ctx context.Context) (result *FindAvgIDResult, err
 	}
 	defer rows.Close()
 
-	for rows.Next() {
-		var v FindAvgIDResult
-		err = rows.StructScan(&v)
-		if err != nil {
-			return nil, err
-		}
-		result = &v
-		break
+	if !rows.Next() {
+		return nil, sql.ErrNoRows
+	}
+
+	err = rows.StructScan(result)
+	if err != nil {
+		return nil, err
 	}
 
 	return result, nil
+
 }
 
 // Update is generated from sql:

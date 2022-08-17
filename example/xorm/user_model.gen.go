@@ -36,15 +36,21 @@ type FindOneWhereParameter struct {
 	IdEqual uint64
 }
 
+// TableName returns the table name. it implemented by gorm.Tabler.
+
 // FindOneByNameWhereParameter is a where parameter structure.
 type FindOneByNameWhereParameter struct {
 	NameEqual string
 }
 
+// TableName returns the table name. it implemented by gorm.Tabler.
+
 // FindOneGroupByNameWhereParameter is a where parameter structure.
 type FindOneGroupByNameWhereParameter struct {
 	NameEqual string
 }
+
+// TableName returns the table name. it implemented by gorm.Tabler.
 
 // FindOneGroupByNameHavingNameWhereParameter is a where parameter structure.
 type FindOneGroupByNameHavingNameWhereParameter struct {
@@ -56,6 +62,10 @@ type FindOneGroupByNameHavingNameHavingParameter struct {
 	NameEqual string
 }
 
+// TableName returns the table name. it implemented by gorm.Tabler.
+
+// TableName returns the table name. it implemented by gorm.Tabler.
+
 // FindLimitWhereParameter is a where parameter structure.
 type FindLimitWhereParameter struct {
 	IdGT uint64
@@ -66,11 +76,15 @@ type FindLimitLimitParameter struct {
 	Count int
 }
 
+// TableName returns the table name. it implemented by gorm.Tabler.
+
 // FindLimitOffsetLimitParameter is a limit parameter structure.
 type FindLimitOffsetLimitParameter struct {
 	Count  int
 	Offset int
 }
+
+// TableName returns the table name. it implemented by gorm.Tabler.
 
 // FindGroupLimitOffsetWhereParameter is a where parameter structure.
 type FindGroupLimitOffsetWhereParameter struct {
@@ -82,6 +96,8 @@ type FindGroupLimitOffsetLimitParameter struct {
 	Count  int
 	Offset int
 }
+
+// TableName returns the table name. it implemented by gorm.Tabler.
 
 // FindGroupHavingLimitOffsetWhereParameter is a where parameter structure.
 type FindGroupHavingLimitOffsetWhereParameter struct {
@@ -99,6 +115,8 @@ type FindGroupHavingLimitOffsetLimitParameter struct {
 	Offset int
 }
 
+// TableName returns the table name. it implemented by gorm.Tabler.
+
 // FindGroupHavingOrderAscLimitOffsetWhereParameter is a where parameter structure.
 type FindGroupHavingOrderAscLimitOffsetWhereParameter struct {
 	IdGT uint64
@@ -114,6 +132,8 @@ type FindGroupHavingOrderAscLimitOffsetLimitParameter struct {
 	Count  int
 	Offset int
 }
+
+// TableName returns the table name. it implemented by gorm.Tabler.
 
 // FindGroupHavingOrderDescLimitOffsetWhereParameter is a where parameter structure.
 type FindGroupHavingOrderDescLimitOffsetWhereParameter struct {
@@ -131,14 +151,23 @@ type FindGroupHavingOrderDescLimitOffsetLimitParameter struct {
 	Offset int
 }
 
+// TableName returns the table name. it implemented by gorm.Tabler.
+
 // FindOnePartWhereParameter is a where parameter structure.
 type FindOnePartWhereParameter struct {
 	IdGT uint64
 }
 
+// TableName returns the table name. it implemented by gorm.Tabler.
+
 // FindAllCountResult is a find all count result.
 type FindAllCountResult struct {
 	CountID sql.NullInt64 `xorm:"'countID'" json:"countID"`
+}
+
+// TableName returns the table name. it implemented by gorm.Tabler.
+func (FindAllCountResult) TableName() string {
+	return "user"
 }
 
 // FindAllCountWhereWhereParameter is a where parameter structure.
@@ -151,9 +180,19 @@ type FindAllCountWhereResult struct {
 	CountID sql.NullInt64 `xorm:"'countID'" json:"countID"`
 }
 
+// TableName returns the table name. it implemented by gorm.Tabler.
+func (FindAllCountWhereResult) TableName() string {
+	return "user"
+}
+
 // FindMaxIDResult is a find max id result.
 type FindMaxIDResult struct {
 	MaxID sql.NullInt64 `xorm:"'maxID'" json:"maxID"`
+}
+
+// TableName returns the table name. it implemented by gorm.Tabler.
+func (FindMaxIDResult) TableName() string {
+	return "user"
 }
 
 // FindMinIDResult is a find min id result.
@@ -161,9 +200,19 @@ type FindMinIDResult struct {
 	MinID sql.NullInt64 `xorm:"'minID'" json:"minID"`
 }
 
+// TableName returns the table name. it implemented by gorm.Tabler.
+func (FindMinIDResult) TableName() string {
+	return "user"
+}
+
 // FindAvgIDResult is a find avg id result.
 type FindAvgIDResult struct {
 	AvgID decimal.NullDecimal `xorm:"'avgID'" json:"avgID"`
+}
+
+// TableName returns the table name. it implemented by gorm.Tabler.
+func (FindAvgIDResult) TableName() string {
+	return "user"
 }
 
 // UpdateWhereParameter is a where parameter structure.
@@ -225,15 +274,19 @@ func NewUserModel(engine xorm.EngineInterface) *UserModel {
 	return &UserModel{engine: engine}
 }
 
-// Insert creates  user data.
-func (m *UserModel) Insert(ctx context.Context, data ...*User) error {
+// Create creates  user data.
+func (m *UserModel) Create(ctx context.Context, data ...*User) error {
 	if len(data) == 0 {
 		return fmt.Errorf("data is empty")
 	}
 
 	var session = m.engine.Context(ctx)
-	list := data[:]
-	_, err := session.Insert(&list)
+	var list []interface{}
+	for _, v := range data {
+		list = append(list, v)
+	}
+
+	_, err := session.Insert(list...)
 	return err
 }
 
@@ -245,7 +298,11 @@ func (m *UserModel) FindOne(ctx context.Context, where FindOneWhereParameter) (*
 	session.Select(`*`)
 	session.Where(`id = ?`, where.IdEqual)
 	session.Limit(1)
-	_, err := session.Get(result)
+	has, err := session.Get(result)
+	if !has {
+		return nil, sql.ErrNoRows
+	}
+
 	return result, err
 }
 
@@ -257,7 +314,11 @@ func (m *UserModel) FindOneByName(ctx context.Context, where FindOneByNameWhereP
 	session.Select(`*`)
 	session.Where(`name = ?`, where.NameEqual)
 	session.Limit(1)
-	_, err := session.Get(result)
+	has, err := session.Get(result)
+	if !has {
+		return nil, sql.ErrNoRows
+	}
+
 	return result, err
 }
 
@@ -270,7 +331,11 @@ func (m *UserModel) FindOneGroupByName(ctx context.Context, where FindOneGroupBy
 	session.Where(`name = ?`, where.NameEqual)
 	session.GroupBy(`name`)
 	session.Limit(1)
-	_, err := session.Get(result)
+	has, err := session.Get(result)
+	if !has {
+		return nil, sql.ErrNoRows
+	}
+
 	return result, err
 }
 
@@ -284,7 +349,11 @@ func (m *UserModel) FindOneGroupByNameHavingName(ctx context.Context, where Find
 	session.GroupBy(`name`)
 	session.Having(fmt.Sprintf(`name = '%v'`, having.NameEqual))
 	session.Limit(1)
-	_, err := session.Get(result)
+	has, err := session.Get(result)
+	if !has {
+		return nil, sql.ErrNoRows
+	}
+
 	return result, err
 }
 
@@ -386,7 +455,11 @@ func (m *UserModel) FindOnePart(ctx context.Context, where FindOnePartWhereParam
 	session.Select(`name, password, mobile`)
 	session.Where(`id > ?`, where.IdGT)
 	session.Limit(1)
-	_, err := session.Get(result)
+	has, err := session.Get(result)
+	if !has {
+		return nil, sql.ErrNoRows
+	}
+
 	return result, err
 }
 
@@ -397,7 +470,11 @@ func (m *UserModel) FindAllCount(ctx context.Context) (*FindAllCountResult, erro
 	var session = m.engine.Context(ctx)
 	session.Select(`count(id) AS countID`)
 	session.Limit(1)
-	_, err := session.Get(result)
+	has, err := session.Get(result)
+	if !has {
+		return nil, sql.ErrNoRows
+	}
+
 	return result, err
 }
 
@@ -409,7 +486,11 @@ func (m *UserModel) FindAllCountWhere(ctx context.Context, where FindAllCountWhe
 	session.Select(`count(id) AS countID`)
 	session.Where(`id > ?`, where.IdGT)
 	session.Limit(1)
-	_, err := session.Get(result)
+	has, err := session.Get(result)
+	if !has {
+		return nil, sql.ErrNoRows
+	}
+
 	return result, err
 }
 
@@ -420,7 +501,11 @@ func (m *UserModel) FindMaxID(ctx context.Context) (*FindMaxIDResult, error) {
 	var session = m.engine.Context(ctx)
 	session.Select(`max(id) AS maxID`)
 	session.Limit(1)
-	_, err := session.Get(result)
+	has, err := session.Get(result)
+	if !has {
+		return nil, sql.ErrNoRows
+	}
+
 	return result, err
 }
 
@@ -431,7 +516,11 @@ func (m *UserModel) FindMinID(ctx context.Context) (*FindMinIDResult, error) {
 	var session = m.engine.Context(ctx)
 	session.Select(`min(id) AS minID`)
 	session.Limit(1)
-	_, err := session.Get(result)
+	has, err := session.Get(result)
+	if !has {
+		return nil, sql.ErrNoRows
+	}
+
 	return result, err
 }
 
@@ -442,7 +531,11 @@ func (m *UserModel) FindAvgID(ctx context.Context) (*FindAvgIDResult, error) {
 	var session = m.engine.Context(ctx)
 	session.Select(`avg(id) AS avgID`)
 	session.Limit(1)
-	_, err := session.Get(result)
+	has, err := session.Get(result)
+	if !has {
+		return nil, sql.ErrNoRows
+	}
+
 	return result, err
 }
 
@@ -450,6 +543,7 @@ func (m *UserModel) FindAvgID(ctx context.Context) (*FindAvgIDResult, error) {
 // update `user` set `name` = ?, `password` = ?, `mobile` = ?, `gender` = ?, `nickname` = ?, `type` = ?, `create_at` = ?, `update_at` = ? where `id` = ?;
 func (m *UserModel) Update(ctx context.Context, data *User, where UpdateWhereParameter) error {
 	var session = m.engine.Context(ctx)
+	session.Table(&User{})
 	session.Where(`id = ?`, where.IdEqual)
 	_, err := session.Update(map[string]interface{}{
 		"name":      data.Name,
@@ -468,6 +562,7 @@ func (m *UserModel) Update(ctx context.Context, data *User, where UpdateWherePar
 // update `user` set `name` = ?, `password` = ?, `mobile` = ?, `gender` = ?, `nickname` = ?, `type` = ?, `create_at` = ?, `update_at` = ? where `id` = ? order by id desc;
 func (m *UserModel) UpdateOrderByIdDesc(ctx context.Context, data *User, where UpdateOrderByIdDescWhereParameter) error {
 	var session = m.engine.Context(ctx)
+	session.Table(&User{})
 	session.Where(`id = ?`, where.IdEqual)
 	session.OrderBy(`id desc`)
 	_, err := session.Update(map[string]interface{}{
@@ -487,6 +582,7 @@ func (m *UserModel) UpdateOrderByIdDesc(ctx context.Context, data *User, where U
 // update `user` set `name` = ?, `password` = ?, `mobile` = ?, `gender` = ?, `nickname` = ?, `type` = ?, `create_at` = ?, `update_at` = ? where `id` = ? order by id desc limit ?;
 func (m *UserModel) UpdateOrderByIdDescLimitCount(ctx context.Context, data *User, where UpdateOrderByIdDescLimitCountWhereParameter, limit UpdateOrderByIdDescLimitCountLimitParameter) error {
 	var session = m.engine.Context(ctx)
+	session.Table(&User{})
 	session.Where(`id = ?`, where.IdEqual)
 	session.OrderBy(`id desc`)
 	session.Limit(limit.Count)

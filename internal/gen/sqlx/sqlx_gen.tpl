@@ -98,17 +98,29 @@ func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if 
     }
     defer rows.Close()
 
+    {{if $stmt.Limit.One}}if !rows.Next() {
+        return nil, sql.ErrNoRows
+    }
+
+    err = rows.StructScan(result)
+    if err != nil {
+        return nil, err
+    }
+
+    return result, nil
+
+    {{else}}
     for rows.Next() {
         var v {{$stmt.ReceiverName}}
         err = rows.StructScan(&v)
         if err != nil {
             return nil, err
         }
-        {{if $stmt.Limit.One}}result=&v
-        break{{else}} result = append(result, &v){{end}}
+        result = append(result, &v)
     }
 
     return result, nil
+    {{end}}
 }
 {{end}}
 

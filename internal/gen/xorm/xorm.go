@@ -30,6 +30,9 @@ func Run(list []spec.Context, output string) error {
 				format = strings.ReplaceAll(format, "?", "'%v'")
 				return format
 			},
+			"IsExtraResult": func(name string) bool {
+				return name != templatex.UpperCamel(ctx.Table.Name)
+			},
 		})
 		gen.MustParse(xormGenTpl)
 		gen.MustExecute(ctx)
