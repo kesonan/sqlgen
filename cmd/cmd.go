@@ -77,6 +77,7 @@ func init() {
 	rootCmd.AddCommand(sqlxCmd)
 	rootCmd.AddCommand(xormCmd)
 	rootCmd.Version = buildVersion
+	rootCmd.CompletionOptions.DisableDefaultCmd = true
 }
 
 func Execute() {
