@@ -21,12 +21,12 @@ type UserModel struct {
 type User struct {
 	bun.BaseModel `bun:"table:user"`
 	Id            uint64    `bun:"id,pk,autoincrement" json:"id"`
-	Name          string    `bun:"name" json:"name"`
-	Password      string    `bun:"password" json:"password"`
-	Mobile        string    `bun:"mobile" json:"mobile"`
-	Gender        string    `bun:"gender" json:"gender"`
-	Nickname      string    `bun:"nickname" json:"nickname"`
-	Type          int8      `bun:"type" json:"type"`
+	Name          string    `bun:"name" json:"name"`         // The username
+	Password      string    `bun:"password" json:"password"` // The  user password
+	Mobile        string    `bun:"mobile" json:"mobile"`     // The mobile phone number
+	Gender        string    `bun:"gender" json:"gender"`     // gender,male|female|unknown
+	Nickname      string    `bun:"nickname" json:"nickname"` // The nickname
+	Type          int8      `bun:"type" json:"type"`         // The user type, 0:normal,1:vip, for test golang keyword
 	CreateAt      time.Time `bun:"create_at" json:"createAt"`
 	UpdateAt      time.Time `bun:"update_at" json:"updateAt"`
 }

@@ -132,6 +132,10 @@ func (c Column) GoType() (string, error) {
 	return p.Type, err
 }
 
+func (c Column) HasComment() bool {
+	return len(c.Comment) > 0
+}
+
 func isNullType(tp byte) bool {
 	return tp >= TypeNullLongLong && tp <= TypeNullString
 }

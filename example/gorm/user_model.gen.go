@@ -21,12 +21,12 @@ type UserModel struct {
 // User represents a user struct data.
 type User struct {
 	Id       uint64    `gorm:"column:id;primaryKey;autoIncrement" json:"id"`
-	Name     string    `gorm:"column:name" json:"name"`
-	Password string    `gorm:"column:password" json:"password"`
-	Mobile   string    `gorm:"column:mobile" json:"mobile"`
-	Gender   string    `gorm:"column:gender" json:"gender"`
-	Nickname string    `gorm:"column:nickname" json:"nickname"`
-	Type     int8      `gorm:"column:type" json:"type"`
+	Name     string    `gorm:"column:name" json:"name"`         // The username
+	Password string    `gorm:"column:password" json:"password"` // The  user password
+	Mobile   string    `gorm:"column:mobile" json:"mobile"`     // The mobile phone number
+	Gender   string    `gorm:"column:gender" json:"gender"`     // gender,male|female|unknown
+	Nickname string    `gorm:"column:nickname" json:"nickname"` // The nickname
+	Type     int8      `gorm:"column:type" json:"type"`         // The user type, 0:normal,1:vip, for test golang keyword
 	CreateAt time.Time `gorm:"column:create_at" json:"createAt"`
 	UpdateAt time.Time `gorm:"column:update_at" json:"updateAt"`
 }
