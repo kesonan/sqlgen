@@ -16,5 +16,18 @@ CREATE TABLE `user`
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '用户表' COLLATE=utf8mb4_general_ci;
 
 -- fn: test
-select avg(id) AS acg from user where id > ?;
+start transaction;
+select * from user where id = 1;
+select * from user where id = 2;
+commit;
+
+-- fn: test2
+start transaction;
+update user set name = ? where id = ?;
+update user set nickname = ? where id = ?;
+commit ;
+
+-- fn: deleteUser
+delete from user;
+
 
