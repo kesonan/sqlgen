@@ -157,3 +157,12 @@ delete from `user` where `name` = ? order by id desc;
 -- test case: delete one with order by desc clause, limit clause.
 -- fn: DeleteOneOrderByIDDescLimitCount
 delete from `user` where `name` = ? order by id desc limit ?;
+
+-- test case: transaction
+-- fn: TxGetAndSet
+start transaction;
+-- fn: TxFindOne
+select * from user where id = ? limit 1;
+-- fn: TxUpdate
+update user set name = ? where id = ?;
+commit;

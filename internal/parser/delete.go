@@ -6,10 +6,10 @@ import (
 	"github.com/anqiansong/sqlgen/internal/spec"
 )
 
-func parseDelete(stmt *ast.DeleteStmt, needFn bool) (spec.DML, error) {
+func parseDelete(stmt *ast.DeleteStmt) (spec.DML, error) {
 	var ret spec.DeleteStmt
 	var text = stmt.Text()
-	comment, err := parseLineComment(text, needFn)
+	comment, err := parseLineComment(text)
 	if err != nil {
 		return nil, errorNearBy(err, text)
 	}

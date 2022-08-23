@@ -30,6 +30,21 @@ func (d *DeleteStmt) TableName() string {
 	return d.From
 }
 
-func (d *DeleteStmt) validate() error {
-	return d.Comment.validate()
+func (d *DeleteStmt) validate() (map[string]string, error) {
+	return map[string]string{
+		d.FuncName: d.OriginText,
+	}, d.Comment.validate()
+}
+
+func (d *DeleteStmt) HasArg() bool {
+	if d.Limit.IsValid() {
+		return true
+	}
+	if d.OrderBy.IsValid() {
+		return true
+	}
+	if d.Where.IsValid() {
+		return true
+	}
+	return false
 }

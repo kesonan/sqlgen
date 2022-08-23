@@ -77,7 +77,7 @@ func Parse(sql string) (*spec.DXL, error) {
 			}
 			ret.DDL = append(ret.DDL, ddl)
 		case *queryStmt:
-			dml, err := parseDML(node.stmt, true)
+			dml, err := parseDML(node.stmt)
 			if err != nil {
 				return nil, err
 			}

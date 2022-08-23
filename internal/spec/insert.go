@@ -28,6 +28,12 @@ func (i *InsertStmt) TableName() string {
 	return i.Table
 }
 
-func (i *InsertStmt) validate() error {
-	return i.Comment.validate()
+func (i *InsertStmt) validate() (map[string]string, error) {
+	return map[string]string{
+		i.FuncName: i.OriginText,
+	}, i.Comment.validate()
+}
+
+func (i *InsertStmt) HasArg() bool {
+	return false
 }

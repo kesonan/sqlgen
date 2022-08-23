@@ -25,9 +25,12 @@ type {{UpperCamel $.Table.Name}} struct { {{range $.Table.Columns}}
 {{range $stmt := .SelectStmt}}{{if $stmt.Where.IsValid}}{{$stmt.Where.ParameterStructure "Where"}}
 {{end}}{{if $stmt.Having.IsValid}}{{$stmt.Having.ParameterStructure "Having"}}
 {{end}}{{if $stmt.Limit.Multiple}}{{$stmt.Limit.ParameterStructure}}
-{{end}}{{$stmt.ReceiverStructure "xorm"}}
+{{end}}
 
-{{if IsExtraResult $stmt.ReceiverName}}// TableName returns the table name. it implemented by gorm.Tabler.
+{{if IsExtraResult $stmt.ReceiverName}}
+{{$stmt.ReceiverStructure "xorm"}}
+
+// TableName returns the table name. it implemented by gorm.Tabler.
 func ({{$stmt.ReceiverName}}) TableName() string {
     return "{{$.Table.Name}}"
 }{{end}}
@@ -69,7 +72,7 @@ func (m *{{UpperCamel $.Table.Name}}Model) Create(ctx context.Context, data ...*
 }
 {{range $stmt := .SelectStmt}}
 // {{.FuncName}} is generated from sql:
-// {{$stmt.SQL}}
+// {{LineComment $stmt.SQL}}
 func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if $stmt.Where.IsValid}}, where {{$stmt.Where.ParameterStructureName "Where"}}{{end}}{{if $stmt.Having.IsValid}}, having {{$stmt.Having.ParameterStructureName "Having"}}{{end}}{{if $stmt.Limit.Multiple}}, limit {{$stmt.Limit.ParameterStructureName}}{{end}})({{if $stmt.Limit.One}}*{{$stmt.ReceiverName}}, {{else}}[]*{{$stmt.ReceiverName}}, {{end}} error){
     var result {{if $stmt.Limit.One}} = new({{$stmt.ReceiverName}}){{else}}[]*{{$stmt.ReceiverName}}{{end}}
     var session = m.engine.Context(ctx)
@@ -90,7 +93,7 @@ func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if 
 
 {{range $stmt := .UpdateStmt}}
 // {{.FuncName}} is generated from sql:
-// {{$stmt.SQL}}
+// {{LineComment $stmt.SQL}}
 func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context, data *{{UpperCamel $.Table.Name}}{{if $stmt.Where.IsValid}}, where {{$stmt.Where.ParameterStructureName "Where"}}{{end}}{{if $stmt.Limit.Multiple}}, limit {{$stmt.Limit.ParameterStructureName}}{{end}}) error {
     var session = m.engine.Context(ctx)
     session.Table(&{{UpperCamel $.Table.Name}}{})
@@ -107,7 +110,7 @@ func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context, dat
 
 {{range $stmt := .DeleteStmt}}
 // {{.FuncName}} is generated from sql:
-// {{$stmt.SQL}}
+// {{LineComment $stmt.SQL}}
 func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if $stmt.Where.IsValid}}, where {{$stmt.Where.ParameterStructureName "Where"}}{{end}}{{if $stmt.Limit.Multiple}}, limit {{$stmt.Limit.ParameterStructureName}}{{end}}) error {
     var session = m.engine.Context(ctx)
     {{if $stmt.Where.IsValid}}session.Where({{$stmt.Where.SQL}}, {{$stmt.Where.Parameters "where"}})

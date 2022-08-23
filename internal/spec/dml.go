@@ -6,5 +6,5 @@ type DML interface {
 	SQLText() string
 	// TableName returns the table of the DML statement.
 	TableName() string
-	validate() error
+	validate() (map[string]string, error)
 }

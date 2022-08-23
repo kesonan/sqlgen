@@ -241,6 +241,22 @@ type DeleteOneOrderByIDDescLimitCountLimitParameter struct {
 	Count int
 }
 
+// TxFindOneWhereParameter is a where parameter structure.
+type TxFindOneWhereParameter struct {
+	IdEqual uint64
+}
+
+// TxUpdateWhereParameter is a where parameter structure.
+type TxUpdateWhereParameter struct {
+	IdEqual uint64
+}
+
+type TxGetAndSetTransactionParameter struct {
+	TxFindOneWhereParameter TxFindOneWhereParameter
+	User                    User
+	TxUpdateWhereParameter  TxUpdateWhereParameter
+}
+
 // TableName returns the table name. it implemented by gorm.Tabler.
 func (User) TableName() string {
 	return "user"
@@ -578,4 +594,13 @@ func (m *UserModel) DeleteOneOrderByIDDescLimitCount(ctx context.Context, where 
 	db = db.Limit(limit.Count)
 	db = db.Delete(&User{})
 	return db.Error
+}
+
+// TxGetAndSet is generated from sql:
+// start transaction;
+// select * from user where id = ? limit 1;
+// update user set name = ? where id = ?;
+// commit;
+func (m *UserModel) TxGetAndSet(ctx context.Context, parameter TxGetAndSetTransactionParameter) {
+
 }

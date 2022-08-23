@@ -20,9 +20,17 @@ func Join(list []string, sep string) string {
 	return strings.Join(list, sep)
 }
 
+func LineComment(s string) string {
+	fields := strings.FieldsFunc(s, func(r rune) bool {
+		return r == '\n'
+	})
+	return strings.Join(fields, "\n// ")
+}
+
 var funcMap = template.FuncMap{
 	"UpperCamel":  UpperCamel,
 	"LowerCamel":  LowerCamel,
 	"Join":        Join,
 	"TrimNewLine": stringx.TrimNewLine,
+	"LineComment": LineComment,
 }

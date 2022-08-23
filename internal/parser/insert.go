@@ -6,9 +6,9 @@ import (
 	"github.com/anqiansong/sqlgen/internal/spec"
 )
 
-func parseInsert(stmt *ast.InsertStmt, needFn bool) (*spec.InsertStmt, error) {
+func parseInsert(stmt *ast.InsertStmt) (*spec.InsertStmt, error) {
 	var text = stmt.Text()
-	comment, err := parseLineComment(text, needFn)
+	comment, err := parseLineComment(text)
 	if err != nil {
 		return nil, errorNearBy(err, text)
 	}
