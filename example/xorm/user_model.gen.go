@@ -36,21 +36,15 @@ type FindOneWhereParameter struct {
 	IdEqual uint64
 }
 
-// TableName returns the table name. it implemented by gorm.Tabler.
-
 // FindOneByNameWhereParameter is a where parameter structure.
 type FindOneByNameWhereParameter struct {
 	NameEqual string
 }
 
-// TableName returns the table name. it implemented by gorm.Tabler.
-
 // FindOneGroupByNameWhereParameter is a where parameter structure.
 type FindOneGroupByNameWhereParameter struct {
 	NameEqual string
 }
-
-// TableName returns the table name. it implemented by gorm.Tabler.
 
 // FindOneGroupByNameHavingNameWhereParameter is a where parameter structure.
 type FindOneGroupByNameHavingNameWhereParameter struct {
@@ -62,10 +56,6 @@ type FindOneGroupByNameHavingNameHavingParameter struct {
 	NameEqual string
 }
 
-// TableName returns the table name. it implemented by gorm.Tabler.
-
-// TableName returns the table name. it implemented by gorm.Tabler.
-
 // FindLimitWhereParameter is a where parameter structure.
 type FindLimitWhereParameter struct {
 	IdGT uint64
@@ -76,15 +66,11 @@ type FindLimitLimitParameter struct {
 	Count int
 }
 
-// TableName returns the table name. it implemented by gorm.Tabler.
-
 // FindLimitOffsetLimitParameter is a limit parameter structure.
 type FindLimitOffsetLimitParameter struct {
 	Count  int
 	Offset int
 }
-
-// TableName returns the table name. it implemented by gorm.Tabler.
 
 // FindGroupLimitOffsetWhereParameter is a where parameter structure.
 type FindGroupLimitOffsetWhereParameter struct {
@@ -96,8 +82,6 @@ type FindGroupLimitOffsetLimitParameter struct {
 	Count  int
 	Offset int
 }
-
-// TableName returns the table name. it implemented by gorm.Tabler.
 
 // FindGroupHavingLimitOffsetWhereParameter is a where parameter structure.
 type FindGroupHavingLimitOffsetWhereParameter struct {
@@ -115,8 +99,6 @@ type FindGroupHavingLimitOffsetLimitParameter struct {
 	Offset int
 }
 
-// TableName returns the table name. it implemented by gorm.Tabler.
-
 // FindGroupHavingOrderAscLimitOffsetWhereParameter is a where parameter structure.
 type FindGroupHavingOrderAscLimitOffsetWhereParameter struct {
 	IdGT uint64
@@ -132,8 +114,6 @@ type FindGroupHavingOrderAscLimitOffsetLimitParameter struct {
 	Count  int
 	Offset int
 }
-
-// TableName returns the table name. it implemented by gorm.Tabler.
 
 // FindGroupHavingOrderDescLimitOffsetWhereParameter is a where parameter structure.
 type FindGroupHavingOrderDescLimitOffsetWhereParameter struct {
@@ -151,14 +131,10 @@ type FindGroupHavingOrderDescLimitOffsetLimitParameter struct {
 	Offset int
 }
 
-// TableName returns the table name. it implemented by gorm.Tabler.
-
 // FindOnePartWhereParameter is a where parameter structure.
 type FindOnePartWhereParameter struct {
 	IdGT uint64
 }
-
-// TableName returns the table name. it implemented by gorm.Tabler.
 
 // FindAllCountResult is a find all count result.
 type FindAllCountResult struct {

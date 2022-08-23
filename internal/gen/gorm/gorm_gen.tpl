@@ -25,8 +25,9 @@ type {{UpperCamel $.Table.Name}} struct { {{range $.Table.Columns}}
 {{end}}{{if $stmt.Having.IsValid}}{{$stmt.Having.ParameterStructure "Having"}}
 {{end}}{{if $stmt.Limit.Multiple}}{{$stmt.Limit.ParameterStructure}}
 {{end}}{{$stmt.ReceiverStructure "gorm"}}
-// TableName returns the table name. it implemented by gorm.Tabler.
-{{if IsExtraResult $stmt.ReceiverName}}func ({{$stmt.ReceiverName}}) TableName() string {
+
+{{if IsExtraResult $stmt.ReceiverName}}// TableName returns the table name. it implemented by gorm.Tabler.
+func ({{$stmt.ReceiverName}}) TableName() string {
     return "{{$.Table.Name}}"
 }{{end}}
 {{end}}
