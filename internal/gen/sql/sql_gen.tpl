@@ -76,7 +76,7 @@ func (m *{{UpperCamel $.Table.Name}}Model) Create(ctx context.Context, data ...*
 }
 {{range $stmt := .SelectStmt}}
 // {{.FuncName}} is generated from sql:
-// {{$stmt.SQL}}
+// {{LineComment $stmt.SQL}}
 func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if $stmt.Where.IsValid}}, where {{$stmt.Where.ParameterStructureName "Where"}}{{end}}{{if $stmt.Having.IsValid}}, having {{$stmt.Having.ParameterStructureName "Having"}}{{end}}{{if $stmt.Limit.Multiple}}, limit {{$stmt.Limit.ParameterStructureName}}{{end}})(result {{if $stmt.Limit.One}}*{{$stmt.ReceiverName}}, {{else}}[]*{{$stmt.ReceiverName}}, {{end}} err error){ {{if $stmt.Limit.One}}
     result = new({{$stmt.ReceiverName}}){{end}}
     b := builder.MySQL()
@@ -108,7 +108,7 @@ func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if 
 
 {{range $stmt := .UpdateStmt}}
 // {{.FuncName}} is generated from sql:
-// {{$stmt.SQL}}
+// {{LineComment $stmt.SQL}}
 func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context, data *{{UpperCamel $.Table.Name}}{{if $stmt.Where.IsValid}}, where {{$stmt.Where.ParameterStructureName "Where"}}{{end}}{{if $stmt.Limit.Multiple}}, limit {{$stmt.Limit.ParameterStructureName}}{{end}}) error {
     b := builder.MySQL()
     b.Update(builder.Eq{
@@ -130,7 +130,7 @@ func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context, dat
 
 {{range $stmt := .DeleteStmt}}
 // {{.FuncName}} is generated from sql:
-// {{$stmt.SQL}}
+// {{LineComment $stmt.SQL}}
 func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if $stmt.Where.IsValid}}, where {{$stmt.Where.ParameterStructureName "Where"}}{{end}}{{if $stmt.Limit.Multiple}}, limit {{$stmt.Limit.ParameterStructureName}}{{end}}) error {
     b := builder.MySQL()
     b.Delete()

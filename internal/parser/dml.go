@@ -7,16 +7,16 @@ import (
 	"github.com/anqiansong/sqlgen/internal/spec"
 )
 
-func parseDML(node ast.StmtNode, needFn bool) (spec.DML, error) {
+func parseDML(node ast.StmtNode) (spec.DML, error) {
 	switch v := node.(type) {
 	case *ast.InsertStmt:
-		return parseInsert(v, needFn)
+		return parseInsert(v)
 	case *ast.SelectStmt:
-		return parseSelect(v, needFn)
+		return parseSelect(v)
 	case *ast.DeleteStmt:
-		return parseDelete(v, needFn)
+		return parseDelete(v)
 	case *ast.UpdateStmt:
-		return parseUpdate(v, needFn)
+		return parseUpdate(v)
 	default:
 		return nil, errorUnsupportedStmt
 	}
@@ -64,7 +64,7 @@ func parseTransaction(node *transactionStmt) (spec.DML, error) {
 		return nil, errorNearBy(err, commitText)
 	}
 
-	comment, err := parseLineComment(beginText, true)
+	comment, err := parseLineComment(beginText)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +73,7 @@ func parseTransaction(node *transactionStmt) (spec.DML, error) {
 	var ret spec.Transaction
 	ret.Action = spec.ActionTransaction
 	for _, v := range node.nodes() {
-		dml, err := parseDML(v, false)
+		dml, err := parseDML(v)
 		if err != nil {
 			return nil, err
 		}

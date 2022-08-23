@@ -130,6 +130,27 @@ func (s *SelectStmt) ContainsExtraColumns() bool {
 	return false
 }
 
-func (s *SelectStmt) validate() error {
-	return s.Comment.validate()
+func (s *SelectStmt) validate() (map[string]string, error) {
+	return map[string]string{
+		s.FuncName: s.OriginText,
+	}, s.Comment.validate()
+}
+
+func (s *SelectStmt) HasArg() bool {
+	if s.GroupBy.IsValid() {
+		return true
+	}
+	if s.Having.IsValid() {
+		return true
+	}
+	if s.Limit.IsValid() {
+		return true
+	}
+	if s.OrderBy.IsValid() {
+		return true
+	}
+	if s.Where.IsValid() {
+		return true
+	}
+	return false
 }

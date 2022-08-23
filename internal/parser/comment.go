@@ -167,7 +167,7 @@ func (s *sqlScanner) enterLineCommentMode() {
 	s.mode = plainTextMode
 }
 
-func parseLineComment(sql string, needFn bool) (spec.Comment, error) {
+func parseLineComment(sql string) (spec.Comment, error) {
 	r := bufio.NewReader(strings.NewReader(sql))
 	var comment spec.Comment
 	comment.OriginText = sql
@@ -179,9 +179,6 @@ func parseLineComment(sql string, needFn bool) (spec.Comment, error) {
 
 		comment.LineText = append(comment.LineText, string(line))
 		if bytes.HasPrefix(line, singleLineComment) {
-			if !needFn {
-				continue
-			}
 			var text = strings.TrimSpace(string(line[2:]))
 			funcName, err := parseFuncName(text)
 			if err != nil {

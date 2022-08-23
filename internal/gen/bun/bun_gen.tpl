@@ -56,7 +56,7 @@ func (m *{{UpperCamel $.Table.Name}}Model) Create(ctx context.Context, data ...*
 }
 {{range $stmt := .SelectStmt}}
 // {{.FuncName}} is generated from sql:
-// {{$stmt.SQL}}
+// {{LineComment $stmt.SQL}}
 func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if $stmt.Where.IsValid}}, where {{$stmt.Where.ParameterStructureName "Where"}}{{end}}{{if $stmt.Having.IsValid}}, having {{$stmt.Having.ParameterStructureName "Having"}}{{end}}{{if $stmt.Limit.Multiple}}, limit {{$stmt.Limit.ParameterStructureName}}{{end}})({{if $stmt.Limit.One}}*{{$stmt.ReceiverName}}, {{else}}[]*{{$stmt.ReceiverName}}, {{end}} error){
     var result {{if $stmt.Limit.One}} = new({{$stmt.ReceiverName}}){{else}}[]*{{$stmt.ReceiverName}}{{end}}
     var db = m.db.NewSelect()
@@ -74,7 +74,7 @@ func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if 
 
 {{range $stmt := .UpdateStmt}}
 // {{.FuncName}} is generated from sql:
-// {{$stmt.SQL}}
+// {{LineComment $stmt.SQL}}
 func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context, data *{{UpperCamel $.Table.Name}}{{if $stmt.Where.IsValid}}, where {{$stmt.Where.ParameterStructureName "Where"}}{{end}}) error {
     var db = m.db.NewUpdate()
     db.Table("{{$.Table.Name}}")
@@ -90,7 +90,7 @@ func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context, dat
 
 {{range $stmt := .DeleteStmt}}
 // {{.FuncName}} is generated from sql:
-// {{$stmt.SQL}}
+// {{LineComment $stmt.SQL}}
 func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if $stmt.Where.IsValid}}, where {{$stmt.Where.ParameterStructureName "Where"}}{{end}}) error {
     var db = m.db.NewDelete()
     db.Model(&{{UpperCamel $.Table.Name}}{})

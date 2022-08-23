@@ -42,6 +42,49 @@ func ({{$stmt.ReceiverName}}) TableName() string {
 {{end}}
 {{end}}
 
+{{range $tx := .Transaction}}
+{{if $tx.HasArg}}
+{{range $stmt := $tx.SelectStmt}}{{if $stmt.Where.IsValid}}{{$stmt.Where.ParameterStructure "Where"}}
+{{end}}{{if $stmt.Having.IsValid}}{{$stmt.Having.ParameterStructure "Having"}}
+{{end}}{{if $stmt.Limit.Multiple}}{{$stmt.Limit.ParameterStructure}}
+{{end}}
+
+{{if IsExtraResult $stmt.ReceiverName}}
+{{$stmt.ReceiverStructure "gorm"}}
+
+// TableName returns the table name. it implemented by gorm.Tabler.
+func ({{$stmt.ReceiverName}}) TableName() string {
+    return "{{$.Table.Name}}"
+}{{end}}
+{{end}}
+
+{{range $stmt := $tx.UpdateStmt}}{{if $stmt.Where.IsValid}}{{$stmt.Where.ParameterStructure "Where"}}
+{{end}}{{if $stmt.Limit.Multiple}}{{$stmt.Limit.ParameterStructure}}
+{{end}}
+{{end}}
+
+{{range $stmt := $tx.DeleteStmt}}{{if $stmt.Where.IsValid}}{{$stmt.Where.ParameterStructure "Where"}}
+{{end}}{{if $stmt.Limit.Multiple}}{{$stmt.Limit.ParameterStructure}}
+{{end}}
+{{end}}
+
+type {{$tx.FuncName}}TransactionParameter struct {
+    {{range $stmt := $tx.SelectStmt}}{{if $stmt.Where.IsValid}}{{$stmt.Where.ParameterStructureName "Where"}} {{$stmt.Where.ParameterStructureName "Where"}}
+    {{end}}{{if $stmt.Having.IsValid}}{{with $stmt.Having.ParameterStructureName "Having"}}{{. .}}{{end}}
+    {{end}}{{if $stmt.Limit.Multiple}}{{with $stmt.Limit.ParameterStructureName}}{{. .}}{{end}}
+    {{end}}{{$stmt.ReceiverName}} {{$stmt.ReceiverName}}
+    {{range $stmt := $tx.UpdateStmt}}{{if $stmt.Where.IsValid}}{{$stmt.Where.ParameterStructureName "Where"}} {{$stmt.Where.ParameterStructureName "Where"}}
+    {{end}}{{if $stmt.Limit.Multiple}}{{with $stmt.Limit.ParameterStructureName}}{{. .}}{{end}}
+    {{end}}
+    {{end}}
+    {{range $stmt := $tx.DeleteStmt}}{{if $stmt.Where.IsValid}}{{$stmt.Where.ParameterStructureName "Where"}} {{$stmt.Where.ParameterStructureName "Where"}}
+    {{end}}{{if $stmt.Limit.Multiple}}{{with $stmt.Limit.ParameterStructureName}}{{. .}}{{end}}
+    {{end}}
+    {{end}}
+    {{end}}
+}{{end}}
+{{end}}
+
 // TableName returns the table name. it implemented by gorm.Tabler.
 func ({{UpperCamel $.Table.Name}}) TableName() string {
     return "{{$.Table.Name}}"
@@ -64,7 +107,7 @@ func (m *{{UpperCamel $.Table.Name}}Model) Create(ctx context.Context, data ...*
 }
 {{range $stmt := .SelectStmt}}
 // {{.FuncName}} is generated from sql:
-// {{$stmt.SQL}}
+// {{LineComment $stmt.SQL}}
 func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if $stmt.Where.IsValid}}, where {{$stmt.Where.ParameterStructureName "Where"}}{{end}}{{if $stmt.Having.IsValid}}, having {{$stmt.Having.ParameterStructureName "Having"}}{{end}}{{if $stmt.Limit.Multiple}}, limit {{$stmt.Limit.ParameterStructureName}}{{end}})({{if $stmt.Limit.One}}*{{$stmt.ReceiverName}}, {{else}}[]*{{$stmt.ReceiverName}}, {{end}} error){
     var result {{if $stmt.Limit.One}} = new({{$stmt.ReceiverName}}){{else}}[]*{{$stmt.ReceiverName}}{{end}}
     var db = m.db.WithContext(ctx)
@@ -81,7 +124,7 @@ func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if 
 
 {{range $stmt := .UpdateStmt}}
 // {{.FuncName}} is generated from sql:
-// {{$stmt.SQL}}
+// {{LineComment $stmt.SQL}}
 func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context, data *{{UpperCamel $.Table.Name}}{{if $stmt.Where.IsValid}}, where {{$stmt.Where.ParameterStructureName "Where"}}{{end}}{{if $stmt.Limit.Multiple}}, limit {{$stmt.Limit.ParameterStructureName}}{{end}}) error {
     var db = m.db.WithContext(ctx)
     db=db.Model(&{{UpperCamel $.Table.Name}}{})
@@ -98,7 +141,7 @@ func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context, dat
 
 {{range $stmt := .DeleteStmt}}
 // {{.FuncName}} is generated from sql:
-// {{$stmt.SQL}}
+// {{LineComment $stmt.SQL}}
 func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if $stmt.Where.IsValid}}, where {{$stmt.Where.ParameterStructureName "Where"}}{{end}}{{if $stmt.Limit.Multiple}}, limit {{$stmt.Limit.ParameterStructureName}}{{end}}) error {
     var db = m.db.WithContext(ctx)
     {{if $stmt.Where.IsValid}}db=db.Where({{$stmt.Where.SQL}}, {{$stmt.Where.Parameters "where"}})
@@ -106,5 +149,13 @@ func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if 
     {{end}}{{if $stmt.Limit.IsValid}}db=db{{if gt $stmt.Limit.Offset 0}}.Offset({{$stmt.Limit.OffsetParameter "limit"}}){{end}}.Limit({{if $stmt.Limit.One}}1{{else}}{{$stmt.Limit.LimitParameter "limit"}}{{end}})
     {{end}}db=db.Delete(&{{UpperCamel $.Table.Name}}{})
     return db.Error
+}
+{{end}}
+
+{{range $stmt := .Transaction}}
+// {{.FuncName}} is generated from sql:
+// {{LineComment $stmt.SQL}}
+func (m *{{UpperCamel $.Table.Name}}Model){{.FuncName}}(ctx context.Context{{if $stmt.HasArg}}, parameter {{.FuncName}}TransactionParameter{{end}}){
+
 }
 {{end}}

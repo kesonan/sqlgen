@@ -34,6 +34,21 @@ func (u *UpdateStmt) TableName() string {
 	return u.Table
 }
 
-func (u *UpdateStmt) validate() error {
-	return u.Comment.validate()
+func (u *UpdateStmt) validate() (map[string]string, error) {
+	return map[string]string{
+		u.FuncName: u.OriginText,
+	}, u.Comment.validate()
+}
+
+func (u *UpdateStmt) HasArg() bool {
+	if u.Limit.IsValid() {
+		return true
+	}
+	if u.OrderBy.IsValid() {
+		return true
+	}
+	if u.Where.IsValid() {
+		return true
+	}
+	return false
 }

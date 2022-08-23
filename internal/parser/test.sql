@@ -17,13 +17,17 @@ CREATE TABLE `user`
 
 -- fn: test
 start transaction;
+-- fn: foo1
 select * from user where id = 1;
+-- fn: foo2
 select * from user where id = 2;
 commit;
 
 -- fn: test2
 start transaction;
+-- fn: foo3
 update user set name = ? where id = ?;
+-- fn: foo4
 update user set nickname = ? where id = ?;
 commit ;
 

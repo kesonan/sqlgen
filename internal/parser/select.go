@@ -12,9 +12,9 @@ import (
 	"github.com/pingcap/parser/test_driver"
 )
 
-func parseSelect(stmt *ast.SelectStmt, needFn bool) (*spec.SelectStmt, error) {
+func parseSelect(stmt *ast.SelectStmt) (*spec.SelectStmt, error) {
 	var text = stmt.Text()
-	comment, err := parseLineComment(text, needFn)
+	comment, err := parseLineComment(text)
 	if err != nil {
 		return nil, errorNearBy(err, text)
 	}
