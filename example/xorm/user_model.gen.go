@@ -21,12 +21,12 @@ type UserModel struct {
 // User represents a user struct data.
 type User struct {
 	Id       uint64    `xorm:"pk autoincr 'id'" json:"id"`
-	Name     string    `xorm:"'name'" json:"name"`
-	Password string    `xorm:"'password'" json:"password"`
-	Mobile   string    `xorm:"'mobile'" json:"mobile"`
-	Gender   string    `xorm:"'gender'" json:"gender"`
-	Nickname string    `xorm:"'nickname'" json:"nickname"`
-	Type     int8      `xorm:"'type'" json:"type"`
+	Name     string    `xorm:"'name'" json:"name"`         // The username
+	Password string    `xorm:"'password'" json:"password"` // The  user password
+	Mobile   string    `xorm:"'mobile'" json:"mobile"`     // The mobile phone number
+	Gender   string    `xorm:"'gender'" json:"gender"`     // gender,male|female|unknown
+	Nickname string    `xorm:"'nickname'" json:"nickname"` // The nickname
+	Type     int8      `xorm:"'type'" json:"type"`         // The user type, 0:normal,1:vip, for test golang keyword
 	CreateAt time.Time `xorm:"'create_at'" json:"createAt"`
 	UpdateAt time.Time `xorm:"'update_at'" json:"updateAt"`
 }

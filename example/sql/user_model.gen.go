@@ -21,12 +21,12 @@ type UserModel struct {
 // User represents a user struct data.
 type User struct {
 	Id       uint64    `json:"id"`
-	Name     string    `json:"name"`
-	Password string    `json:"password"`
-	Mobile   string    `json:"mobile"`
-	Gender   string    `json:"gender"`
-	Nickname string    `json:"nickname"`
-	Type     int8      `json:"type"`
+	Name     string    `json:"name"`     // The username
+	Password string    `json:"password"` // The  user password
+	Mobile   string    `json:"mobile"`   // The mobile phone number
+	Gender   string    `json:"gender"`   // gender,male|female|unknown
+	Nickname string    `json:"nickname"` // The nickname
+	Type     int8      `json:"type"`     // The user type, 0:normal,1:vip, for test golang keyword
 	CreateAt time.Time `json:"createAt"`
 	UpdateAt time.Time `json:"updateAt"`
 }

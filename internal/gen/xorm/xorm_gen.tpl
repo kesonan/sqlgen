@@ -19,7 +19,7 @@ type {{UpperCamel $.Table.Name}}Model struct {
 
 // {{UpperCamel $.Table.Name}} represents a {{$.Table.Name}} struct data.
 type {{UpperCamel $.Table.Name}} struct { {{range $.Table.Columns}}
-{{UpperCamel .Name}} {{.GoType}} `xorm:"{{if IsPrimary .Name}}pk {{end}}{{if .AutoIncrement}}autoincr {{end}}'{{.Name}}'" json:"{{LowerCamel .Name}}"`{{end}}
+{{UpperCamel .Name}} {{.GoType}} `xorm:"{{if IsPrimary .Name}}pk {{end}}{{if .AutoIncrement}}autoincr {{end}}'{{.Name}}'" json:"{{LowerCamel .Name}}"`{{if .HasComment}}// {{TrimNewLine .Comment}}{{end}}{{end}}
 }
 
 {{range $stmt := .SelectStmt}}{{if $stmt.Where.IsValid}}{{$stmt.Where.ParameterStructure "Where"}}

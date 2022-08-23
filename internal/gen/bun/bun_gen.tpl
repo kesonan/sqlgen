@@ -20,7 +20,7 @@ type {{UpperCamel $.Table.Name}}Model struct {
 // {{UpperCamel $.Table.Name}} represents a {{$.Table.Name}} struct data.
 type {{UpperCamel $.Table.Name}} struct {
     bun.BaseModel `bun:"table:{{$.Table.Name}}"`{{range $.Table.Columns}}
-    {{UpperCamel .Name}} {{.GoType}} `bun:"{{.Name}}{{if IsPrimary .Name}},pk{{end}}{{if .AutoIncrement}},autoincrement{{end}}" json:"{{LowerCamel .Name}}"`{{end}}
+    {{UpperCamel .Name}} {{.GoType}} `bun:"{{.Name}}{{if IsPrimary .Name}},pk{{end}}{{if .AutoIncrement}},autoincrement{{end}}" json:"{{LowerCamel .Name}}"`{{if .HasComment}}// {{TrimNewLine .Comment}}{{end}}{{end}}
 }
 {{range $stmt := .SelectStmt}}{{if $stmt.Where.IsValid}}{{$stmt.Where.ParameterStructure "Where"}}
 {{end}}{{if $stmt.Having.IsValid}}{{$stmt.Having.ParameterStructure "Having"}}
