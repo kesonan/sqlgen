@@ -6,10 +6,10 @@ import (
 	"github.com/anqiansong/sqlgen/internal/spec"
 )
 
-func parseUpdate(stmt *ast.UpdateStmt) (spec.DML, error) {
+func parseUpdate(stmt *ast.UpdateStmt, needFn bool) (spec.DML, error) {
 	var ret spec.UpdateStmt
 	var text = stmt.Text()
-	comment, err := parseLineComment(text)
+	comment, err := parseLineComment(text, needFn)
 	if err != nil {
 		return nil, errorNearBy(err, text)
 	}

@@ -64,7 +64,7 @@ values ('test', 'test', 'test', 'test');`,
 		}},
 	}
 	for _, c := range test {
-		actual, _ := parseLineComment(c.input)
+		actual, _ := parseLineComment(c.input, true)
 		assert.Equal(t, c.expected, actual)
 	}
 }
