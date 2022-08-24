@@ -3,12 +3,11 @@ package cmd
 import (
 	"os"
 
-	"github.com/spf13/cobra"
-
 	"github.com/anqiansong/sqlgen/internal/gen/flags"
+	"github.com/spf13/cobra"
 )
 
-const buildVersion = "0.0.1"
+const buildVersion = "0.0.3"
 
 var arg flags.RunArg
 
@@ -80,6 +79,7 @@ func init() {
 	rootCmd.CompletionOptions.DisableDefaultCmd = true
 }
 
+// Execute executes the sql cmd.
 func Execute() {
 	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)

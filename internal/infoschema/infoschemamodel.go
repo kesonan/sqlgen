@@ -32,7 +32,17 @@ import (
 	"github.com/zeromicro/go-zero/core/stores/sqlx"
 )
 
+var _ IInformationSchema = (*InformationSchemaModel)(nil)
+
 type (
+	// IInformationSchema defines an interface for schema.
+	// Just for mock.
+	IInformationSchema interface {
+		GetAllTables(database string) ([]string, error)
+		FindColumns(db, table string) (*Table, error)
+		FindIndex(db, table, column string) ([]*DbIndex, error)
+	}
+
 	// InformationSchemaModel defines information schema model
 	InformationSchemaModel struct {
 		conn sqlx.SqlConn
@@ -72,7 +82,7 @@ type (
 )
 
 // NewInformationSchemaModel creates an instance for InformationSchemaModel
-func NewInformationSchemaModel(conn sqlx.SqlConn) *InformationSchemaModel {
+func NewInformationSchemaModel(conn sqlx.SqlConn) IInformationSchema {
 	return &InformationSchemaModel{conn: conn}
 }
 
@@ -90,7 +100,7 @@ func (m *InformationSchemaModel) GetAllTables(database string) ([]string, error)
 
 // FindColumns return columns in specified database and table
 func (m *InformationSchemaModel) FindColumns(db, table string) (*Table, error) {
-	querySql := `SELECT c.COLUMN_NAME,c.DATA_TYPE,c.COLUMN_TYPE,EXTRA,c.COLUMN_COMMENT,c.COLUMN_DEFAULT,c.IS_NULLABLE,c.ORDINAL_POSITION from COLUMNS c WHERE c.TABLE_SCHEMA = ? and c.TABLE_NAME = ? `
+	querySql := `SELECT c.COLUMN_NAME,c.DATA_TYPE,c.COLUMN_TYPE,EXTRA,c.COLUMN_COMMENT,c.COLUMN_DEFAULT,c.IS_NULLABLE,c.ORDINAL_POSITION from COLUMNS c WHERE c.TABLE_SCHEMA = ? and c.TABLE_NAME = ?`
 	var reply []*DbColumn
 	err := m.conn.QueryRowsPartial(&reply, querySql, db, table)
 	if err != nil {
