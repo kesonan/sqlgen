@@ -17,6 +17,10 @@ sqlgen 是一个 SQL 代码生成工具，其支持 **bun**， **gorm**， **sql
 go install github.com/anqiansong/sqlgen@latest
 ```
 
+# 视频
+<iframe width="1512" height="945" src="https://www.youtube.com/embed/Yt5zXerc7Qo" title="sqlgen, a tool to generate gorm,xorm,sqlx,sql,bun code" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
+
 # 示例
 
  见 [example](https://github.com/anqiansong/sqlgen/tree/main/example)

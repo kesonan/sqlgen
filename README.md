@@ -15,6 +15,9 @@ sqlgen is a tool to generate **bun**, **gorm**, **sql**, **sqlx** and **xorm** s
 go install github.com/anqiansong/sqlgen@latest
 ```
 
+# Video
+<iframe width="1512" height="945" src="https://www.youtube.com/embed/Yt5zXerc7Qo" title="sqlgen, a tool to generate gorm,xorm,sqlx,sql,bun code" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 # Example
 
 See [example](https://github.com/anqiansong/sqlgen/tree/main/example)
