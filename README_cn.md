@@ -52,10 +52,10 @@ select * from user where id = ? limit 1;
 > 注意: 此规则不适用于规则 2
 
 ```sql
--- fn: FineLimit
+-- fn: FindLimit
 select * from user where id = ?;
 
--- fn: FineLimit
+-- fn: FindLimit
 select * from user where id = 1;
 
 ```

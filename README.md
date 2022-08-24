@@ -60,12 +60,12 @@ will be converted into variables, for example, the following query are equivalen
 > NOTES: It does not apply to rule 2
 
 ```sql
--- fn: FineLimit
+-- fn: FindLimit
 select *
 from user
 where id = ?;
 
--- fn: FineLimit
+-- fn: FindLimit
 select *
 from user
 where id = 1;
