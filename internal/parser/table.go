@@ -6,7 +6,7 @@ import (
 	"github.com/anqiansong/sqlgen/internal/spec"
 )
 
-func parseCreateTableStmt(stmt *ast.CreateTableStmt) (*spec.Table, error) {
+func parseCreateTableStmt(stmt *ast.CreateTableStmt) *spec.Table {
 	var table spec.Table
 	if stmt.Table != nil {
 		table.Name = stmt.Table.Name.String()
@@ -26,5 +26,5 @@ func parseCreateTableStmt(stmt *ast.CreateTableStmt) (*spec.Table, error) {
 	}
 
 	table.Constraint = *constraint
-	return &table, nil
+	return &table
 }

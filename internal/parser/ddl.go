@@ -8,10 +8,6 @@ import (
 
 func parseDDL(node *ast.CreateTableStmt) (*spec.DDL, error) {
 	var ddl spec.DDL
-	var err error
-	ddl.Table, err = parseCreateTableStmt(node)
-	if err != nil {
-		return nil, err
-	}
+	ddl.Table = parseCreateTableStmt(node)
 	return &ddl, nil
 }
