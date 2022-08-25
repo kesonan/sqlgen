@@ -22,6 +22,10 @@ func TrimSpace(s string) string {
 }
 
 func RepeatJoin(s, sep string, count int) string {
+	if len(s) == 0 {
+		return ""
+	}
+
 	var list []string
 	for i := 0; i < count; i++ {
 		list = append(list, s)
