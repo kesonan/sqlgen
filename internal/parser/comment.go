@@ -135,9 +135,6 @@ func (s *sqlScanner) enterDocCommentMode() error {
 
 func (s *sqlScanner) CurrentPosition() int {
 	offset := s.Pos().Offset
-	if offset == 0 {
-		return 0
-	}
 	return offset
 }
 
@@ -202,7 +199,7 @@ func parseFuncName(text string) (string, error) {
 
 	fn := strings.TrimPrefix(s, fnPrefix)
 	if len(fn) == 0 {
-		return "", fmt.Errorf("missing function name")
+		return "", errorMissingFunction
 	}
 
 	match, _ := regexp.MatchString(fnRegex, fn)

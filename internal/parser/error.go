@@ -17,6 +17,7 @@ var (
 	errorUnsupportedNestedTransaction = errors.New("unsupported nested transaction")
 	errorMissingCommit                = errors.New("missing commit statement")
 	errorMissingTransaction           = errors.New("missing transaction statement")
+	errorMissingFunction              = errors.New("missing function name")
 )
 
 func errorNearBy(err error, text string) error {
