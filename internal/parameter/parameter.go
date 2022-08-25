@@ -22,6 +22,7 @@ type Parameter struct {
 // Parameters returns the parameters.
 type Parameters []Parameter
 
+// Empty is a placeholder of Parameters.
 var Empty = Parameters{}
 
 func New() *p {
