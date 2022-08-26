@@ -95,35 +95,26 @@ func parseSelect(stmt *ast.SelectStmt) (*spec.SelectStmt, error) {
 	return &ret, nil
 }
 
+var opM = map[opcode.Op]spec.OP{
+	opcode.LogicAnd: spec.And,
+	opcode.LogicOr:  spec.Or,
+	opcode.GE:       spec.GE,
+	opcode.EQ:       spec.EQ,
+	opcode.NE:       spec.LE,
+	opcode.LT:       spec.LT,
+	opcode.GT:       spec.GT,
+	opcode.Not:      spec.Not,
+	opcode.In:       spec.In,
+	opcode.Like:     spec.Like,
+	opcode.Case:     spec.Case,
+}
+
 func convertOP(in opcode.Op) (spec.OP, error) {
-	switch in {
-	case opcode.LogicAnd:
-		return spec.And, nil
-	case opcode.LogicOr:
-		return spec.Or, nil
-	case opcode.GE:
-		return spec.GE, nil
-	case opcode.LE:
-		return spec.LE, nil
-	case opcode.EQ:
-		return spec.EQ, nil
-	case opcode.NE:
-		return spec.NE, nil
-	case opcode.LT:
-		return spec.LT, nil
-	case opcode.GT:
-		return spec.GT, nil
-	case opcode.Not:
-		return spec.Not, nil
-	case opcode.In:
-		return spec.In, nil
-	case opcode.Like:
-		return spec.Like, nil
-	case opcode.Case:
-		return spec.Case, nil
-	default:
-		return 0, fmt.Errorf("unsupported opcode %s", in)
+	op, ok := opM[in]
+	if ok {
+		return op, nil
 	}
+	return 0, fmt.Errorf("unsupported opcode %s", in)
 }
 
 type exprType int
