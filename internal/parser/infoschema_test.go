@@ -2,7 +2,6 @@ package parser
 
 import (
 	"errors"
-	"io"
 	"testing"
 	"text/template"
 
@@ -141,24 +140,6 @@ func Test_convertDML(t *testing.T) {
 			patch.Reset()
 		})
 		_, err := convertDML(nil)
-		assert.ErrorIs(t, err, dummyError)
-	})
-
-	t.Run("Execute", func(t *testing.T) {
-		tpl := template.New("foo")
-		patch := gomonkey.ApplyMethodFunc(tpl, "Execute", func(wr io.Writer, data any) error {
-			return dummyError
-		})
-		t.Cleanup(func() {
-			patch.Reset()
-		})
-		_, err := convertDML(&spec.Table{
-			Columns: spec.Columns{
-				{Name: "foo"},
-				{Name: "bar"},
-			},
-			Name: "foo",
-		})
 		assert.ErrorIs(t, err, dummyError)
 	})
 
