@@ -15,10 +15,22 @@ CREATE TABLE `user`
     UNIQUE KEY `mobile_index` (`mobile`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT '用户表' COLLATE=utf8mb4_general_ci;
 
+-- fn: findLimit
+select * from user where id > ? group by name having id > ? order by id desc limit ?,?;
+
+-- fn: case1
+select count(mobile) as mobileCount, count(1) as count, id,name from user;
+
+-- fn: case2
+select * from user where name in (?) and id between ? and ? or (mobile = ?) and nickname like ?;
+
+-- fn: count
+select count(id) as count from user;
+
 -- fn: test
 start transaction;
 -- fn: foo1
-select * from user where id = 1;
+select * from user where id = 1 ;
 -- fn: foo2
 select * from user where id = 2;
 commit;
