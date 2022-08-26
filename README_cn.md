@@ -3,6 +3,10 @@
 [English](README.md) | 中文
 
 [![Go](https://github.com/anqiansong/sqlgen/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/anqiansong/sqlgen/actions/workflows/go.yml)
+[![codecov](https://codecov.io/gh/anqiansong/sqlgen/branch/main/graph/badge.svg?token=8mLCFUqD2l)](https://codecov.io/gh/anqiansong/sqlgen)
+[![Go Report Card](https://goreportcard.com/badge/github.com/anqiansong/sqlgen)](https://goreportcard.com/report/github.com/anqiansong/sqlgen)
+[![Release](https://img.shields.io/github/v/release/anqiansong/sqlgen.svg?style=flat-square)](https://github.com/anqiansong/sqlgen)
+[![GitHub license](https://img.shields.io/github/license/anqiansong/sqlgen?style=flat-square)](https://github.com/anqiansong/sqlgen/blob/main/LICENSE)
 
 sqlgen 是一个 SQL 代码生成工具，其支持 **bun**， **gorm**， **sql**， **sqlx**， **xorm** 的代码生成，灵感来自于：
 

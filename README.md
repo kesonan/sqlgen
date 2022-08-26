@@ -3,6 +3,10 @@
 English | [中文](README_cn.md)
 
 [![Go](https://github.com/anqiansong/sqlgen/actions/workflows/go.yml/badge.svg?branch=main)](https://github.com/anqiansong/sqlgen/actions/workflows/go.yml)
+[![codecov](https://codecov.io/gh/anqiansong/sqlgen/branch/main/graph/badge.svg?token=8mLCFUqD2l)](https://codecov.io/gh/anqiansong/sqlgen)
+[![Go Report Card](https://goreportcard.com/badge/github.com/anqiansong/sqlgen)](https://goreportcard.com/report/github.com/anqiansong/sqlgen)
+[![Release](https://img.shields.io/github/v/release/anqiansong/sqlgen.svg?style=flat-square)](https://github.com/anqiansong/sqlgen)
+[![GitHub license](https://img.shields.io/github/license/anqiansong/sqlgen?style=flat-square)](https://github.com/anqiansong/sqlgen/blob/main/LICENSE)
 
 sqlgen is a tool to generate **bun**, **gorm**, **sql**, **sqlx** and **xorm** sql code from SQL
 file which is inspired by
