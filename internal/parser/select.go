@@ -100,7 +100,7 @@ var opM = map[opcode.Op]spec.OP{
 	opcode.LogicOr:  spec.Or,
 	opcode.GE:       spec.GE,
 	opcode.EQ:       spec.EQ,
-	opcode.NE:       spec.LE,
+	opcode.NE:       spec.NE,
 	opcode.LT:       spec.LT,
 	opcode.GT:       spec.GT,
 	opcode.Not:      spec.Not,
